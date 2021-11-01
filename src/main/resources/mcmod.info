@@ -1,0 +1,16 @@
+[
+    {
+        "modid": "examplemod",
+        "name": "Example Mod",
+        "description": "Example placeholder mod.",
+        "version": "${version}",
+        "mcversion": "1.8.9",
+        "url": "",
+        "updateUrl": "",
+        "authorList": ["Antonio32A"],
+        "credits": "Example credits",
+        "logoFile": "",
+        "screenshots": [],
+        "dependencies": []
+    }
+]

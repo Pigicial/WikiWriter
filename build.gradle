@@ -1,0 +1,127 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "https://maven.minecraftforge.net/"
+        }
+        maven {
+            name = "sponge"
+            url = "https://repo.spongepowered.org/repository/maven-public"
+        }
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
+    }
+    dependencies {
+        classpath "com.github.asbyth:ForgeGradle:FG_2.1-SNAPSHOT"
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
+        classpath "com.github.xcfrg:MixinGradle:0.6-SNAPSHOT"
+    }
+}
+
+apply plugin: "java"
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "org.spongepowered.mixin"
+
+version = "1.0"
+group = "com.antonio32a"
+archivesBaseName = "ExampleMod"
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+compileJava.options.encoding = "UTF-8"
+
+sourceSets {
+    main {
+        output.resourcesDir = java.outputDir
+    }
+}
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
+}
+
+mixin {
+    add sourceSets.main, "examplemod.mixins.refmap.json"
+    defaultObfuscationEnv searge
+}
+
+configurations {
+    embed
+    implementation.extendsFrom(embed)
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.sk1er.club/repository/maven-public/" }
+    maven { url = "https://jitpack.io/" }
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+}
+
+dependencies {
+    implementation "gg.essential:Essential:1193-10809-SNAPSHOT"
+    embed "gg.essential:loader-launchwrapper:1.0.2"
+
+    annotationProcessor "com.google.guava:guava:21.0"
+    annotationProcessor "org.apache.logging.log4j:log4j-core:2.0-beta9"
+    annotationProcessor "org.ow2.asm:asm-tree:6.2"
+    annotationProcessor "org.ow2.asm:asm-commons:6.2"
+    annotationProcessor "org.ow2.asm:asm-util:6.2"
+    annotationProcessor "com.google.code.gson:gson:2.8.6"
+    annotationProcessor "org.spongepowered:mixin:0.7.11-SNAPSHOT"
+
+    compileOnly "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
+}
+
+shadowJar {
+    archiveName = tasks.jar.archiveName
+    classifier = ""
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest.attributes(
+            "ForceLoadAsMod": true,
+            "ModSide": "CLIENT",
+            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
+            "MixinConfigs": "examplemod.mixins.json"
+    )
+
+    exclude("dummyThing")
+    exclude("META-INF/maven/")
+    exclude("META-INF/nar/")
+    exclude("module-info.class")
+    exclude("META-INF/versions/")
+    exclude("LICENSE.txt")
+
+    configurations = [project.configurations.embed]
+}
+
+reobfJar.dependsOn tasks.shadowJar
+
+reobf {
+    shadowJar {
+        mappingType = "SEARGE"
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+
+        expand "version": project.version, "mcversion": project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+    }
+
+    from(file("LICENSE"))
+}
