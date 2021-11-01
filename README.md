@@ -1,5 +1,5 @@
-# ExampleMod
-Simple mod which I use as a template for my Minecraft Forge 1.8.9 mods. 
+# WikiWriter
+Yeah
 
 # Program Arguments in Development Environment 
 ```jvm
