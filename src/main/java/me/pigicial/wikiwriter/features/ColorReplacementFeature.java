@@ -16,7 +16,7 @@ public enum ColorReplacementFeature {
     RESET("&r", "", "", true),
     BLACK("&0", "&0", ""),
     DARK_BLUE("&1", "&1", ""),
-    DARK_GREEN("&2", "&3", ""),
+    DARK_GREEN("&2", "&2", ""),
     DARK_AQUA("&3", "&3", ""),
     DARK_RED("&4", "&4", ""),
     DARK_PURPLE("&5", "&5", ""),
@@ -32,7 +32,7 @@ public enum ColorReplacementFeature {
     WHITE("&f", "&f", ""),
     BOLD("&l", "'''", "'''", false),
     UNDERLINE("&n", "<ins>", "</ins>", false),
-    ITALICS("&m", "''", "''", false),
+    ITALICS("&o", "''", "''", false),
     OBFUSCATION("&k", "", "", false),
     STRIKETHROUGH("&m", "<s>", "</s>", false);
 
