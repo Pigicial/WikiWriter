@@ -1,0 +1,9 @@
+{
+    "compatibilityLevel": "JAVA_8",
+    "package": "me.pigicial.wikiwriter.mixins",
+    "refmap": "wikiwriter.mixins.refmap.json",
+    "client": [
+        "MinecraftMixin"
+    ],
+    "server": []
+}

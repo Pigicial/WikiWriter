@@ -1,0 +1,64 @@
+package me.pigicial.wikiwriter;
+
+import gg.essential.api.EssentialAPI;
+import me.pigicial.wikiwriter.commands.MainCommand;
+import me.pigicial.wikiwriter.core.Config;
+import lombok.Getter;
+import me.pigicial.wikiwriter.features.CopyLoreFeature;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
+@Mod(
+    modid = WikiWriter.MODID,
+    version = WikiWriter.VERSION,
+    name = WikiWriter.NAME,
+    clientSideOnly = true
+)
+public class WikiWriter {
+    public static final String NAME = "WikiWriter";
+    public static final String MODID = "wikiwriter";
+    public static final String VERSION = "1.0";
+    public static final String configLocation = "./config/wikiwriter.toml";
+
+    @Getter private static WikiWriter instance;
+    @Getter private final Logger logger;
+    @Getter private final Config config;
+
+    public WikiWriter() {
+        instance = this;
+        logger = LogManager.getLogger();
+        config = new Config();
+    }
+
+    @EventHandler
+    public void init(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(this);
+        config.preload();
+        new MainCommand().register();
+        MinecraftForge.EVENT_BUS.register(new CopyLoreFeature(this));
+
+        this.logger.info("WikiWriter loaded.");
+    }
+
+    public void sendMessage(String... messages) {
+        for (String message : messages) {
+            EssentialAPI.getMinecraftUtil().sendMessage(EnumChatFormatting.GRAY + "[" + EnumChatFormatting.RED + "WikiWriter"
+                    + EnumChatFormatting.GRAY + "]" + EnumChatFormatting.RESET + " ", message);
+        }
+    }
+
+    public void copyToClipboard(String text) {
+        StringSelection selection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, selection);
+    }
+}
