@@ -5,11 +5,13 @@ import me.pigicial.wikiwriter.commands.MainCommand;
 import me.pigicial.wikiwriter.core.Config;
 import lombok.Getter;
 import me.pigicial.wikiwriter.features.CopyLoreFeature;
+import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,7 +28,7 @@ import java.awt.datatransfer.StringSelection;
 public class WikiWriter {
     public static final String NAME = "WikiWriter";
     public static final String MODID = "wikiwriter";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1.1 Beta";
     public static final String configLocation = "./config/wikiwriter.toml";
 
     @Getter private static WikiWriter instance;
@@ -41,10 +43,12 @@ public class WikiWriter {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(this);
+        EventBus eventBus = MinecraftForge.EVENT_BUS;
+        eventBus.register(this);
         config.preload();
         new MainCommand().register();
-        MinecraftForge.EVENT_BUS.register(new CopyLoreFeature(this));
+        eventBus.register(new CopyLoreFeature(this));
+        eventBus.register(new GUIStealerFeature(this));
 
         this.logger.info("WikiWriter loaded.");
     }

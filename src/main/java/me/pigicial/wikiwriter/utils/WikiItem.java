@@ -2,14 +2,13 @@ package me.pigicial.wikiwriter.utils;
 
 import lombok.Getter;
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.features.ColorReplacementFeature;
-import me.pigicial.wikiwriter.features.JsonTextReplacementsFeature;
-import me.pigicial.wikiwriter.features.LoreRemovalFeature;
+import me.pigicial.wikiwriter.features.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -26,31 +25,37 @@ public class WikiItem {
     private final String minecraftId;
     private final List<String> lore;
     private final String skyblockId;
-    private final Rarity skyblockRarity;
+    private final Rarity currentItemRarity;
+    private final Rarity baseItemRarity;
     private final int rarityUpgrades;
     private final int stackSize;
     private final boolean enchanted;
+    private final long color;
 
-    public WikiItem(String name, String minecraftId, List<String> lore, String skyblockId, Rarity skyblockRarity, int rarityUpgrades, int stackSize, boolean enchanted) {
+    public WikiItem(String name, String minecraftId, List<String> lore, String skyblockId, Rarity currentItemRarity, Rarity baseItemRarity, int rarityUpgrades, int stackSize, boolean enchanted, long color) {
         this.name = name;
         this.minecraftId = minecraftId;
         this.lore = lore;
         this.skyblockId = skyblockId;
-        this.skyblockRarity = skyblockRarity;
+        this.currentItemRarity = currentItemRarity;
+        this.baseItemRarity = baseItemRarity;
         this.rarityUpgrades = rarityUpgrades;
         this.stackSize = stackSize;
         this.enchanted = enchanted;
+        this.color = color;
     }
 
     private WikiItem() {
         this.name = "";
         this.minecraftId = "";
         this.lore = new ArrayList<>();
-        this.skyblockId = null;
-        this.skyblockRarity = Rarity.NONE;
+        this.skyblockId = "";
+        this.currentItemRarity = Rarity.NONE;
+        this.baseItemRarity = Rarity.NONE;
         this.rarityUpgrades = 0;
         this.stackSize = 1;
         this.enchanted = false;
+        this.color = 0;
     }
 
     public static WikiItem fromItemStack(ItemStack stack) {
@@ -71,7 +76,8 @@ public class WikiItem {
         LoreRemovalFeature.filterLore(lore);
 
         String name = stack.getDisplayName();
-        Rarity rarity = Rarity.NONE;
+        Rarity currentItemRarity = Rarity.NONE;
+        Rarity baseItemRarity = Rarity.NONE;
 
         int rarityUpgrades = extraAttributes.getInteger("rarity_upgrades");
         loreLoop: for (String s : lore) {
@@ -85,10 +91,11 @@ public class WikiItem {
                 String rarityName = r.name();
                 String textToCheck = lineWithoutColor.substring(offset, lineWithoutColor.length() - offset);
                 if (textToCheck.startsWith(rarityName)) { // using startsWith instead of equals since it can have text after rarity
-                    rarity = r;
+                    currentItemRarity = r;
+                    baseItemRarity = r;
                     if (rarityUpgrades > 0) {
                         for (int i = 0; i < rarityUpgrades; i++) {
-                            rarity = rarity.getPreviousRarity();
+                            baseItemRarity = baseItemRarity.getPreviousRarity();
                         }
                     }
                     break loreLoop;
@@ -96,7 +103,7 @@ public class WikiItem {
             }
         }
 
-        if (rarity == Rarity.NONE && !name.isEmpty()) {
+        if (currentItemRarity == Rarity.NONE && !name.isEmpty()) {
 
             int lastEnd = -1;
             Matcher matcher = STRIP_COLOR_PATTERN.matcher(name);
@@ -113,10 +120,11 @@ public class WikiItem {
                         for (Rarity r : Rarity.values()) {
                             if (r == Rarity.NONE) continue;
                             if (r.getColorCode() == name.charAt(end - 1)) {
-                                rarity = r;
+                                currentItemRarity = r;
+                                baseItemRarity = r;
                                 if (rarityUpgrades > 0) {
                                     for (int i = 0; i < rarityUpgrades; i++) {
-                                        rarity = rarity.getPreviousRarity();
+                                        baseItemRarity = baseItemRarity.getPreviousRarity();
                                     }
                                 }
                                 break colorLoop;
@@ -132,11 +140,21 @@ public class WikiItem {
 
         boolean hasEnchantments = nbt.getTagList("ench", 8).tagCount() > 0;
         String minecraftId = stack.getItem().getItemStackDisplayName(stack).toLowerCase().replace(" ", "_");
+
+        boolean head = minecraftId.contains("head");
+        boolean skyblockItem = head && !minecraftId.equalsIgnoreCase("Zombie_Head") && !minecraftId.equalsIgnoreCase("Creeper_Head") ;
+
+        if (skyblockItem) {
+            minecraftId = "head";
+        }
+
         if (!minecraftId.equalsIgnoreCase("head") && hasEnchantments) {
             minecraftId = "enchanted_" + minecraftId;
         }
 
-        return new WikiItem(name, minecraftId, lore, skyblockId, rarity, rarityUpgrades, stack.stackSize, hasEnchantments);
+        long color = display.getLong("color");
+
+        return new WikiItem(name, minecraftId, lore, skyblockId, currentItemRarity, baseItemRarity, rarityUpgrades, stack.stackSize, hasEnchantments, color);
 
     }
 
@@ -146,33 +164,41 @@ public class WikiItem {
         String lore = JsonTextReplacementsFeature.replaceEverything(this.lore.stream().map(s -> "\"" + ColorReplacementFeature.replace(s) + "\"")
                         .collect(Collectors.joining(", ")));
 
-        boolean skyblockItem = minecraftId.equalsIgnoreCase("head");
-        String typeText = skyblockItem ? "sb" : "mc";
-
         String name = ColorReplacementFeature.replace(JsonTextReplacementsFeature.replaceEverything(this.name.replaceAll("(?i)§[0-9A-FK-ORX]", "")));
-        WikiWriter.getInstance().getLogger().info(name);
+        String goodName = EnumChatFormatting.getTextWithoutFormattingCodes(name);
+
+        String minecraftId = this.minecraftId;
+        String skyblockId = this.skyblockId;
+
+        boolean head = minecraftId.equalsIgnoreCase("head");
+        boolean skyblockItem = head && !skyblockId.equals("");
+        String headReplacement = HeadReplacements.replaceHeadIDByItemName(goodName);
+        if (!headReplacement.equalsIgnoreCase("head") && !skyblockItem) {
+            skyblockItem = true;
+            skyblockId = headReplacement;
+        }
+        String typeText = skyblockItem ? "sb" : "mc";
 
         boolean emptyTitle = name.replace(" ", "").isEmpty();
 
         String initialChar = emptyTitle ? "?" : "";
 
-        String goodName = EnumChatFormatting.getTextWithoutFormattingCodes(name);
+        /*
+        if (minecraftId.startsWith("leather") && color != 0) {
+            WikiWriter.getInstance().sendMessage("scanning for color " + color);
+            LeatherColorFinderFeature color = LeatherColorFinderFeature.findColor((int) this.color);
+            WikiWriter.getInstance().sendMessage("color " + color.name() + " found");
+            if (color != LeatherColorFinderFeature.DEFAULT) {
+                minecraftId = minecraftId + "_" + color.name().toLowerCase();
+            }
+        }
+
+         */
+
         //WikiWriter.getInstance().sendMessage("Minecraft ID: " + minecraftId + ", good name: " + goodName);
 
-        return initialChar + typeText + "," + skyblockRarity.toString().toLowerCase() + "," + (skyblockItem ? skyblockId : minecraftId)
+        return initialChar + typeText + "," + currentItemRarity.toString().toLowerCase() + "," + (skyblockItem ? skyblockId.toLowerCase() : minecraftId)
                 + (emptyTitle ? "" : (minecraftId.equals(goodName) ? "" : ":" + goodName))
-                //
-                + (lore.isEmpty() && stackSize == 1 ? "" : ("," + NumberFormat.getInstance().format(stackSize) + (emptyTitle ? "" : "," + StringEscapeUtils.escapeJava(lore.substring(1, lore.length() - 1)))));
-    }
-
-    public void logData() {
-        Logger logger = WikiWriter.getInstance().getLogger();
-        logger.log(Level.INFO, "Name: " + this.name);
-        logger.log(Level.INFO, "Minecraft ID: " + this.minecraftId);
-        logger.log(Level.INFO, "Skyblock ID: " + this.skyblockId);
-        logger.log(Level.INFO, "Skyblock Rarity: " + this.skyblockRarity);
-        logger.log(Level.INFO, "Lore: " + this.lore);
-        logger.log(Level.INFO, "Rarity Upgrades: " + this.rarityUpgrades);
-        logger.log(Level.INFO, "Stack Size: " + this.stackSize);
+                + (lore.isEmpty() && stackSize == 1 ? "" : ("," + NumberFormat.getInstance().format(stackSize) + (emptyTitle || lore.isEmpty() ? "" : "," + new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(lore.substring(1, lore.length() - 1))).replace("\\\"", "\""))));
     }
 }

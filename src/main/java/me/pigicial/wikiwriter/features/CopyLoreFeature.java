@@ -1,6 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.WikiItem;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.settings.KeyBinding;
@@ -23,7 +24,8 @@ public class CopyLoreFeature {
 
     @SubscribeEvent
     public void onKey(GuiScreenEvent.KeyboardInputEvent.Post event) {
-        if (!wikiWriter.getConfig().copyItems) return;
+        Config config = wikiWriter.getConfig();
+        if (!config.modEnabled || !config.copyItems) return;
         if (Keyboard.getEventKey() != copyLoreKeybind.getKeyCode()) return;
         if (!(event.gui instanceof GuiContainer)) return;
         if (Keyboard.getEventKeyState()) return; // only activate on key release
