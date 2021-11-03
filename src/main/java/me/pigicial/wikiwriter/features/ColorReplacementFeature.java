@@ -59,12 +59,9 @@ public enum ColorReplacementFeature {
     public static String replace(String text) {
         text = text.replace('§', '&');
         List<ReplacementSection> replacementSections = getReplacementSections(text);
-        Logger logger = WikiWriter.getInstance().getLogger();
         if (replacementSections.size() == 0) {
-            logger.info("No color codes found from " + text);
             return text;
         }
-        logger.info("section count: " + replacementSections.size());
         List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
 
         StringBuilder newString = new StringBuilder();
@@ -103,14 +100,11 @@ public enum ColorReplacementFeature {
     }
 
     private static List<ReplacementSection> getReplacementSections(String text) {
-        Logger logger = WikiWriter.getInstance().getLogger();
-        logger.info("hello yes this is running");
         Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
         List<ReplacementSection> sections = new LinkedList<>();
         while (matcher.find()) {
             String check = matcher.group();
             ReplacementSection replacementSection = byCode(check, matcher.start(), matcher.end());
-            logger.info(check + ": " + replacementSection.feature.name());
 
             if (replacementSection.getFeature() != UNKNOWN) {
                 sections.add(replacementSection);

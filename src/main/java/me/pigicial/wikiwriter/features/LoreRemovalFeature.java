@@ -12,14 +12,37 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public enum LoreRemovalFeature {
-    A("Right-click to view recipes!", ""),
-    B("Right click to view recipes", ""),
-    C("", "Click to view recipe!"),
-    D("", "Click to view recipes!"),
-    E("Right click on your pet to", "give it this item!", ""),
-    F("Right click on your pet to", "feed it this candy!", ""),
-    G("", "Cost", "Coins", "", "Click to trade!"),
-    H("Right-click to add this pet to", "your pet menu!"),
+    CLICK_1(config -> config.removeRightClickNotices, "Right-click to view recipes!", ""),
+    CLICK_2(config -> config.removeRightClickNotices, "Right click to view recipes", ""),
+    CLICK_3(config -> config.removeRightClickNotices, "", "Click to view recipe!"),
+    CLICK_4(config -> config.removeRightClickNotices, "", "Click to view recipes!"),
+    CLICK_5(config -> config.removeRightClickNotices, "Right click on your pet to", "give it this item!", ""),
+    CLICK_6(config -> config.removeRightClickNotices, "Right click on your pet to", "feed it this candy!", ""),
+    CLICK_7(config -> config.removeRightClickNotices, "Right-click to add this pet to", "your pet menu!", ""),
+    CLICK_8(config -> config.removeRightClickNotices, "Right-click to use your class", "ability", ""),
+    CLICK_9(config -> config.removeRightClickNotices, "Right-click to use your class ability", ""),
+    CLICK_10(config -> config.removeRightClickNotices, "Right-click to use Class Ability", ""),
+    CLICK_11(config -> config.removeRightClickNotices, "Right click to use Class", "Ability", ""),
+    CLICK_12(config -> config.removeRightClickNotices, "Right-click to consume!", ""),
+    CLICK_13(config -> config.removeRightClickNotices, "Right click on your pet to", "apply this skin!", ""),
+
+    ENCHANTMENTS_1(config -> config.removeEnchantmentRequirementNotices, "You do not have a high enough", "Enchantment level to use some of", "the enchantments on this item", ""),
+    ENCHANTMENTS_2(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", "apply.", ""),
+    ENCHANTMENTS_3(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", ""),
+
+    SHOP_1(config -> config.removeShopNPCTradeText, "Right-Click for more trading options!"),
+    SHOP_2(config -> config.removeShopNPCTradeText, "", "Cost", "{anything}", "", "Click to trade!"),
+    SHOP_3(config -> config.removeShopNPCTradeText, "", "Cost", "{anything}", "{anything}", "", "Click to trade!"),
+    SHOP_4(config -> config.removeShopNPCTradeText, "", "Cost", "{anything}", "{anything}", "{anything}", "", "Click to trade!"),
+    SHOP_5(config -> config.removeShopNPCTradeText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to trade!"),
+
+    PET_CANDY(config -> config.removePetCandy, "Pet Candy Used", ""),
+
+    PET_ITEMS_1(config -> config.removePetItems, "Held Item:", "{anything}", ""),
+    PET_ITEMS_2(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", ""),
+    PET_ITEMS_3(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", ""),
+    PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", ""),
+    PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", ""),
 
     BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Ends in", "", "Click to inspect!"),
     BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Ends in"),
@@ -94,7 +117,7 @@ public enum LoreRemovalFeature {
                 String s = EnumChatFormatting.getTextWithoutFormattingCodes(strings.get(i));
                 String checkingAgainst = textToFilter.get(i - offsetPosition);
                 if ((s.replace(" ", "").length() == 0 && checkingAgainst.replace(" ", "").length() == 0)
-                        || (s.contains(checkingAgainst) && checkingAgainst.length() >= 1)) {
+                        || (s.contains(checkingAgainst) && checkingAgainst.length() >= 1) || checkingAgainst.equals("{anything}")) {
                     toRemove.add(i + totalRemoved);
 
                     if (toRemove.size() == textToFilter.size()) {
