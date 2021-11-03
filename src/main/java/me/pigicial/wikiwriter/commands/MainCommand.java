@@ -4,10 +4,22 @@ import me.pigicial.wikiwriter.WikiWriter;
 import gg.essential.api.EssentialAPI;
 import gg.essential.api.commands.Command;
 import gg.essential.api.commands.DefaultHandler;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainCommand extends Command {
     public MainCommand() {
-        super("wikiwriter");
+        super("wikiwriter", false);
+    }
+
+    @Nullable
+    @Override
+    public Set<Alias> getCommandAliases() {
+        return new HashSet<>(Collections.singletonList(new Alias("ww")));
     }
 
     @DefaultHandler

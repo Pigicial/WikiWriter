@@ -35,9 +35,15 @@ public class CopyLoreFeature {
         ItemStack stack = slotUnderMouse.getStack();
         if (stack == null) return;
 
-        WikiItem wikiItem = WikiItem.fromItemStack(stack);
-        wikiWriter.copyToClipboard(wikiItem.convertToWikiItem());
-        wikiWriter.sendMessage("Copied hovered item to clipboard.");
+        WikiItem wikiItem = new WikiItem(null, stack);
+        String text = wikiItem.convertToWikiItem();
+
+        if (config.itemTemplatesMode) {
+            text = "<noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>\n" + text + "\n</includeonly>";
+        }
+
+        wikiWriter.copyToClipboard(text);
+        wikiWriter.sendMessage("Copied hovered item to clipboard" + (config.itemTemplatesMode ? " as template item" : "") + ".");
 
     }
 }
