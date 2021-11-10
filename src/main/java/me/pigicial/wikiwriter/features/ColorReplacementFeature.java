@@ -1,11 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
 import lombok.Data;
-import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.utils.WikiItem;
-import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -66,7 +62,6 @@ public enum ColorReplacementFeature {
 
         StringBuilder newString = new StringBuilder();
         int lastEnd = 0;
-        boolean addSpacesOnPreviousSection = false;
 
         for (ReplacementSection replacementSection : replacementSections) {
             int start = replacementSection.getStart();
@@ -87,7 +82,6 @@ public enum ColorReplacementFeature {
 
             currentlyAppliedSections.add(replacementSection);
             lastEnd = end;
-            addSpacesOnPreviousSection = feature.addSpaces;
         }
 
         newString.append(text.substring(lastEnd));
