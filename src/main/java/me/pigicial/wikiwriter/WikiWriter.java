@@ -7,6 +7,8 @@ import lombok.Getter;
 import me.pigicial.wikiwriter.core.LoginNotifications;
 import me.pigicial.wikiwriter.features.CopyLoreFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
+import me.pigicial.wikiwriter.features.RawNBTExtractor;
+import me.pigicial.wikiwriter.features.StatGenerationFeature;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -29,7 +31,7 @@ import java.awt.datatransfer.StringSelection;
 public class WikiWriter {
     public static final String NAME = "WikiWriter";
     public static final String MODID = "wikiwriter";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.7.2";
     public static final String configLocation = "./config/wikiwriter.toml";
 
     @Getter private static WikiWriter instance;
@@ -50,6 +52,8 @@ public class WikiWriter {
         new MainCommand().register();
         eventBus.register(new CopyLoreFeature(this));
         eventBus.register(new GUIStealerFeature(this));
+        eventBus.register(new RawNBTExtractor(this));
+        eventBus.register(new StatGenerationFeature(this));
 
         this.logger.info("WikiWriter loaded.");
         LoginNotifications.sendLoginNotification();
@@ -59,6 +63,14 @@ public class WikiWriter {
         for (String message : messages) {
             EssentialAPI.getMinecraftUtil().sendMessage(EnumChatFormatting.GRAY + "[" + EnumChatFormatting.RED + "WikiWriter"
                     + EnumChatFormatting.GRAY + "]" + EnumChatFormatting.RESET + " ", message);
+        }
+    }
+
+    public void debug(String... messages) {
+        if (config.debugMode) {
+            for (String s : messages) {
+                logger.info("[DEBUG] " + s);
+            }
         }
     }
 

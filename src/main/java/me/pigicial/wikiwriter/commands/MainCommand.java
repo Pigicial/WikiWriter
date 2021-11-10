@@ -24,6 +24,11 @@ public class MainCommand extends Command {
 
     @DefaultHandler
     public void handle() {
-        EssentialAPI.getGuiUtil().openScreen(WikiWriter.getInstance().getConfig().gui());
+        try {
+            EssentialAPI.getGuiUtil().openScreen(WikiWriter.getInstance().getConfig().gui());
+        } catch (Exception e) {
+            WikiWriter.getInstance().sendMessage("Failed to open this GUI, please report this with your latest.log file!");
+            e.printStackTrace();
+        }
     }
 }

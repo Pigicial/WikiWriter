@@ -8,23 +8,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class WikiItem {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-ORX]");
-    private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("(-?[0-9]|[1-9][0-9]|[1-9][0-9][0-9])x ");
+    private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("§7(-?[0-9]|[1-9][0-9]|[1-9][0-9][0-9])x ");
     private static final Pattern PET_NUMBER_COUNTER = Pattern.compile("\\[Lvl ([01]?[0-9][0-9]?|200)] ");
     private static final Pattern PET_NUMBER_COUNTER_WITH_COLOR = Pattern.compile("§7\\[Lvl ([01]?[0-9][0-9]?|200)] ");
+    private static final Pattern SHOP_NAME_ITEM_COUNT = Pattern.compile("§8x([0-9][0-9]?)");
 
     private final String name;
     private final String minecraftId;
@@ -44,8 +41,15 @@ public class WikiItem {
     private final String loreAsString;
     private final String nameWithColor;
     private final String referenceId;
+    private final boolean recipeMode;
+    private final boolean mysteryPet;
+    @Getter
+    private final String removedLore;
+    @Getter
+    private final boolean hasSkyblockItemID;
+    private final String textureLink;
 
-    public WikiItem(@Nullable String guiName, ItemStack stack) {
+    public WikiItem(@Nullable String guiName, ItemStack stack, Action action, boolean referenceMode) {
         if (stack == null) {
             this.name = "";
             this.minecraftId = "";
@@ -64,6 +68,11 @@ public class WikiItem {
             this.loreAsString = "";
             this.nameWithColor = "";
             this.referenceId = "";
+            this.recipeMode = false;
+            this.mysteryPet = false;
+            this.removedLore = "";
+            this.hasSkyblockItemID = false;
+            this.textureLink = "";
             return;
         }
 
@@ -72,7 +81,7 @@ public class WikiItem {
         if (nbt == null) nbt = new NBTTagCompound();
 
         NBTTagCompound extraAttributes = nbt.getCompoundTag("ExtraAttributes");
-        String skyblockId = extraAttributes.getString("id");
+        String skyblockId = extraAttributes.getString("id").toLowerCase();
 
         NBTTagCompound display = nbt.getCompoundTag("display");
         NBTTagList loreTag = display.getTagList("Lore", 8); // 8 is NBTTagString from NBTBase#createNewByType
@@ -81,13 +90,40 @@ public class WikiItem {
         for (int i = 0; i < loreTag.tagCount(); i++)
             lore.add(loreTag.getStringTagAt(i));
 
-        LoreRemovalFeature.filterLore(lore);
+        List<String> removedLore = new ArrayList<>();
+        Config config = WikiWriter.getInstance().getConfig();
+
+        boolean originalReferenceMode = referenceMode;
+        referenceMode = originalReferenceMode || (!LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.BOTTOM_SHOP_FILTERS).removedLore.isEmpty());
+
+        if (referenceMode) {
+            removedLore = LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.SHOP_FILTERS).removedLore;
+
+            // handle this price check separately since it can break stuff if both are removed (elegant tux for instance)
+            if (removedLore.isEmpty()) {
+                removedLore = LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), new LoreRemovalFeature[]{LoreRemovalFeature.SHOP_9}).removedLore;
+            }
+        }
+
+        LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(action, lore, referenceMode && action == Action.COPYING_INVENTORY ? LoreRemovalFeature.NON_SHOP_FILTERS : LoreRemovalFeature.values());
+        if (!referenceMode) removedLore = removeData.removedLore;
 
         String name = stack.getDisplayName();
         String minecraftId = stack.getItem().getItemStackDisplayName(stack).toLowerCase().replace(" ", "_");
 
-        boolean head = minecraftId.contains("head");
-        boolean skyblockItem = head && !minecraftId.equalsIgnoreCase("Zombie_Head") && !minecraftId.equalsIgnoreCase("Creeper_Head") ;
+        String registryName = stack.getItem().getRegistryName().replace("minecraft:", "");
+        int dataValue = stack.getItem().getMetadata(stack);
+        if (dataValue != 0) {
+            registryName = registryName + ":" + NumberFormat.getInstance().format(dataValue);
+        }
+
+        boolean head = minecraftId.contains("head") || minecraftId.contains("skull");
+        boolean skyblockItem = head && !minecraftId.equalsIgnoreCase("zombie_head") && !minecraftId.equalsIgnoreCase("skeleton_skull") && !minecraftId.equalsIgnoreCase("creeper_head") && !minecraftId.equalsIgnoreCase("wither_skeleton_skull");
+
+        if (guiName != null && skyblockId.equals("") && (guiName.contains("Oringo") || (guiName.contains("Pets") && skyblockItem && !lore.isEmpty()
+                && lore.get(lore.size() - 1).contains("Click to summon")))) {
+            skyblockId = "pet";
+        }
 
         boolean pet = skyblockId.equalsIgnoreCase("pet") || (skyblockId.equals("") && !lore.isEmpty() && lore.get(0).contains("Pet") && skyblockItem);
         boolean hasSkyblockItemID = !skyblockId.equals("");
@@ -95,16 +131,23 @@ public class WikiItem {
         if (pet) {
             // update if it didn't include the id but is a pet
             skyblockId = "pet";
+            hasSkyblockItemID = true;
         } else if (skyblockItem && skyblockId.equals("")) {
             skyblockId = "head";
         }
 
         boolean petNameChanged = false;
-        Config config = WikiWriter.getInstance().getConfig();
         if (config.updatePetName && pet) {
             Matcher matcher = PET_NUMBER_COUNTER_WITH_COLOR.matcher(name);
             while (matcher.find()) {
                 petNameChanged = true;
+                name = name.replace(matcher.group(), "");
+            }
+        }
+
+        if (config.removeItemAmountsFromItemNames) {
+            Matcher matcher = SHOP_NAME_ITEM_COUNT.matcher(name);
+            while (matcher.find()) {
                 name = name.replace(matcher.group(), "");
             }
         }
@@ -180,10 +223,7 @@ public class WikiItem {
             color = -1;
         }
 
-        int maxStackSize = stack.getMaxStackSize();
-        if (extraAttributes.hasKey("uuid, 8")) {
-            maxStackSize = 1;
-        }
+        int stackSize = stack.stackSize;
 
         if (minecraftId.startsWith("leather") && color != -1) {
             LeatherColorFinderFeature colorFinderFeature = LeatherColorFinderFeature.findColor((int) color);
@@ -193,7 +233,34 @@ public class WikiItem {
             }
         }
 
-        minecraftId = VersionConverterFeature.replace(minecraftId);
+        if (skyblockItem && skyblockId.contains("backpack") && config.backpackColors && extraAttributes.hasKey("backpack_color", 8)) {
+            String backpackColor = extraAttributes.getString("backpack_color").toLowerCase();
+            if (!backpackColor.equals("") && !backpackColor.equalsIgnoreCase("default")) {
+                skyblockId = backpackColor + "_" + skyblockId;
+            }
+        }
+
+        if (minecraftId.equalsIgnoreCase("music_disc")) {
+            minecraftId = registryName;
+        }
+
+        if (minecraftId.equalsIgnoreCase("button")) {
+            minecraftId = registryName.equalsIgnoreCase("wooden_button") ? "oak_button" : registryName;
+        }
+
+        // log referenceMode, shopMode, and hasSkyblockItemID
+        WikiWriter.getInstance().getLogger().info("ReferenceMode: " + referenceMode);
+        WikiWriter.getInstance().getLogger().info("HasSkyblockItemID: " + hasSkyblockItemID);
+
+        skyblockId = VersionConverterFeature.replace(skyblockId, true);
+        minecraftId = VersionConverterFeature.replace(minecraftId, false);
+        //if ((referenceMode) && hasSkyblockItemID) {
+            // log this
+       //     skyblockId = VersionConverterFeature.replace(skyblockId, true);
+        //    WikiWriter.getInstance().getLogger().info(skyblockId);
+        //} else {
+        //    minecraftId = VersionConverterFeature.replace(minecraftId, false);
+        //}
 
         // spawn eggs are formatted like ghast_spawn_egg instead of spawn_ghast (which it normally gets)
         if (minecraftId.startsWith("spawn_")) {
@@ -204,14 +271,25 @@ public class WikiItem {
             minecraftId = minecraftId.replace("chain_", "chainmail_");
         }
 
-        if (!minecraftId.equalsIgnoreCase("head") && hasEnchantments) {
+        if (!minecraftId.equalsIgnoreCase("head") && hasEnchantments && !minecraftId.startsWith("enchanted_")) {
             minecraftId = "enchanted_" + minecraftId;
         }
 
         String petId = null;
+
+        boolean mystery = false;
         if (skyblockItem && pet) {
 
             String rawName = EnumChatFormatting.getTextWithoutFormattingCodes(name);
+            mystery = rawName.startsWith("Mystery ");
+            if (mystery) {
+                rawName = rawName.substring(8);
+            }
+
+            if (mystery && rawName.endsWith(" Pet")) {
+                rawName = rawName.substring(0, rawName.length() - 4);
+            }
+
             Matcher matcher = PET_NUMBER_COUNTER.matcher(rawName);
             boolean found = petNameChanged;
 
@@ -224,25 +302,32 @@ public class WikiItem {
                 rawName = rawName.substring(0, rawName.length() - 2);
             }
 
-            if (petNameChanged) {
+            if (petNameChanged && !mystery) {
                 name = name.replace(rawName, rawName + " Pet");
             }
 
-            if (found) {
+            if (found || mystery) {
                 petId = rawName.replace(" ", "_").toLowerCase();
             }
         }
-
-        int stackSize = stack.stackSize;
 
         String nameWithColor = name;
 
         boolean showRarity = currentItemRarity != Rarity.NONE;
 
-        if (showRarity && config.guaranteedStackSizeToggled && hasSkyblockItemID) {
+        if (!(referenceMode && config.recipeMode) && showRarity && config.guaranteedStackSizeToggled && hasSkyblockItemID) {
+
+            int maxStackSize = stackSize;
+
+            if (extraAttributes.hasKey("uuid, 8") && !pet) {
+                maxStackSize = 1;
+            }
+
             int setStackSize = config.setStackSize;
             if (!config.bypassStackSizeLimit) {
-                setStackSize = Math.min(setStackSize, maxStackSize);
+                if (setStackSize > maxStackSize) {
+                    setStackSize = maxStackSize;
+                }
             }
 
             if (setStackSize != stackSize) {
@@ -271,9 +356,18 @@ public class WikiItem {
         String nameWithoutColor = ColorReplacementFeature.replace(rawNameWithoutColor);
         boolean emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
 
+        if (config.removeCloseGoBackAndPageItems <= 1) {
+            if (nameWithoutColor.contains("Close") && registryName.equalsIgnoreCase("barrier")) {
+                emptyTitle = true;
+            } else if (registryName.equalsIgnoreCase("arrow") && (nameWithoutColor.contains("Page") || nameWithoutColor.contains("Level") ||
+                    (nameWithoutColor.contains("Go Back") && (lore.isEmpty() || !lore.get(0).toLowerCase().contains("skyblock menu") || config.removeCloseGoBackAndPageItems == 0)))) {
+                emptyTitle = true;
+            }
+        }
+
         HeadReplacements headReplacement = HeadReplacements.replaceHeadIDByItemName(rawNameWithoutColor);
 
-        if (headReplacement != null && skyblockItem) {
+        if (headReplacement != null && skyblockItem && !hasSkyblockItemID) {
             skyblockItem = headReplacement.isTurnToSbItem();
             if (skyblockItem) {
                 skyblockId = headReplacement.getIdReplacement();
@@ -289,7 +383,6 @@ public class WikiItem {
         String typeText = skyblockItem ? pet ? "sbpet" : "sb" : "mc";
         String initialChar = emptyTitle ? "?" : "";
 
-        WikiWriter.getInstance().getLogger().info("Writing item " + nameWithColor + " to wiki");
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             lore.add(0, nameWithColor);
             name = "e";
@@ -299,8 +392,14 @@ public class WikiItem {
             nameWithoutColor = "e";
         }
 
-        String loreAsString = JsonTextReplacementsFeature.replaceEverything(lore.stream().map(s -> "\"" + ColorReplacementFeature.replace(s) + "\"")
-                .collect(Collectors.joining(", ")));
+        //String loreAsString = JsonTextReplacementsFeature.replaceEverything(lore.stream().map(s -> "\"" + ColorReplacementFeature.replace(s) + "\"")
+        //        .collect(Collectors.joining(", ")));
+
+        //if (loreAsString.endsWith("\n}")) {
+        //    loreAsString = loreAsString.substring(0, loreAsString.length() - 2) + "}";
+        //}
+
+        String loreAsString = TextUtils.convertListToString(lore);
 
         this.petId = petId;
         this.minecraftId = minecraftId;
@@ -318,25 +417,63 @@ public class WikiItem {
         this.initialChar = initialChar;
         this.skyblockItem = skyblockItem;
         this.nameWithColor = nameWithColor;
-        this.referenceId = (skyblockItem ? pet ? petId : skyblockId.toLowerCase() : minecraftId);
+        this.recipeMode = referenceMode;
+        this.mysteryPet = mystery;
+        this.hasSkyblockItemID = hasSkyblockItemID;
+        /*
+        String removedLoreAsString = JsonTextReplacementsFeature.replaceEverything(removedLore.stream().map(s -> "\"" + ColorReplacementFeature.replace(s) + "\"")
+                .collect(Collectors.joining(", ")));
+
+        WikiWriter.getInstance().debug(removedLoreAsString);
+
+        if (removedLoreAsString.endsWith("\\n}")) {
+            // will always end with \n since it's only be used for shops atm, and they always have the ending text which isn't removed
+            WikiWriter.getInstance().debug("yes2");
+            removedLoreAsString = removedLoreAsString.substring(0, removedLoreAsString.length() - 2) + "}";
+        }
+
+        removedLoreAsString = TextUtils.unescapeText(removedLoreAsString);
+
+        if (!removedLoreAsString.isEmpty()) {
+            removedLoreAsString = removedLoreAsString.substring(1, removedLoreAsString.length() - 1);
+            if (removedLoreAsString.endsWith("\n")) {
+                removedLoreAsString = removedLoreAsString.substring(0, removedLoreAsString.length() - 1);
+            }
+        }
+         */
+
+        this.removedLore = TextUtils.convertListToString(removedLore);
+
+        this.textureLink = skyblockItem ? pet ? petId : skyblockId.toLowerCase() : minecraftId;
+        boolean potion = skyblockId.equalsIgnoreCase("potion");
+        String baseReferenceId = skyblockItem || (hasSkyblockItemID && !potion) ? pet ? petId : skyblockId.toLowerCase() : potion ? nameWithoutColor : minecraftId;
+        if (referenceMode) {
+            this.referenceId = (emptyTitle || minecraftId.equals(nameWithoutColor) ? (showRarity ? nameWithoutColor.toLowerCase() : nameWithColor.toLowerCase()) : baseReferenceId);
+        } else {
+            this.referenceId = baseReferenceId;
+        }
     }
 
-    public String convertToRecipeReference() {
+    public String convertToReference() {
         if (minecraftId.equals("")) return "";
 
         if (pet) {
-            return "{{Item_" + petId + "_" + currentItemRarity.name().toLowerCase() + "}}";
+            return "{{Item_" + (recipeMode ? "pet_craft_" : "") + petId + (!mysteryPet ? "_" + currentItemRarity.name().toLowerCase() : "") + "}}";
         } else {
             return "{{Item_" + referenceId.replace(" ", "_").toLowerCase() + "}}";
         }
     }
 
+    public String convertToReferenceWithPotentialShopLore() {
+        return convertToReference() + (removedLore.length() == 0 ? "" : TextUtils.unescapeText("\n") + removedLore) + (stackSize != 1 ? "," + NumberFormat.getInstance().format(stackSize) : "");
+    }
+
     public String convertToWikiItem() {
         if (minecraftId.equals("")) return "";
 
-        return initialChar + typeText + "," + (!showRarity ? "" : currentItemRarity.toString().toLowerCase()) + "," + referenceId
+        return initialChar + typeText + "," + (!showRarity ? "" : currentItemRarity.toString().toLowerCase()) + "," + textureLink
                 + (emptyTitle ? "" : (minecraftId.equals(nameWithoutColor) ? "" : ":" + (showRarity ? nameWithoutColor : nameWithColor)))
                 + (lore.isEmpty() && stackSize == 1 ? "" : ("," + NumberFormat.getInstance().format(stackSize) + (emptyTitle || lore.isEmpty() ? "" : ","
-                + new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(loreAsString.substring(1, loreAsString.length() - 1))).replace("\\\"", "\""))));
+                + loreAsString)));
     }
 }
