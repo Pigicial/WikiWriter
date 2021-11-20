@@ -106,7 +106,7 @@ public class GUIStealerFeature {
                 for (int i = 0; i < loreTag.tagCount(); i++)
                     lore.add(loreTag.getStringTagAt(i));
 
-                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, LoreRemovalFeature.BOTTOM_SHOP_FILTERS);
+                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, LoreRemovalFeature.BOTTOM_SHOP_FILTERS, false);
                 shopMode = !removeData.removedLore.isEmpty();
             }
 
@@ -142,7 +142,8 @@ public class GUIStealerFeature {
                     if (itemStack == null) break;
 
                     WikiItem item = new WikiItem(inventoryName, itemStack, Action.COPYING_INVENTORY, true);
-                    builder.append("|item").append(i + 1).append("=").append(item.convertToReferenceWithPotentialShopLore()).append("\n");
+                    builder.append("|item").append(i + 1).append("=").append((config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && item.isShopItem())
+                            ? item.isShopItem() ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference() : item.convertToWikiItem()).append("\n");
                 }
 
                 builder.append("}}\n<noinclude>[[Category:NPC UI Templates]]</noinclude>");
@@ -213,7 +214,8 @@ public class GUIStealerFeature {
 
                     WikiItem item = new WikiItem(inventoryName, itemStack, Action.COPYING_INVENTORY, false);
                     builder.append("|").append(alphabet[verticalPosition - 1]).append(numberFormat.format(horizontalPosition)).append("=")
-                            .append(item.isHasSkyblockItemID() ? item.convertToReferenceWithPotentialShopLore() : item.convertToWikiItem()).append("\n");
+                            .append(item.isHasSkyblockItemID() && (config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && item.isShopItem())
+                                    ? item.isShopItem() ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference() : item.convertToWikiItem()).append("\n");
                 }
                 builder.append("}}");
                 wikiWriter.sendMessage("Copied top GUI to clipboard.");

@@ -48,6 +48,8 @@ public class WikiItem {
     @Getter
     private final boolean hasSkyblockItemID;
     private final String textureLink;
+    @Getter
+    private final boolean shopItem;
 
     public WikiItem(@Nullable String guiName, ItemStack stack, Action action, boolean referenceMode) {
         if (stack == null) {
@@ -73,6 +75,7 @@ public class WikiItem {
             this.removedLore = "";
             this.hasSkyblockItemID = false;
             this.textureLink = "";
+            this.shopItem = false;
             return;
         }
 
@@ -94,7 +97,8 @@ public class WikiItem {
         Config config = WikiWriter.getInstance().getConfig();
 
         boolean originalReferenceMode = referenceMode;
-        referenceMode = originalReferenceMode || (!LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.BOTTOM_SHOP_FILTERS).removedLore.isEmpty());
+        boolean shopItem = false;
+        referenceMode = originalReferenceMode || (shopItem = !LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.BOTTOM_SHOP_FILTERS, false).removedLore.isEmpty());
 
         if (referenceMode) {
             removedLore = LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.SHOP_FILTERS).removedLore;
@@ -102,6 +106,10 @@ public class WikiItem {
             // handle this price check separately since it can break stuff if both are removed (elegant tux for instance)
             if (removedLore.isEmpty()) {
                 removedLore = LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), new LoreRemovalFeature[]{LoreRemovalFeature.SHOP_9}).removedLore;
+            }
+
+            if (!removedLore.isEmpty()) {
+                shopItem = true;
             }
         }
 
@@ -166,7 +174,7 @@ public class WikiItem {
                 if (r == Rarity.NONE) continue;
                 String rarityName = r.name();
                 String textToCheck = lineWithoutColor.substring(offset, lineWithoutColor.length() - offset);
-                if (textToCheck.startsWith(rarityName)) { // using startsWith instead of equals since it can have text after rarity
+                if (/*textToCheck.startsWith(rarityName)*/lineWithoutColor.contains(rarityName)) { // using startsWith instead of equals since it can have text after rarity
                     currentItemRarity = r;
                     baseItemRarity = r;
                     if (rarityUpgrades > 0) {
@@ -212,7 +220,7 @@ public class WikiItem {
             }
         }
 
-        boolean hasEnchantments = stack.isItemEnchanted();
+        boolean hasEnchantments = stack.isItemEnchanted() || skyblockId.equalsIgnoreCase("potion");
 
         if (skyblockItem) {
             minecraftId = "head";
@@ -227,7 +235,7 @@ public class WikiItem {
 
         if (minecraftId.startsWith("leather") && color != -1) {
             LeatherColorFinderFeature colorFinderFeature = LeatherColorFinderFeature.findColor((int) color);
-            WikiWriter.getInstance().getLogger().info("Found leather color " + colorFinderFeature.name() + " for " + minecraftId);
+            WikiWriter.getInstance().debug("Found leather color " + colorFinderFeature.name() + " for " + minecraftId);
             if (colorFinderFeature != LeatherColorFinderFeature.DEFAULT) {
                 minecraftId = minecraftId + "_" + colorFinderFeature.name().toLowerCase();
             }
@@ -249,8 +257,8 @@ public class WikiItem {
         }
 
         // log referenceMode, shopMode, and hasSkyblockItemID
-        WikiWriter.getInstance().getLogger().info("ReferenceMode: " + referenceMode);
-        WikiWriter.getInstance().getLogger().info("HasSkyblockItemID: " + hasSkyblockItemID);
+        WikiWriter.getInstance().debug("ReferenceMode: " + referenceMode);
+        WikiWriter.getInstance().debug("HasSkyblockItemID: " + hasSkyblockItemID);
 
         skyblockId = VersionConverterFeature.replace(skyblockId, true);
         minecraftId = VersionConverterFeature.replace(minecraftId, false);
@@ -365,12 +373,21 @@ public class WikiItem {
             }
         }
 
+        if (skyblockItem && !hasSkyblockItemID && nameWithoutColor.endsWith(" Minion")) {
+            // for crafted minions, really
+            skyblockId = nameWithoutColor.substring(0, nameWithoutColor.length() - 7) + "_GENERATOR_1";
+            hasSkyblockItemID = true;
+        }
+
         HeadReplacements headReplacement = HeadReplacements.replaceHeadIDByItemName(rawNameWithoutColor);
 
         if (headReplacement != null && skyblockItem && !hasSkyblockItemID) {
             skyblockItem = headReplacement.isTurnToSbItem();
             if (skyblockItem) {
                 skyblockId = headReplacement.getIdReplacement();
+                if (!skyblockId.isEmpty()) {
+                    hasSkyblockItemID = true;
+                }
             } else {
                 minecraftId = headReplacement.getIdReplacement();
             }
@@ -381,13 +398,13 @@ public class WikiItem {
             }
         }
         String typeText = skyblockItem ? pet ? "sbpet" : "sb" : "mc";
-        String initialChar = emptyTitle ? "?" : "";
+        String initialChar = emptyTitle && lore.isEmpty() ? "?" : config.disableClicking && !hasSkyblockItemID ? "!" : "";
 
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             lore.add(0, nameWithColor);
             name = "e";
-            baseItemRarity = Rarity.NONE;
-            currentItemRarity = Rarity.NONE;
+            //baseItemRarity = Rarity.NONE;
+            //currentItemRarity = Rarity.NONE;
             nameWithColor = "e";
             nameWithoutColor = "e";
         }
@@ -420,6 +437,7 @@ public class WikiItem {
         this.recipeMode = referenceMode;
         this.mysteryPet = mystery;
         this.hasSkyblockItemID = hasSkyblockItemID;
+        this.shopItem = shopItem;
         /*
         String removedLoreAsString = JsonTextReplacementsFeature.replaceEverything(removedLore.stream().map(s -> "\"" + ColorReplacementFeature.replace(s) + "\"")
                 .collect(Collectors.joining(", ")));
@@ -458,7 +476,7 @@ public class WikiItem {
         if (minecraftId.equals("")) return "";
 
         if (pet) {
-            return "{{Item_" + (recipeMode ? "pet_craft_" : "") + petId + (!mysteryPet ? "_" + currentItemRarity.name().toLowerCase() : "") + "}}";
+            return "{{Item_" + (recipeMode ? "pet_craft_" : "pet_") + petId + (!mysteryPet ? "_" + currentItemRarity.name().toLowerCase() : "") + "}}";
         } else {
             return "{{Item_" + referenceId.replace(" ", "_").toLowerCase() + "}}";
         }

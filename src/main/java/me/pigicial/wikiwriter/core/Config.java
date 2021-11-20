@@ -47,6 +47,14 @@ public class Config extends Vigilant {
     public boolean guaranteedStackSizeToggled = false;
 
     @Property(
+            type = PropertyType.SWITCH,
+            name = "Disable Clicking on Certain Items",
+            description = "Disables the ability to click on items in menus that don't have an item ID or name. Items without a name and any lore already cannot be clicked nor hovered over, this doesn't change that.",
+            category = "Copying Items"
+    )
+    public boolean disableClicking = true;
+
+    @Property(
             type = PropertyType.NUMBER,
             name = "Guaranteed Stack Size",
             description = "The guaranteed stack size of items. Items will not go higher than their vanilla stack size limit.\n\nWarning: Items copied from Auction GUIs that have a stack size that isn't one will have their references break.",
@@ -74,6 +82,15 @@ public class Config extends Vigilant {
             subcategory = "Misc"
     )
     public boolean backpackColors = true;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Modified Item Format (When Copying GUIs)",
+            description = "If enabled, when copying shop items, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
+            category = "Copying Inventories",
+            options = {"Always", "When Copying Shop Items", "Never"}
+    )
+    public int modifiedShopItemFormat = 1;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -110,7 +127,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Automatic Shop Menu Format",
-            description = "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop Prices will be forcefully copied over, even if they're set to be hidden. They will be hidden for copying the individual items though.\n\nNote 2: Shop prices are affected by certain talismans, so make sure to remove them first!",
+            description = "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop prices are affected by certain talismans, so make sure to remove them first!",
             category = "Copying Inventories"
     )
     public boolean shopMenuMode = true;
