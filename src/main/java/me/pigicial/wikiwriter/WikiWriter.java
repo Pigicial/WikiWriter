@@ -5,7 +5,7 @@ import me.pigicial.wikiwriter.commands.MainCommand;
 import me.pigicial.wikiwriter.core.Config;
 import lombok.Getter;
 import me.pigicial.wikiwriter.core.LoginNotifications;
-import me.pigicial.wikiwriter.features.CopyLoreFeature;
+import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import me.pigicial.wikiwriter.features.RawNBTExtractor;
 import me.pigicial.wikiwriter.features.StatGenerationFeature;
@@ -31,7 +31,7 @@ import java.awt.datatransfer.StringSelection;
 public class WikiWriter {
     public static final String NAME = "WikiWriter";
     public static final String MODID = "wikiwriter";
-    public static final String VERSION = "1.7.2";
+    public static final String VERSION = "1.7.4";
     public static final String configLocation = "./config/wikiwriter.toml";
 
     @Getter private static WikiWriter instance;
@@ -50,7 +50,7 @@ public class WikiWriter {
         eventBus.register(this);
         config.preload();
         new MainCommand().register();
-        eventBus.register(new CopyLoreFeature(this));
+        eventBus.register(new CopyItemFeature(this));
         eventBus.register(new GUIStealerFeature(this));
         eventBus.register(new RawNBTExtractor(this));
         eventBus.register(new StatGenerationFeature(this));

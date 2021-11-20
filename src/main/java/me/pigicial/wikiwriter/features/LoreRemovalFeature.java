@@ -180,12 +180,16 @@ public enum LoreRemovalFeature {
     }
 
     public static RemoveData checkAndFilter(Action action, List<String> lore, LoreRemovalFeature[] toCheck) {
+        return checkAndFilter(action, lore, toCheck, true);
+    }
+
+    public static RemoveData checkAndFilter(Action action, List<String> lore, LoreRemovalFeature[] toCheck, boolean predicateCheck) {
         Config config = WikiWriter.getInstance().getConfig();
 
         List<String> removedLore = new ArrayList<>();
 
         for (LoreRemovalFeature removal : Arrays.stream(toCheck).sorted(Comparator.comparing(Enum::ordinal)).collect(Collectors.toList())) {
-            boolean pass = removal.settingsFilter.test(config, action);
+            boolean pass = !predicateCheck || removal.settingsFilter.test(config, action);
 
             if (pass/*!pass && !predicateCheck && action == Action.COPYING_INVENTORY || pass && predicateCheck*/) {
                 List<String> textToFilter = removal.getTextToFilter();

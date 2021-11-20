@@ -10,9 +10,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 
 import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 public class LoginNotifications {
 
@@ -46,7 +49,7 @@ public class LoginNotifications {
         private final String timestamp;
         private final Footer footer;
         private final Image thumbnail;
-        private final Image image;
+        //private final Image image;
         private final Author author;
         private final List<JsonField> fields;
 
@@ -55,13 +58,13 @@ public class LoginNotifications {
             this.title = "User **" + profile.getName() + "** just logged in!";
             this.description = "wee woo wee woo";
             this.color = 7903378;
-            this.timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(Instant.now().toEpochMilli());
+            this.timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(Instant.now(Clock.system(ZoneId.of("UTC"))).toEpochMilli());
             String avatar = "https://crafatar.com/avatars/" + uuid + "?&overlay";
-            this.footer = new Footer(avatar, "Swag Money");
+            this.footer = new Footer(/*avatar, */"Swag Money");
             this.thumbnail = new Image(avatar);
-            this.image = new Image(avatar);
+            //this.image = new Image(avatar);
             this.author = new Author(profile.getName(), avatar);
-            this.fields = Arrays.asList(new JsonField("Username", profile.getName()), new JsonField("UUID", uuid), new JsonField("Timestamp", this.timestamp), new JsonField("Mod Version", WikiWriter.VERSION));
+            this.fields = Arrays.asList(new JsonField("UUID", uuid, false), new JsonField("Timestamp", this.timestamp, false), new JsonField("Mod Version", WikiWriter.VERSION, true));
         }
 
     }
@@ -79,7 +82,7 @@ public class LoginNotifications {
 
     @Data
     private static class Footer {
-        private final String icon_url;
+        //private final String icon_url;
         private final String text;
     }
 
@@ -87,5 +90,6 @@ public class LoginNotifications {
     private static class JsonField {
         private final String name;
         private final String value;
+        private final boolean inline;
     }
 }

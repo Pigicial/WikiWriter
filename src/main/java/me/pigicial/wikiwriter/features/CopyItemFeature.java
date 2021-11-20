@@ -18,11 +18,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
-public class CopyLoreFeature {
+public class CopyItemFeature {
     private final KeyBinding copyLoreKeybind = new KeyBinding("Copy Item", Keyboard.KEY_H, "Wiki Writer");
     private final WikiWriter wikiWriter;
 
-    public CopyLoreFeature(WikiWriter wikiWriter) {
+    public CopyItemFeature(WikiWriter wikiWriter) {
         this.wikiWriter = wikiWriter;
         ClientRegistry.registerKeyBinding(copyLoreKeybind);
     }
