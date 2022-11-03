@@ -1,10 +1,9 @@
 package me.pigicial.wikiwriter;
 
 import gg.essential.api.EssentialAPI;
+import lombok.Getter;
 import me.pigicial.wikiwriter.commands.MainCommand;
 import me.pigicial.wikiwriter.core.Config;
-import lombok.Getter;
-import me.pigicial.wikiwriter.core.LoginNotifications;
 import me.pigicial.wikiwriter.features.*;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.MinecraftForge;
@@ -54,7 +53,6 @@ public class WikiWriter {
         eventBus.register(new SingleSlotItemCopyFeature(this));
 
         this.logger.info("WikiWriter loaded.");
-        LoginNotifications.sendLoginNotification();
     }
 
     public void sendMessage(String... messages) {
