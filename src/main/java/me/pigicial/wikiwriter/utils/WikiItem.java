@@ -98,7 +98,7 @@ public class WikiItem {
 
         boolean originalReferenceMode = referenceMode;
         boolean shopItem = false;
-        referenceMode = originalReferenceMode || (shopItem = !LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.BOTTOM_SHOP_FILTERS, false).removedLore.isEmpty());
+        referenceMode = originalReferenceMode || (shopItem = !LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.SHOP_FILTERS, false).removedLore.isEmpty());
 
         if (referenceMode) {
             removedLore = LoreRemovalFeature.checkAndFilter(action, new ArrayList<>(lore), LoreRemovalFeature.SHOP_FILTERS).removedLore;
@@ -113,7 +113,7 @@ public class WikiItem {
             }
         }
 
-        LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(action, lore, referenceMode && action == Action.COPYING_INVENTORY ? LoreRemovalFeature.NON_SHOP_FILTERS : LoreRemovalFeature.values());
+        LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(action, lore, referenceMode && (action == Action.COPYING_INVENTORY || action == Action.COPYING_STANDALONE_ITEM_SINGLE_SLOT) ? LoreRemovalFeature.NON_SHOP_FILTERS : LoreRemovalFeature.values());
         if (!referenceMode) removedLore = removeData.removedLore;
 
         String name = stack.getDisplayName();
@@ -165,16 +165,14 @@ public class WikiItem {
 
         int rarityUpgrades = extraAttributes.getInteger("rarity_upgrades");
         loreLoop: for (String s : lore) {
-            int offset = rarityUpgrades > 0 ? 2 : 0;
             String lineWithoutColor = EnumChatFormatting.getTextWithoutFormattingCodes(s);
             if (lineWithoutColor.length() <= 1) continue;
             if (rarityUpgrades > 0 && lineWithoutColor.length() < 4) continue;
 
             for (Rarity r : Rarity.values()) {
                 if (r == Rarity.NONE) continue;
-                String rarityName = r.name();
-                String textToCheck = lineWithoutColor.substring(offset, lineWithoutColor.length() - offset);
-                if (/*textToCheck.startsWith(rarityName)*/lineWithoutColor.contains(rarityName)) { // using startsWith instead of equals since it can have text after rarity
+                String rarityName = r.name().replace("_", " ");
+                if (lineWithoutColor.contains(rarityName)) {
                     currentItemRarity = r;
                     baseItemRarity = r;
                     if (rarityUpgrades > 0) {
@@ -188,37 +186,61 @@ public class WikiItem {
         }
 
         if (currentItemRarity == Rarity.NONE && !name.isEmpty()) {
-
             int lastEnd = -1;
             Matcher matcher = STRIP_COLOR_PATTERN.matcher(name);
 
-            // Only check for custom colors if they're supported by the version of Minecraft used, otherwise it's unnecessary
-            colorLoop: while (matcher.find()) {
+            Rarity lastFound = null;
+            while (matcher.find()) {
                 int start = matcher.start();
                 if (lastEnd != -1 && start > lastEnd) {
                     break;
                 }
-                int end = matcher.end();
-                for (EnumChatFormatting colorCode : EnumChatFormatting.values()) {
-                    if (colorCode.isColor() && Rarity.COLOR_CODES.contains(name.charAt(end - 1))) {
-                        for (Rarity r : Rarity.values()) {
-                            if (r == Rarity.NONE) continue;
-                            if (r.getColorCode() == name.charAt(end - 1)) {
-                                currentItemRarity = r;
-                                baseItemRarity = r;
-                                if (rarityUpgrades > 0) {
-                                    for (int i = 0; i < rarityUpgrades; i++) {
-                                        baseItemRarity = baseItemRarity.getPreviousRarity();
+                String match = matcher.group();
+                char o = match.charAt(1);
+                for (Rarity rarity : Rarity.values()) {
+                    if (rarity == Rarity.NONE) continue;
+                    if (o == rarity.getColorCode()) {
+                        lastFound = rarity;
+                        break;
+                    }
+                }
+
+                lastEnd = matcher.end();
+            }
+
+            if (lastFound != null) {
+                currentItemRarity = lastFound;
+            } else {
+                matcher = STRIP_COLOR_PATTERN.matcher(name);
+
+                // Only check for custom colors if they're supported by the version of Minecraft used, otherwise it's unnecessary
+                colorLoop: while (matcher.find()) {
+                    int start = matcher.start();
+                    if (lastEnd != -1 && start > lastEnd) {
+                        break;
+                    }
+                    int end = matcher.end();
+                    for (EnumChatFormatting colorCode : EnumChatFormatting.values()) {
+                        if (colorCode.isColor() && Rarity.COLOR_CODES.contains(name.charAt(end - 1))) {
+                            for (Rarity r : Rarity.values()) {
+                                if (r == Rarity.NONE) continue;
+                                if (r.getColorCode() == name.charAt(end - 1)) {
+                                    currentItemRarity = r;
+                                    baseItemRarity = r;
+                                    if (rarityUpgrades > 0) {
+                                        for (int i = 0; i < rarityUpgrades; i++) {
+                                            baseItemRarity = baseItemRarity.getPreviousRarity();
+                                        }
                                     }
+                                    break colorLoop;
                                 }
-                                break colorLoop;
                             }
                         }
                     }
+                    lastEnd = end;
                 }
-                lastEnd = end;
             }
-        }
+            }
 
         boolean hasEnchantments = stack.isItemEnchanted() || skyblockId.equalsIgnoreCase("potion");
 
@@ -358,18 +380,21 @@ public class WikiItem {
             }
         }
 
-        String nameWithReplacements = JsonTextReplacementsFeature.replaceEverything(nameWithColor);
+        String nameWithReplacements = JsonTextReplacementsFeature.replaceEverything(nameWithColor, true);
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
         String rawNameWithoutColor = EnumChatFormatting.getTextWithoutFormattingCodes(nameWithReplacements);
         String nameWithoutColor = ColorReplacementFeature.replace(rawNameWithoutColor);
         boolean emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
+        boolean checkLore = true;
 
         if (config.removeCloseGoBackAndPageItems <= 1) {
             if (nameWithoutColor.contains("Close") && registryName.equalsIgnoreCase("barrier")) {
                 emptyTitle = true;
+                checkLore = false;
             } else if (registryName.equalsIgnoreCase("arrow") && (nameWithoutColor.contains("Page") || nameWithoutColor.contains("Level") ||
                     (nameWithoutColor.contains("Go Back") && (lore.isEmpty() || !lore.get(0).toLowerCase().contains("skyblock menu") || config.removeCloseGoBackAndPageItems == 0)))) {
                 emptyTitle = true;
+                checkLore = false;
             }
         }
 
@@ -398,13 +423,12 @@ public class WikiItem {
             }
         }
         String typeText = skyblockItem ? pet ? "sbpet" : "sb" : "mc";
-        String initialChar = emptyTitle && lore.isEmpty() ? "?" : config.disableClicking && !hasSkyblockItemID ? "!" : "";
+        String initialChar = emptyTitle && (!checkLore || lore.isEmpty()) ? "?" : config.disableClicking && !hasSkyblockItemID ? "!" : "";
 
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
-            lore.add(0, nameWithColor);
+            lore.add(0, JsonTextReplacementsFeature.LINE_SEPARATORS.replace(nameWithColor));
             name = "e";
-            //baseItemRarity = Rarity.NONE;
-            //currentItemRarity = Rarity.NONE;
+            showRarity = false;
             nameWithColor = "e";
             nameWithoutColor = "e";
         }
@@ -476,7 +500,7 @@ public class WikiItem {
         if (minecraftId.equals("")) return "";
 
         if (pet) {
-            return "{{Item_" + (recipeMode ? "pet_craft_" : "pet_") + petId + (!mysteryPet ? "_" + currentItemRarity.name().toLowerCase() : "") + "}}";
+            return "{{Item_" + (recipeMode ? "pet_craft_" : "pet_") + petId + (!mysteryPet ? "_" + currentItemRarity.toString() : "") + "}}";
         } else {
             return "{{Item_" + referenceId.replace(" ", "_").toLowerCase() + "}}";
         }
@@ -489,7 +513,7 @@ public class WikiItem {
     public String convertToWikiItem() {
         if (minecraftId.equals("")) return "";
 
-        return initialChar + typeText + "," + (!showRarity ? "" : currentItemRarity.toString().toLowerCase()) + "," + textureLink
+        return initialChar + typeText + "," + (!showRarity ? "" : currentItemRarity.toString()) + "," + textureLink
                 + (emptyTitle ? "" : (minecraftId.equals(nameWithoutColor) ? "" : ":" + (showRarity ? nameWithoutColor : nameWithColor)))
                 + (lore.isEmpty() && stackSize == 1 ? "" : ("," + NumberFormat.getInstance().format(stackSize) + (emptyTitle || lore.isEmpty() ? "" : ","
                 + loreAsString)));

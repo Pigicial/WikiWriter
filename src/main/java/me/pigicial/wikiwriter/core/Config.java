@@ -23,11 +23,19 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Copying Items",
-            description = "Enable the ability to copy hovered items using a set keybind, which you can find in your controls menu.\n\nNote: Don't worry about any mods or settings that add additional lore to items. The data is taken directly from NBT, which mods don't affect!",
+            description = "Enable the ability to copy hovered items either individually or into a single-slot menu using a set keybind, which you can find in your controls menu.\n\nNote: Don't worry about any mods or settings that add additional lore to items. The data is taken directly from NBT, which mods don't affect!",
             category = "Copying Items"
     )
     public boolean copyItems = true;
 
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Item Reference Mode (Copying Items into Single-Slot GUIs)",
+            description = "If enabled, when copying items into single-slot menus, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see Copying Inventories).",
+            category = "Copying Items",
+            options = {"Always", "When Copying Shop Items", "Never"}
+    )
+    public int referenceModeForSingleSlotItems = 0;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -85,8 +93,8 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SELECTOR,
-            name = "Modified Item Format (When Copying GUIs)",
-            description = "If enabled, when copying shop items, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
+            name = "Item Reference Mode (Copying GUIs)",
+            description = "If enabled, when copying items, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
             category = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
     )
@@ -342,9 +350,25 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Debug Mode",
             description = "Toggles console logs for certain actions.",
-            category = "Debug"
+            category = "Other"
     )
     public boolean debugMode = false;
+
+    public boolean watermarkCopiedItems = false;
+
+    public String watermarkCopiedItemsText = "Item generated with WikiWriter by Pigicial";
+
+    public boolean watermarkCopiedInventories = false;
+
+    public String watermarkCopiedInventoriesText = "Inventory generated with WikiWriter by Pigicial";
+
+    public boolean watermarkRecipes = false;
+
+    public String watermarkRecipesText = "Recipe generated with WikiWriter by Pigicial";
+
+    public boolean watermarkCopiedSingleInventoryItems = false;
+
+    public String watermarkCopiedSingleInventoryItemsText = "Single-Item GUI generated with WikiWriter by Pigicial";
 
     public Config() {
         super(new File(WikiWriter.configLocation), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());

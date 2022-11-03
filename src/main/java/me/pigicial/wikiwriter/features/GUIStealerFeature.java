@@ -106,7 +106,7 @@ public class GUIStealerFeature {
                 for (int i = 0; i < loreTag.tagCount(); i++)
                     lore.add(loreTag.getStringTagAt(i));
 
-                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, LoreRemovalFeature.BOTTOM_SHOP_FILTERS, false);
+                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, LoreRemovalFeature.SHOP_FILTERS, false);
                 shopMode = !removeData.removedLore.isEmpty();
             }
 
@@ -133,7 +133,9 @@ public class GUIStealerFeature {
             }
 
             if (shopMode) {
-                builder.append("{{Merchant\n|name=").append(inventoryName).append("\n");
+                builder.append("{{Merchant")
+                        .append(config.watermarkCopiedInventories && !config.watermarkCopiedInventoriesText.isEmpty() ? " <!-- " + config.watermarkCopiedInventoriesText + " -->" : "")
+                        .append("\n").append("|name=").append(inventoryName).append("\n");
                 for (int i = 0, max = (rows - 2) * 7; i < max; i++) {
                     int row = 2 + (i / 7);
                     int across = 2 + (i % 7);
@@ -155,7 +157,9 @@ public class GUIStealerFeature {
                     wikiWriter.sendMessage("Cannot copy invalid recipe." + EnumChatFormatting.GRAY + " (Barrier Detected)");
                     return;
                 }
-                builder.append("{{Craft Item\n");
+                builder.append("{{Craft Item")
+                        .append(config.watermarkRecipes && !config.watermarkRecipesText.isEmpty() ? " <!-- " + config.watermarkRecipesText + " -->" : "")
+                        .append("\n");
                 for (int i = 1; i <= 9; i++) {
                     Integer integer = craftingTablePositionToSlotMap.get(i);
                     ItemStack itemStack = inventory.get(integer);
@@ -174,7 +178,9 @@ public class GUIStealerFeature {
 
                 wikiWriter.sendMessage("Copied top GUI recipe to clipboard.");
             } else if (forgeRecipeMode) {
-                builder.append("{{Forge_Item\n");
+                builder.append("{{Forge_Item")
+                        .append(config.watermarkRecipes && !config.watermarkRecipesText.isEmpty() ? " <!-- " + config.watermarkRecipesText + " -->" : "")
+                        .append("\n");
                 builder.append("|type=").append(forgeItem.getDisplayName().toLowerCase().contains("cast") ? "cast" : "refine").append("\n");
                 for (int i = 1; i <= 8; i++) {
                     Integer integer = forgePositionToSlotMap.get(i);
@@ -202,8 +208,10 @@ public class GUIStealerFeature {
                     builder.append("<noinclude>[[Category:Inventory_Templates]]</noinclude>\n");
                 }
 
-                builder.append("{{inventory\n"
-                                + "|name=").append(inventoryName).append("\n")
+                builder.append("{{inventory")
+                        .append(config.watermarkCopiedInventories && !config.watermarkCopiedInventoriesText.isEmpty() ? " <!-- " + config.watermarkCopiedInventoriesText + " -->" : "")
+                        .append("\n")
+                        .append("|name=").append(inventoryName).append("\n")
                         .append("|rows=").append(numberFormat.format(rows))
                         .append("\n");
 

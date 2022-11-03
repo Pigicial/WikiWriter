@@ -18,10 +18,11 @@ public enum JsonTextReplacementsFeature {
         this.regex = regex;
     }
 
-    public static String replaceEverything(String text) {
+    public static String replaceEverything(String text, boolean name) {
         Config config = WikiWriter.getInstance().getConfig();
         for (JsonTextReplacementsFeature replacement : JsonTextReplacementsFeature.values()) {
             if (replacement == DUNGEON_STATS && (!config.removeDungeonStats || !text.contains(":"))) continue;
+            if (name && replacement == STRAY_COMMAS) continue;
             text = replacement.replace(text);
         }
 

@@ -18,6 +18,7 @@ public enum VersionConverterFeature {
     K("wooden_pressure_plate", "oak_pressure_plate", true),
     L("slightly_damaged_anvil", "chipped_anvil", true),
     M("very_damaged_anvil", "broken_anvil", true),
+    SPAWN("spawn", "ghast_spawn_egg", true),
     N("wooden_trapdoor", "oak_trapdoor", true),
     O("nether_stalk", "nether_wart"),
     BED("bed", "red_bed"),
@@ -259,7 +260,6 @@ public enum VersionConverterFeature {
     }
 
     public static String replace(String text, boolean colonCheck) {
-        Logger logger = WikiWriter.getInstance().getLogger();
         for (VersionConverterFeature feature : values()) {
             if (colonCheck != feature.colonCheck) continue;
             if (feature.exact) {
