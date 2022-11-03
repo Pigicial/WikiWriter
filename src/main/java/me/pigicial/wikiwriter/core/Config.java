@@ -1,6 +1,5 @@
 package me.pigicial.wikiwriter.core;
 
-import com.sun.org.apache.bcel.internal.generic.SWITCH;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
 import gg.essential.vigilance.data.Property;
@@ -162,7 +161,7 @@ public class Config extends Vigilant {
             description = "Toggle whether or not pet levels should be removed from pet names, as well as if pets should have the word \"Pet\" included in their name.",
             category = "Text Filters"
     )
-    public boolean updatePetName = false;
+    public boolean removePetLevelsAndChangePetName = false;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -353,22 +352,6 @@ public class Config extends Vigilant {
             category = "Other"
     )
     public boolean debugMode = false;
-
-    public boolean watermarkCopiedItems = false;
-
-    public String watermarkCopiedItemsText = "Item generated with WikiWriter by Pigicial";
-
-    public boolean watermarkCopiedInventories = false;
-
-    public String watermarkCopiedInventoriesText = "Inventory generated with WikiWriter by Pigicial";
-
-    public boolean watermarkRecipes = false;
-
-    public String watermarkRecipesText = "Recipe generated with WikiWriter by Pigicial";
-
-    public boolean watermarkCopiedSingleInventoryItems = false;
-
-    public String watermarkCopiedSingleInventoryItemsText = "Single-Item GUI generated with WikiWriter by Pigicial";
 
     public Config() {
         super(new File(WikiWriter.configLocation), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());

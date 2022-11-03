@@ -4,7 +4,7 @@ import gg.essential.universal.UScreen;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.WikiItem;
+import me.pigicial.wikiwriter.WikiItem;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 
 public class CopyItemFeature {
@@ -48,10 +47,6 @@ public class CopyItemFeature {
 
             WikiItem wikiItem = new WikiItem(null, stack, Action.COPYING_STANDALONE_ITEM, false);
             String text = wikiItem.convertToWikiItem();
-
-            if (config.watermarkCopiedItems && !config.watermarkCopiedItemsText.isEmpty()) {
-                text = " <!-- " + config.watermarkCopiedItemsText + " -->\n" + text;
-            }
 
             if (config.itemTemplatesMode) {
                 text = "<noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>\n" + text + "\n</includeonly>";
