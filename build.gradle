@@ -8,7 +8,8 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.github.asbyth:ForgeGradle:6f53277"
+        // classpath "com.github.asbyth:ForgeGradle:6f53277"
+        classpath "com.github.Debuggingss:ForgeGradle:581a86dcbe"
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
         classpath "com.github.xcfrg:MixinGradle:0.6-SNAPSHOT"
         classpath "org.apache.httpcomponents:httpclient:4.5.13"
@@ -20,7 +21,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "org.spongepowered.mixin"
 
-version = "1.7.14"
+version = "1.7.15"
 group = "me.pigicial"
 archivesBaseName = "WikiWriter"
 
