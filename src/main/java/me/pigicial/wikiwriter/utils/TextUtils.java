@@ -1,8 +1,7 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.features.ColorReplacementFeature;
-import me.pigicial.wikiwriter.features.JsonTextReplacementsFeature;
+import me.pigicial.wikiwriter.features.RegexTextReplacements;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
@@ -26,7 +25,7 @@ public class TextUtils {
             newList.add(added);
         }
 
-        String s = JsonTextReplacementsFeature.replaceEverything(String.join("\", \"", newList), false);
+        String s = RegexTextReplacements.replaceEverything(String.join("\", \"", newList), false);
         if (s.startsWith("{") && s.endsWith("}")) s = s.substring(1, s.length() - 1);
 
         return unescapeText(s);

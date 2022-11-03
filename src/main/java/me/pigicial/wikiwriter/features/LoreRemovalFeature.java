@@ -1,6 +1,5 @@
 package me.pigicial.wikiwriter.features;
 
-import com.sun.corba.se.impl.protocol.INSServerRequestDispatcher;
 import lombok.Data;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
@@ -60,9 +59,6 @@ public enum LoreRemovalFeature {
     ENCHANTMENTS_2(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", "apply.", ""),
     ENCHANTMENTS_3(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", ""),
 
-    QUIVER_SHOP_ADD_NOTICE(LorePredicates.QUIVER_SHOP_ADD_NOTICE_PREDICATE,
-            "", "Added directly to your quiver"),
-
     SHOP_1(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
     SHOP_2(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
     SHOP_3(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
@@ -72,7 +68,6 @@ public enum LoreRemovalFeature {
     SHOP_7(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}"),
     SHOP_8(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}"),
     SHOP_9(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost:"),
-    QUIVER_SHOP_FILL_QUIVER_COST(LorePredicates.QUIVER_SHOP_FILL_QUIVER_COST, "", "Fill Quiver Cost", "{anything}"),
 
     BOTTOM_SHOP_1(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to purchase"),
     BOTTOM_SHOP_2(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to trade"),
@@ -162,12 +157,7 @@ public enum LoreRemovalFeature {
     SELF_BID_ON_ENDED_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Status", "", "Click to inspect"),
     SELF_BID_ON_ENDED_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Status");
 
-    public static final LoreRemovalFeature[] BOTTOM_SHOP_FILTERS = new LoreRemovalFeature[]{BOTTOM_SHOP_1, BOTTOM_SHOP_2, BOTTOM_SHOP_3, BOTTOM_SHOP_4, BOTTOM_SHOP_5, BOTTOM_SHOP_6, BOTTOM_SHOP_7, BOTTOM_SHOP_8, BOTTOM_SHOP_9};
-
-    public static final LoreRemovalFeature[] NON_SHOP_FILTERS = Arrays.stream(values()).filter(loreRemovalFeature ->
-            !loreRemovalFeature.name().contains("SHOP")).toArray(LoreRemovalFeature[]::new);
-
-    public static final LoreRemovalFeature[] SHOP_FILTERS = new LoreRemovalFeature[]{QUIVER_SHOP_ADD_NOTICE, QUIVER_SHOP_FILL_QUIVER_COST, SHOP_1, SHOP_2, SHOP_3, SHOP_4, SHOP_5, SHOP_6, SHOP_7, SHOP_8, BOTTOM_SHOP_1, BOTTOM_SHOP_2, BOTTOM_SHOP_3, BOTTOM_SHOP_4, BOTTOM_SHOP_5, BOTTOM_SHOP_6, BOTTOM_SHOP_7, BOTTOM_SHOP_8, BOTTOM_SHOP_9};
+    public static final LoreRemovalFeature[] SHOP_FILTERS = new LoreRemovalFeature[]{SHOP_1, SHOP_2, SHOP_3, SHOP_4, SHOP_5, SHOP_6, SHOP_7, SHOP_8, BOTTOM_SHOP_1, BOTTOM_SHOP_2, BOTTOM_SHOP_3, BOTTOM_SHOP_4, BOTTOM_SHOP_5, BOTTOM_SHOP_6, BOTTOM_SHOP_7, BOTTOM_SHOP_8, BOTTOM_SHOP_9};
 
     private final BiPredicate<Config, Action> settingsFilter;
     private final List<String> textToFilter;
@@ -182,73 +172,70 @@ public enum LoreRemovalFeature {
         this.textToFilter = Arrays.asList(textToFilter);
     }
 
-    public static RemoveData checkAndFilter(Action action, List<String> lore, LoreRemovalFeature[] toCheck) {
-        return checkAndFilter(action, lore, toCheck, true);
+    public static RemoveData checkAndFilter(Action action, List<String> lore, LoreRemovalFeature... toCheck) {
+        return checkAndFilter(action, lore, true, toCheck);
     }
 
-    public static RemoveData checkAndFilter(Action action, List<String> lore, LoreRemovalFeature[] toCheck, boolean predicateCheck) {
+    public static RemoveData checkAndFilter(Action action, List<String> lore, boolean predicateCheck, LoreRemovalFeature... toCheck) {
         Config config = WikiWriter.getInstance().getConfig();
 
         List<String> removedLore = new ArrayList<>();
 
-        for (LoreRemovalFeature removal : Arrays.stream(toCheck).sorted(Comparator.comparing(Enum::ordinal)).collect(Collectors.toList())) {
-            boolean pass = !predicateCheck || removal.settingsFilter.test(config, action);
+        for (LoreRemovalFeature removalType : Arrays.stream(toCheck).sorted(Comparator.comparing(Enum::ordinal)).collect(Collectors.toList())) {
+            boolean pass = !predicateCheck || removalType.settingsFilter.test(config, action);
+            if (!pass) {
+                continue;
+            }
 
-            if (pass/*!pass && !predicateCheck && action == Action.COPYING_INVENTORY || pass && predicateCheck*/) {
-                List<String> textToFilter = removal.getTextToFilter();
-                if (textToFilter.isEmpty() || textToFilter.size() > lore.size()) continue;
+            List<String> textToFilter = removalType.getTextToFilter();
+            if (textToFilter.isEmpty() || textToFilter.size() > lore.size()) {
+                continue;
+            }
 
-                int matchCount = 0;
-                int lastReset = 0;
-                for (int i = 0, loreSize = lore.size(); i < loreSize; i++) {
-                    String loreLine = EnumChatFormatting.getTextWithoutFormattingCodes(lore.get(i));
-                    if (i - lastReset >= textToFilter.size()) {
-                        break;
-                    }
+            int matchCount = 0;
+            int lastResetIndex = 0;
 
-                    String check = textToFilter.get(i - lastReset);
-                    if (matches(loreLine, check)) {
-                        matchCount++;
-                        //if (!(loreLine.replace(" ", "").length() == 0 && check.replace(" ", "").length() == 0)) {
-                            WikiWriter.getInstance().debug(removal.name() + " MATCH " + loreLine + " | " + check);
-                       // }
-                        if (matchCount == textToFilter.size()) {
-                            WikiWriter.getInstance().debug("Same count (" + matchCount + " | " + lastReset + ")");
-                            List<String> removedLoreTemp = new ArrayList<>();
-                            List<Runnable> debugMessages = new ArrayList<>();
-                            for (int j = matchCount; j > 0; j--) {
-                                String remove = lore.remove((lastReset - 1) + j);
-                                debugMessages.add(() -> WikiWriter.getInstance().debug("Removing " + remove));
-                                removedLoreTemp.add(remove);
-                            }
-
-                            Collections.reverse(removedLoreTemp);
-                            Collections.reverse(debugMessages);
-                            removedLore.addAll(removedLoreTemp);
-
-                            for (Runnable debugMessage : debugMessages) {
-                                debugMessage.run();
-                            }
-
-                            i -= matchCount;
-                            lastReset -= matchCount;
-                            matchCount = 0;
-                            loreSize = lore.size();
-                        }
-                    } else {
-                        matchCount = 0;
-                        lastReset = i + 1;
-                    }
+            for (int i = 0, loreSize = lore.size(); i < loreSize; i++) {
+                if (i - lastResetIndex >= textToFilter.size()) {
+                    break;
                 }
+
+                String sanitizedText = EnumChatFormatting.getTextWithoutFormattingCodes(lore.get(i));
+                String textToCompareAgainst = textToFilter.get(i - lastResetIndex);
+
+                if (!matches(sanitizedText, textToCompareAgainst)) {
+                    matchCount = 0;
+
+                    // add 1 for the next iteration
+                    lastResetIndex = i + 1;
+                    continue;
+                }
+
+                matchCount++;
+                if (matchCount != textToFilter.size()) {
+                    continue;
+                }
+
+                for (int j = 0; j <= matchCount; j++) {
+                    // remove it from lastResetIndex each time, since each time it does it the next text that's removed is different
+                    String removeText = lore.remove(lastResetIndex);
+                    removedLore.add(removeText);
+                }
+
+                // Reset index data so the loop doesn't break
+                i -= matchCount;
+                lastResetIndex -= matchCount;
+                matchCount = 0;
+                loreSize = lore.size();
             }
         }
 
-        return new RemoveData(lore, new ArrayList<>(removedLore));
+        return new RemoveData(lore, removedLore);
     }
 
     private static boolean matches(String textFromLore, String checkingAgainst) {
         return (textFromLore.replace(" ", "").length() == 0 && checkingAgainst.replace(" ", "").length() == 0)
-                            || (textFromLore.contains(checkingAgainst) && checkingAgainst.length() >= 1) || (checkingAgainst.equals("{anything}") && textFromLore.replace(" ", "").length() > 0);
+                || (textFromLore.contains(checkingAgainst) && checkingAgainst.length() >= 1) || (checkingAgainst.equals("{anything}") && textFromLore.replace(" ", "").length() > 0);
     }
 
     public List<String> getTextToFilter() {
@@ -257,7 +244,13 @@ public enum LoreRemovalFeature {
 
     @Data
     public static class RemoveData {
-        public final List<String> newLore;
-        public final List<String> removedLore;
+        private final List<String> newLore;
+        private final List<String> removedLore;
+
+        public boolean hasRemovedLore() {
+            return !removedLore.isEmpty();
+        }
+
+
     }
 }

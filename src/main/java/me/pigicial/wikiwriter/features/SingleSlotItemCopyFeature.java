@@ -4,7 +4,7 @@ import gg.essential.universal.UScreen;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.WikiItem;
+import me.pigicial.wikiwriter.WikiItem;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
@@ -51,7 +51,7 @@ public class SingleSlotItemCopyFeature {
             String text = item.isHasSkyblockItemID() && (config.referenceModeForSingleSlotItems == 0 || config.referenceModeForSingleSlotItems == 1 && item.isShopItem())
                     ? item.isShopItem() ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference() : item.convertToWikiItem();
 
-            wikiWriter.copyToClipboard("{{inventory" + (config.watermarkCopiedSingleInventoryItems && !config.watermarkCopiedSingleInventoryItemsText.isEmpty() ? " <!-- " + config.watermarkCopiedSingleInventoryItemsText + " -->" : "") + "\n|rows=1\n|columns=1\n|A1=" + text + "\n}}");
+            wikiWriter.copyToClipboard("{{Inventory" + "\n|rows=1\n|columns=1\n|A1=" + text + "\n}}");
             wikiWriter.sendMessage("Copied hovered item to clipboard as a single-slot menu item.");
         } catch (Exception e) {
             wikiWriter.sendMessage("Something went wrong when trying to copy this item, please report this with your latest.log file!");

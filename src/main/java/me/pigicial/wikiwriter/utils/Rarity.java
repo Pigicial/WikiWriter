@@ -19,11 +19,17 @@ public enum Rarity {
     public static final Set<Character> COLOR_CODES = Arrays.stream(values()).filter(rarity -> rarity != NONE).map(Rarity::getColorCode).collect(Collectors.toSet());
 
     private final String name;
+    private final String check;
     private final char code;
 
     Rarity(String name, char code) {
         this.name = name;
+        this.check = "&" + code + "&l" + name().replace("_", " ");
         this.code = code;
+    }
+
+    public String getCheck() {
+        return check;
     }
 
     public char getColorCode() {

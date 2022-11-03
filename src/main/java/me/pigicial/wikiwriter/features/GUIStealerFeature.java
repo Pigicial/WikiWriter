@@ -4,7 +4,7 @@ import gg.essential.universal.UScreen;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.WikiItem;
+import me.pigicial.wikiwriter.WikiItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -106,8 +106,8 @@ public class GUIStealerFeature {
                 for (int i = 0; i < loreTag.tagCount(); i++)
                     lore.add(loreTag.getStringTagAt(i));
 
-                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, LoreRemovalFeature.SHOP_FILTERS, false);
-                shopMode = !removeData.removedLore.isEmpty();
+                LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, false, LoreRemovalFeature.SHOP_FILTERS);
+                shopMode = !removeData.getRemovedLore().isEmpty();
             }
 
             if (shopMode) {
@@ -134,8 +134,10 @@ public class GUIStealerFeature {
 
             if (shopMode) {
                 builder.append("{{Merchant")
-                        .append(config.watermarkCopiedInventories && !config.watermarkCopiedInventoriesText.isEmpty() ? " <!-- " + config.watermarkCopiedInventoriesText + " -->" : "")
-                        .append("\n").append("|name=").append(inventoryName).append("\n");
+                        .append("\n")
+                        .append("|name=").append(inventoryName)
+                        .append("\n");
+
                 for (int i = 0, max = (rows - 2) * 7; i < max; i++) {
                     int row = 2 + (i / 7);
                     int across = 2 + (i % 7);
@@ -157,9 +159,7 @@ public class GUIStealerFeature {
                     wikiWriter.sendMessage("Cannot copy invalid recipe." + EnumChatFormatting.GRAY + " (Barrier Detected)");
                     return;
                 }
-                builder.append("{{Craft Item")
-                        .append(config.watermarkRecipes && !config.watermarkRecipesText.isEmpty() ? " <!-- " + config.watermarkRecipesText + " -->" : "")
-                        .append("\n");
+                builder.append("{{Craft Item").append("\n");
                 for (int i = 1; i <= 9; i++) {
                     Integer integer = craftingTablePositionToSlotMap.get(i);
                     ItemStack itemStack = inventory.get(integer);
@@ -178,10 +178,11 @@ public class GUIStealerFeature {
 
                 wikiWriter.sendMessage("Copied top GUI recipe to clipboard.");
             } else if (forgeRecipeMode) {
-                builder.append("{{Forge_Item")
-                        .append(config.watermarkRecipes && !config.watermarkRecipesText.isEmpty() ? " <!-- " + config.watermarkRecipesText + " -->" : "")
+                builder.append("{{Forge Item")
+                        .append("\n")
+                        .append("|type=").append(forgeItem.getDisplayName().toLowerCase().contains("cast") ? "cast" : "refine")
                         .append("\n");
-                builder.append("|type=").append(forgeItem.getDisplayName().toLowerCase().contains("cast") ? "cast" : "refine").append("\n");
+
                 for (int i = 1; i <= 8; i++) {
                     Integer integer = forgePositionToSlotMap.get(i);
                     ItemStack itemStack = inventory.get(integer);
@@ -208,8 +209,7 @@ public class GUIStealerFeature {
                     builder.append("<noinclude>[[Category:Inventory_Templates]]</noinclude>\n");
                 }
 
-                builder.append("{{inventory")
-                        .append(config.watermarkCopiedInventories && !config.watermarkCopiedInventoriesText.isEmpty() ? " <!-- " + config.watermarkCopiedInventoriesText + " -->" : "")
+                builder.append("{{Inventory")
                         .append("\n")
                         .append("|name=").append(inventoryName).append("\n")
                         .append("|rows=").append(numberFormat.format(rows))
@@ -218,10 +218,10 @@ public class GUIStealerFeature {
                 for (int i = 0; i < size; i++) {
                     ItemStack itemStack = inventory.get(i);
                     int horizontalPosition = 1 + (i % 9);
-                    int verticalPosition = 1 + (i / 9);
+                    int verticalPosition = (i / 9);
 
                     WikiItem item = new WikiItem(inventoryName, itemStack, Action.COPYING_INVENTORY, false);
-                    builder.append("|").append(alphabet[verticalPosition - 1]).append(numberFormat.format(horizontalPosition)).append("=")
+                    builder.append("|").append(alphabet[verticalPosition]).append(numberFormat.format(horizontalPosition)).append("=")
                             .append(item.isHasSkyblockItemID() && (config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && item.isShopItem())
                                     ? item.isShopItem() ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference() : item.convertToWikiItem()).append("\n");
                 }
