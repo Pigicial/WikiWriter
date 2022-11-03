@@ -5,22 +5,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum Rarity {
-    NONE(' '),
-    COMMON('f'),
-    UNCOMMON('a'),
-    RARE('9'),
-    EPIC('5'),
-    LEGENDARY('6'),
-    MYTHIC('d'),
-    DIVINE('b'),
-    SPECIAL('c'),
-    VERY_SPECIAL('c');
+    VERY_SPECIAL("veryspecial", 'c'),
+    SPECIAL("special", 'c'),
+    DIVINE("divine", 'b'),
+    MYTHIC("mythic", 'd'),
+    LEGENDARY("legendary", '6'),
+    EPIC("epic", '5'),
+    RARE("rare", '9'),
+    UNCOMMON("uncommon", 'a'),
+    COMMON("common", 'f'),
+    NONE("", ' ');
 
     public static final Set<Character> COLOR_CODES = Arrays.stream(values()).filter(rarity -> rarity != NONE).map(Rarity::getColorCode).collect(Collectors.toSet());
 
+    private final String name;
     private final char code;
 
-    Rarity(char code) {
+    Rarity(String name, char code) {
+        this.name = name;
         this.code = code;
     }
 
@@ -30,7 +32,7 @@ public enum Rarity {
 
     @Override
     public String toString() {
-        return this == NONE ? "" : name();
+        return this == NONE ? "" : name;
     }
 
     public Rarity getPreviousRarity() {

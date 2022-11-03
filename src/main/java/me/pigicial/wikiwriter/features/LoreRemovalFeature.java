@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 public enum LoreRemovalFeature {
     CLICK_1(config -> config.removeRightClickNotices, "Right-click to view recipes!", ""),
     CLICK_2(config -> config.removeRightClickNotices, "Right click to view recipes", ""),
+    CLICK_1A(config -> config.removeRightClickNotices, "Right-click to view recipes!"),
+    CLICK_2A(config -> config.removeRightClickNotices, "Right click to view recipes"),
     CLICK_3(config -> config.removeRightClickNotices, "", "Click to view recipe!"),
     CLICK_4(config -> config.removeRightClickNotices, "", "Click to view recipes!"),
     CLICK_5(config -> config.removeRightClickNotices, "Right click on your pet to", "give it this item!", ""),
@@ -33,7 +35,8 @@ public enum LoreRemovalFeature {
     CLICK_17(config -> config.removeRightClickNotices, "", "Right-click to open!"),
     CLICK_18(config -> config.removeRightClickNotices, "", "Right-click on Kat to use"),
     CLICK_19(config -> config.removeRightClickNotices, "", "Right-Click a block to use!"),
-    CLICK_20(config -> config.removeClickToSummon, "", "Right-click to configure!"),
+    CLICK_20(config -> config.removeRightClickNotices, "", "Right-click to configure!"),
+    CLICK_21(config -> config.removeRightClickNotices, "", "Click to view upgrades"),
 
     CLICK_TO_SUMMON(config -> config.removeClickToSummon, "", "Click to summon"),
 
@@ -206,15 +209,15 @@ public enum LoreRemovalFeature {
                     String check = textToFilter.get(i - lastReset);
                     if (matches(loreLine, check)) {
                         matchCount++;
-                        if (!(loreLine.replace(" ", "").length() == 0 && check.replace(" ", "").length() == 0)) {
+                        //if (!(loreLine.replace(" ", "").length() == 0 && check.replace(" ", "").length() == 0)) {
                             WikiWriter.getInstance().debug(removal.name() + " MATCH " + loreLine + " | " + check);
-                        }
+                       // }
                         if (matchCount == textToFilter.size()) {
-                            WikiWriter.getInstance().debug("Same count (" + matchCount + ")");
+                            WikiWriter.getInstance().debug("Same count (" + matchCount + " | " + lastReset + ")");
                             List<String> removedLoreTemp = new ArrayList<>();
                             List<Runnable> debugMessages = new ArrayList<>();
                             for (int j = matchCount; j > 0; j--) {
-                                String remove = lore.remove((lastReset == 0 ? 0 : lastReset - 1) + j);
+                                String remove = lore.remove((lastReset - 1) + j);
                                 debugMessages.add(() -> WikiWriter.getInstance().debug("Removing " + remove));
                                 removedLoreTemp.add(remove);
                             }

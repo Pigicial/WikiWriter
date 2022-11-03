@@ -9,6 +9,8 @@ public enum LorePredicates implements BiPredicate<Config, Action> {
     SHOP_PRICE_PREDICATE((config, action) -> {
         if (action == Action.COPYING_STANDALONE_ITEM) {
             return config.removeShopNPCPriceText == 0 || config.removeShopNPCPriceText == 2;
+        } else if (action == Action.COPYING_STANDALONE_ITEM_SINGLE_SLOT) {
+            return config.removeShopNPCPriceText != 0 && config.removeShopNPCPriceText != 2;
         } else {
             // because it's copying the full inventory, and it's a shop item, it won't show since the item is a reference and actually will be removed
             return config.removeShopNPCPriceText != 0 && config.removeShopNPCPriceText != 1;
@@ -20,6 +22,8 @@ public enum LorePredicates implements BiPredicate<Config, Action> {
     SHOP_CLICK_PREDICATE((config, action) -> {
         if (action == Action.COPYING_STANDALONE_ITEM) {
             return config.removeShopNPCTradeText == 0 || config.removeShopNPCTradeText == 2;
+        } else if (action == Action.COPYING_STANDALONE_ITEM_SINGLE_SLOT) {
+            return config.removeShopNPCTradeText != 0 && config.removeShopNPCTradeText != 2;
         } else {
             // because it's copying the full inventory, and it's a shop item, it won't show since the item is a reference and actually will be removed
             return config.removeShopNPCTradeText != 0 && config.removeShopNPCTradeText != 1;
@@ -32,6 +36,8 @@ public enum LorePredicates implements BiPredicate<Config, Action> {
     QUIVER_SHOP_ADD_NOTICE_PREDICATE(((config, action) -> {
         if (action == Action.COPYING_STANDALONE_ITEM) {
             return config.removeFillQuiverNotice == 0 || config.removeFillQuiverNotice == 2;
+        } else if (action == Action.COPYING_STANDALONE_ITEM_SINGLE_SLOT) {
+            return config.removeFillQuiverNotice != 0 && config.removeFillQuiverNotice != 2;
         } else {
             // because it's copying the full inventory, and it's a shop item, it won't show since the item is a reference and actually will be removed
             return config.removeFillQuiverNotice != 0 && config.removeFillQuiverNotice != 1;
@@ -44,6 +50,8 @@ public enum LorePredicates implements BiPredicate<Config, Action> {
     QUIVER_SHOP_FILL_QUIVER_COST(((config, action) -> {
         if (action == Action.COPYING_STANDALONE_ITEM) {
             return config.removeFillQuiverShopPrice == 0 || config.removeFillQuiverShopPrice == 2;
+        } else if (action == Action.COPYING_STANDALONE_ITEM_SINGLE_SLOT) {
+            return config.removeFillQuiverShopPrice != 0 && config.removeFillQuiverShopPrice != 2;
         } else {
             // because it's copying the full inventory, and it's a shop item, it won't show since the item is a reference and actually will be removed
             return config.removeFillQuiverShopPrice != 0 && config.removeFillQuiverShopPrice != 1;

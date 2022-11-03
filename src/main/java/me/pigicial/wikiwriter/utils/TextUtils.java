@@ -26,7 +26,7 @@ public class TextUtils {
             newList.add(added);
         }
 
-        String s = JsonTextReplacementsFeature.replaceEverything(String.join("\", \"", newList));
+        String s = JsonTextReplacementsFeature.replaceEverything(String.join("\", \"", newList), false);
         if (s.startsWith("{") && s.endsWith("}")) s = s.substring(1, s.length() - 1);
 
         return unescapeText(s);
