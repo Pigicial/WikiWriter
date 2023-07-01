@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Getter
 public class WikiItem {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-ORX]");
     private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("§7(-?[1-9][0-9]?[0-9]?[0-9]?)x ");
@@ -59,6 +60,7 @@ public class WikiItem {
     private boolean hasSkyblockItemID = false;
     @Getter
     private boolean shopItem = false;
+    private boolean enchanted = false;
 
     public WikiItem(@Nullable String guiName, ItemStack stack, Action action, boolean referenceMode) {
         if (stack == null) {
@@ -336,6 +338,7 @@ public class WikiItem {
     }
 
     private void fixIDs(ItemStack stack, NBTTagCompound display, NBTTagCompound extraAttributes) {
+        enchanted = stack.isItemEnchanted();
         boolean hasEnchantments = stack.isItemEnchanted() || skyblockId.equalsIgnoreCase("potion");
 
         if (skyblockItem) {

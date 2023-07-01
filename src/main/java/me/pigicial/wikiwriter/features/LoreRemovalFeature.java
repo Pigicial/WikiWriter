@@ -216,7 +216,7 @@ public enum LoreRemovalFeature {
                     continue;
                 }
 
-                for (int j = 0; j <= matchCount; j++) {
+                for (int j = 0; j < matchCount; j++) {
                     // remove it from lastResetIndex each time, since each time it does it the next text that's removed is different
                     String removeText = lore.remove(lastResetIndex);
                     removedLore.add(removeText);

@@ -1,32 +1,33 @@
-buildscript {
-    repositories {
-        jcenter()
-        gradlePluginPortal()
-        maven { url = "https://jitpack.io" }
-        maven { url = "https://maven.minecraftforge.net/" }
-        maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
-    }
+import dev.architectury.pack200.java.Pack200Adapter
 
-    dependencies {
-        // classpath "com.github.asbyth:ForgeGradle:6f53277"
-        classpath "com.github.Debuggingss:ForgeGradle:581a86dcbe"
-        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
-        classpath "com.github.xcfrg:MixinGradle:0.6-SNAPSHOT"
-        classpath "org.apache.httpcomponents:httpclient:4.5.13"
+plugins {
+    id "java"
+    id "gg.essential.loom" version "0.10.0.5"
+    id "dev.architectury.architectury-pack200" version "0.1.3"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+loom {
+    launchConfigs {
+        getByName("client") {
+            arg "--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker"
+        }
+        "client" {
+            property("devauth.enabled", "true")
+            arg "--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker"
+        }
+    }
+    forge {
+        pack200Provider.set(new Pack200Adapter())
     }
 }
 
-apply plugin: "java"
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: "com.github.johnrengelman.shadow"
-apply plugin: "org.spongepowered.mixin"
-
-version = "2.0"
+version = "1.8"
 group = "me.pigicial"
 archivesBaseName = "WikiWriter"
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
@@ -34,24 +35,8 @@ tasks.withType(JavaCompile) {
 
 sourceSets {
     main {
-        output.resourcesDir = java.outputDir
+        output.resourcesDir = java.classesDirectory
     }
-}
-
-minecraft {
-    version = "1.8.9-11.15.1.2318-1.8.9"
-    runDir = "run"
-    mappings = "stable_22"
-
-    clientJvmArgs += "-Delementa.dev=true"
-    clientJvmArgs += "-Ddevauth.enabled=true"
-    clientRunArgs += "--tweakClass gg.essential.loader.stage0.EssentialSetupTweaker"
-    clientRunArgs += "--mixin wikiwriter.mixins.json"
-}
-
-mixin {
-    add sourceSets.main, "wikiwriter.mixins.refmap.json"
-    defaultObfuscationEnv searge
 }
 
 configurations {
@@ -61,22 +46,41 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url = "https://repo.sk1er.club/repository/maven-public/" }
+    gradlePluginPortal()
+    mavenLocal()
+
     maven { url = "https://jitpack.io/" }
     maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+
+    maven { url = "https://plugins.gradle.org/m2/" }
+    maven { url = "https://repo.sk1er.club/repository/maven-public/" }
+    maven { url = "https://repo.sk1er.club/repository/maven-releases/" }
+    maven { url = "https://repo.essential.gg/repository/maven-public/" }
+
+    maven {
+        name "JitPack"
+        url "https://jitpack.io"
+    }
+
+    maven {
+        name "DevAuth"
+        url "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
+    }
 }
 
 dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraftVersion}"
+    mappings "de.oceanlabs.mcp:mcp_stable:${project.mappings}"
+    forge "net.minecraftforge:forge:${project.forgeVersion}"
+
+    runtimeOnly "me.djtheredstoner:DevAuth-forge-legacy:1.1.2"
+
     implementation "gg.essential:essential-1.8.9-forge:1542"
-    embed "gg.essential:loader-launchwrapper:1.1.2"
-    implementation "org.spongepowered:mixin:0.7.11-SNAPSHOT"
-    annotationProcessor "org.spongepowered:mixin:0.7.11-SNAPSHOT"
+    embed "gg.essential:loader-launchwrapper:1.1.3"
 
     annotationProcessor "com.google.guava:guava:21.0"
     annotationProcessor "org.apache.logging.log4j:log4j-core:2.0-beta9"
-    annotationProcessor "org.ow2.asm:asm-tree:6.2"
-    annotationProcessor "org.ow2.asm:asm-commons:6.2"
-    annotationProcessor "org.ow2.asm:asm-util:6.2"
+
     annotationProcessor "com.google.code.gson:gson:2.8.6"
 
     compileOnly "org.projectlombok:lombok:1.18.12"
@@ -84,15 +88,13 @@ dependencies {
 }
 
 shadowJar {
-    archiveName = tasks.jar.archiveName
-    classifier = ""
+    configurations = [project.configurations.embed]
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest.attributes(
             "ForceLoadAsMod": true,
             "ModSide": "CLIENT",
-            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
-            "MixinConfigs": "wikiwriter.mixins.json"
+            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker"
     )
 
     exclude("dummyThing")
@@ -101,30 +103,21 @@ shadowJar {
     exclude("module-info.class")
     exclude("META-INF/versions/")
     exclude("LICENSE.txt")
-
-    configurations = [project.configurations.embed]
 }
 
-reobfJar.dependsOn tasks.shadowJar
+remapJar {
+    from(tasks.shadowJar)
+    input.set(tasks.shadowJar.archiveFile.get())
 
-reobf {
-    shadowJar {
-        mappingType = "SEARGE"
-    }
+    archiveFileName = "${project.name}-${project.version}-for-MC-${project.minecraftVersion}.jar"
 }
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mcversion", project.minecraftVersion
 
-    from(sourceSets.main.resources.srcDirs) {
-        include "mcmod.info"
-
-        expand "version": project.version, "mcversion": project.minecraft.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "mcmod.info"
+    filesMatching("mcmod.info") {
+        expand "version": project.version
     }
 
     from(file("LICENSE"))
