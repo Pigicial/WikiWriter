@@ -1,73 +1,69 @@
 package me.pigicial.wikiwriter;
 
 import gg.essential.api.EssentialAPI;
-import lombok.Getter;
 import me.pigicial.wikiwriter.commands.MainCommand;
 import me.pigicial.wikiwriter.core.Config;
-import me.pigicial.wikiwriter.features.*;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.EventBus;
+import me.pigicial.wikiwriter.features.CopyItemFeature;
+import me.pigicial.wikiwriter.features.KeyBindFeature;
+import net.fabricmc.api.ModInitializer;
+import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.util.List;
 
-@Mod(
-    modid = WikiWriter.MODID,
-    version = WikiWriter.VERSION,
-    name = WikiWriter.NAME,
-    clientSideOnly = true
-)
-public class WikiWriter {
-    public static final String NAME = "WikiWriter";
-    public static final String MODID = "wikiwriter";
-    public static final String VERSION = "1.7.14";
-    public static final String configLocation = "./config/wikiwriter.toml";
+public class WikiWriter implements ModInitializer {
+    private static WikiWriter instance;
 
-    @Getter private static WikiWriter instance;
-    @Getter private final Logger logger;
-    @Getter private final Config config;
-
-    public WikiWriter() {
-        instance = this;
-        logger = LogManager.getLogger();
-        config = new Config();
+    public static WikiWriter getInstance() {
+        return instance;
     }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
-        EventBus eventBus = MinecraftForge.EVENT_BUS;
-        eventBus.register(this);
+    private final String messagePrefix;
+    private final Logger logger;
+    private final Config config;
+
+    public WikiWriter() {
+        WikiWriter.instance = this;
+        this.messagePrefix = Formatting.GRAY + "[" + Formatting.RED + "WikiWriter" + Formatting.GRAY + "]";
+        this.logger = LogManager.getLogger(WikiWriter.class);
+        this.config = new Config();
+    }
+
+    @Override
+    public void onInitialize() {
         config.preload();
         new MainCommand().register();
-        eventBus.register(new CopyItemFeature(this));
+
+        List<? extends KeyBindFeature> features = List.of(
+                new CopyItemFeature(this)
+        );
+
+        for (KeyBindFeature feature : features) {
+            feature.register();
+        }
+
+        /*
         eventBus.register(new GUIStealerFeature(this));
         eventBus.register(new RawNBTExtractor(this));
         eventBus.register(new StatGenerationFeature(this));
         eventBus.register(new SingleSlotItemCopyFeature(this));
+         */
 
         this.logger.info("WikiWriter loaded.");
     }
 
     public void sendMessage(String... messages) {
         for (String message : messages) {
-            EssentialAPI.getMinecraftUtil().sendMessage(EnumChatFormatting.GRAY + "[" + EnumChatFormatting.RED + "WikiWriter"
-                    + EnumChatFormatting.GRAY + "]" + EnumChatFormatting.RESET + " ", message);
+            EssentialAPI.getMinecraftUtil().sendMessage(messagePrefix + Formatting.RESET + " ", message);
         }
     }
 
-    public void debug(String... messages) {
-        if (config.debugMode) {
-            for (String s : messages) {
-                sendMessage("[DEBUG] " + s);
-            }
-        }
+    public Config getConfig() {
+        return config;
     }
 
     public void copyToClipboard(String text) {
