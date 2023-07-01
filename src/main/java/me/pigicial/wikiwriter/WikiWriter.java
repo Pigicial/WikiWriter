@@ -4,6 +4,7 @@ import gg.essential.api.EssentialAPI;
 import me.pigicial.wikiwriter.commands.MainCommand;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
+import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import me.pigicial.wikiwriter.features.KeyBindFeature;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Formatting;
@@ -39,19 +40,15 @@ public class WikiWriter implements ModInitializer {
         new MainCommand().register();
 
         List<? extends KeyBindFeature> features = List.of(
-                new CopyItemFeature(this)
+                new CopyItemFeature(this),
+                new GUIStealerFeature(this)
         );
 
         for (KeyBindFeature feature : features) {
             feature.register();
         }
 
-        /*
-        eventBus.register(new GUIStealerFeature(this));
-        eventBus.register(new RawNBTExtractor(this));
-        eventBus.register(new StatGenerationFeature(this));
-        eventBus.register(new SingleSlotItemCopyFeature(this));
-         */
+        // eventBus.register(new RawNBTExtractor(this));
 
         this.logger.info("WikiWriter loaded.");
     }
