@@ -9,9 +9,16 @@ import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.resource.featuretoggle.FeatureFlag;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.Format;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
@@ -65,24 +72,24 @@ public class WikiItem {
             return;
         }
 
-        NBTTagCompound nbt = stack.getTagCompound();
+        NbtCompound nbt = stack.getNbt();
         // I don't think this can be null but there's null checks in ItemStack so just in case
         if (nbt == null) {
-            nbt = new NBTTagCompound();
+            nbt = new NbtCompound();
         }
 
-        NBTTagCompound extraAttributes = nbt.getCompoundTag("ExtraAttributes");
+        NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
         skyblockId = extraAttributes.getString("id").toLowerCase();
 
-        NBTTagCompound display = nbt.getCompoundTag("display");
-        NBTTagList loreTag = display.getTagList("Lore", 8); // 8 is NBTTagString from NBTBase#createNewByType
+        NbtCompound display = nbt.getCompound("display");
+        NbtList loreTag = display.getList("Lore", 8); // 8 is NBTTagString from NBTBase#createNewByType
 
         lore = new ArrayList<>();
-        for (int i = 0; i < loreTag.tagCount(); i++) {
-            lore.add(loreTag.getStringTagAt(i));
+        for (int i = 0; i < loreTag.size(); i++) {
+            lore.add(loreTag.getString(i));
         }
 
-        nameWithColor = stack.getDisplayName();
+        nameWithColor = stack.getName().getString();
 
         // Removes lore (if not a reference or shop item), and tracks removed lore if a reference or shop item
         parseLore(action, referenceMode);
@@ -114,7 +121,7 @@ public class WikiItem {
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
 
-        String rawNameWithoutColor = EnumChatFormatting.getTextWithoutFormattingCodes(nameWithReplacements);
+        String rawNameWithoutColor = Formatting.strip(nameWithReplacements);
         nameWithoutColor = ColorReplacementFeature.replace(rawNameWithoutColor);
 
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
@@ -225,7 +232,7 @@ public class WikiItem {
 
     // Returns if the pet name was changed
     private boolean updateName(ItemStack stack) {
-        nameWithColor = stack.getDisplayName();
+        nameWithColor = stack.getName().getString();
 
         boolean petNameChanged = false;
         if (CONFIG.removePetLevelsAndChangePetName && pet) {
@@ -246,14 +253,15 @@ public class WikiItem {
         return petNameChanged;
     }
 
-    private void parseRarity(NBTTagCompound extraAttributes, String name) {
+    private void parseRarity(NbtCompound extraAttributes, String name) {
         Rarity baseItemRarity;
 
-        int rarityUpgrades = extraAttributes.getInteger("rarity_upgrades");
+        int rarityUpgrades = extraAttributes.getInt("rarity_upgrades");
 
         loreLoop:
         for (String s : lore) {
-            String lineWithoutColor = EnumChatFormatting.getTextWithoutFormattingCodes(s);
+            String lineWithoutColor = Formatting.strip(s);
+            if (lineWithoutColor == null) continue;
             if (lineWithoutColor.length() <= 1) continue;
             if (rarityUpgrades > 0 && lineWithoutColor.length() < 4) continue;
 
@@ -314,7 +322,7 @@ public class WikiItem {
                 break;
             }
             int end = matcher.end();
-            for (EnumChatFormatting colorCode : EnumChatFormatting.values()) {
+            for (Formatting colorCode : Formatting.values()) {
                 if (colorCode.isColor() && Rarity.COLOR_CODES.contains(name.charAt(end - 1))) {
                     for (Rarity r : Rarity.values()) {
                         if (r == Rarity.NONE) continue;
@@ -335,14 +343,14 @@ public class WikiItem {
         }
     }
 
-    private void fixIDs(ItemStack stack, NBTTagCompound display, NBTTagCompound extraAttributes) {
-        boolean hasEnchantments = stack.isItemEnchanted() || skyblockId.equalsIgnoreCase("potion");
+    private void fixIDs(ItemStack stack, NbtCompound display, NbtCompound extraAttributes) {
+        boolean hasEnchantments = stack.isItemEnabled(FeatureSet.of(FeatureFlags.VANILLA)) || skyblockId.equalsIgnoreCase("potion");
 
         if (skyblockItem) {
             minecraftId = "head";
         }
 
-        stackSize = stack.stackSize;
+        stackSize = stack.getCount();
 
         long color = display.getLong("color");
         if (minecraftId.startsWith("leather") && color != 0) {
@@ -352,7 +360,7 @@ public class WikiItem {
             }
         }
 
-        if (skyblockItem && skyblockId.contains("backpack") && CONFIG.backpackColors && extraAttributes.hasKey("backpack_color", 8)) {
+        if (skyblockItem && skyblockId.contains("backpack") && CONFIG.backpackColors && extraAttributes.contains("backpack_color", 8)) {
             String backpackColor = extraAttributes.getString("backpack_color").toLowerCase();
             if (!backpackColor.equals("") && !backpackColor.equalsIgnoreCase("default")) {
                 skyblockId = backpackColor + "_" + skyblockId;
@@ -387,7 +395,7 @@ public class WikiItem {
     private void updateNameAndPetInfo(boolean petNameChanged) {
         if (skyblockItem && pet) {
 
-            String rawName = EnumChatFormatting.getTextWithoutFormattingCodes(nameWithColor);
+            String rawName = Formatting.strip(nameWithColor);
             mysteryPet = rawName.startsWith("Mystery ");
             if (mysteryPet) {
                 rawName = rawName.substring(8);
@@ -419,13 +427,13 @@ public class WikiItem {
         }
     }
 
-    private void updateStackSizes(boolean referenceMode, String guiName, NBTTagCompound extraAttributes) {
+    private void updateStackSizes(boolean referenceMode, String guiName, NbtCompound extraAttributes) {
         showRarity = rarity != Rarity.NONE;
         if (!(referenceMode && CONFIG.recipeMode) && showRarity && CONFIG.guaranteedStackSizeToggled && hasSkyblockItemID) {
 
             int maxStackSize = stackSize;
 
-            if (!pet && extraAttributes.hasKey("uuid", 8)) {
+            if (!pet && extraAttributes.contains("uuid", 8)) {
                 maxStackSize = 1;
             }
 
@@ -448,7 +456,7 @@ public class WikiItem {
 
                 // only change stack amounts in auction menus, since that's only where they show up in
                 if (guiName != null && guiName.toLowerCase().contains("auction")) {
-                    String amountString = EnumChatFormatting.GRAY + NumberFormat.getInstance().format(setStackSize) + "x " + EnumChatFormatting.RESET;
+                    String amountString = Formatting.GRAY + NumberFormat.getInstance().format(setStackSize) + "x " + Formatting.RESET;
                     nameWithColor = amountString + nameWithColor;
                 }
 

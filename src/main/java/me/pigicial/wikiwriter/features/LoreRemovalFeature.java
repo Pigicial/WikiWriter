@@ -5,7 +5,7 @@ import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.LorePredicates;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Formatting;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -200,7 +200,11 @@ public enum LoreRemovalFeature {
                     break;
                 }
 
-                String sanitizedText = EnumChatFormatting.getTextWithoutFormattingCodes(lore.get(i));
+                String sanitizedText = Formatting.strip(lore.get(i));
+                if (sanitizedText == null) {
+                    break;
+                }
+
                 String textToCompareAgainst = textToFilter.get(i - lastResetIndex);
 
                 if (!matches(sanitizedText, textToCompareAgainst)) {

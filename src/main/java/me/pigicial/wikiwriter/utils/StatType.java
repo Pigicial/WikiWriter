@@ -1,7 +1,6 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.WikiWriter;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.HashSet;
@@ -48,7 +47,7 @@ public enum StatType {
             return "";
         }
 
-        lore = lore.stream().map(EnumChatFormatting::getTextWithoutFormattingCodes).collect(Collectors.toList());
+        lore = lore.stream().map(Formatting::strip).collect(Collectors.toList());
 
         Set<StatType> foundStatTypes = new HashSet<>();
 
