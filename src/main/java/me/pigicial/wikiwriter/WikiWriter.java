@@ -50,7 +50,6 @@ public class WikiWriter {
         eventBus.register(new GUIStealerFeature(this));
         eventBus.register(new RawNBTExtractor(this));
         eventBus.register(new StatGenerationFeature(this));
-        eventBus.register(new SingleSlotItemCopyFeature(this));
 
         this.logger.info("WikiWriter loaded.");
     }
