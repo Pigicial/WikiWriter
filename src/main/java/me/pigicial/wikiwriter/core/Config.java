@@ -4,12 +4,12 @@ import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
-import me.pigicial.wikiwriter.WikiWriter;
 
 import java.io.File;
 
 public class Config extends Vigilant {
 
+    public static final String configLocation = "./config/wikiwriter.toml";
     @Property(
             type = PropertyType.SWITCH,
             name = "Mod Enabled",
@@ -354,7 +354,7 @@ public class Config extends Vigilant {
     public boolean debugMode = false;
 
     public Config() {
-        super(new File(WikiWriter.configLocation), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
+        super(new File(configLocation), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();
     }
 }

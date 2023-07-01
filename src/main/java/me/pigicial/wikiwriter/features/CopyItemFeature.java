@@ -1,51 +1,38 @@
 package me.pigicial.wikiwriter.features;
 
-import gg.essential.universal.UScreen;
+import me.pigicial.wikiwriter.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.WikiItem;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiContainerCreative;
-import net.minecraft.client.gui.inventory.GuiEditSign;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.inventory.Slot;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import org.lwjgl.glfw.GLFW;
 
-public class CopyItemFeature {
-    private final KeyBinding copyLoreKeybind = new KeyBinding("Copy Item", Keyboard.KEY_H, "Wiki Writer");
-    private final WikiWriter wikiWriter;
+import javax.annotation.Nullable;
+
+public class CopyItemFeature extends KeyBindFeature {
 
     public CopyItemFeature(WikiWriter wikiWriter) {
-        this.wikiWriter = wikiWriter;
-        ClientRegistry.registerKeyBinding(copyLoreKeybind);
+        super(wikiWriter, "Copy Item", GLFW.GLFW_KEY_H);
     }
 
-    @SubscribeEvent
-    public void onKey(GuiScreenEvent.KeyboardInputEvent.Post event) {
+    @Override
+    protected void onKeyPress(MinecraftClient client) {
         try {
             Config config = wikiWriter.getConfig();
-            if (!config.modEnabled || !config.copyItems) return;
-            if (Keyboard.getEventKey() != copyLoreKeybind.getKeyCode()) return;
-            if (!(event.gui instanceof GuiContainer)) return;
-            if (Keyboard.getEventKeyState()) return; // only activate on key release
-
-            GuiScreen currentScreen = UScreen.getCurrentScreen();
-            if (currentScreen instanceof GuiEditSign || currentScreen instanceof GuiContainerCreative && ((GuiContainerCreative) currentScreen).getSelectedTabIndex() == 5) {
+            if (!config.copyItems) {
                 return;
             }
 
-            Slot slotUnderMouse = ((GuiContainer) event.gui).getSlotUnderMouse();
-            if (slotUnderMouse == null) return; // if they press H while outside a slot, don't do anything
-            ItemStack stack = slotUnderMouse.getStack();
-            if (stack == null) return;
+            ItemStack itemUnderCursor = getHoveredSlot(client);
+            if (itemUnderCursor == null) {
+                return;
+            }
 
-            WikiItem wikiItem = new WikiItem(null, stack, Action.COPYING_STANDALONE_ITEM, false);
+            WikiItem wikiItem = new WikiItem(null, itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
             String text = wikiItem.convertToWikiItem();
 
             if (config.itemTemplatesMode) {
@@ -58,6 +45,41 @@ public class CopyItemFeature {
             wikiWriter.sendMessage("Something went wrong when trying to copy this item, please report this with your latest.log file!");
             e.printStackTrace();
         }
+    }
 
+    @Nullable
+    public ItemStack getHoveredSlot(MinecraftClient client) {
+        ClientPlayerEntity player = client.player;
+        if (player == null) {
+            return null;
+        }
+
+        ScreenHandler currentScreenHandler = player.currentScreenHandler;
+        if (currentScreenHandler != null) {
+            int mouseX = (int) (client.mouse.getX() * client.getWindow().getScaledWidth() / client.getWindow().getWidth());
+            int mouseY = (int) (client.mouse.getY() * client.getWindow().getScaledHeight() / client.getWindow().getHeight());
+
+            Slot hoveredSlot = getHoveredSlot(currentScreenHandler, mouseX, mouseY);
+            if (hoveredSlot != null) {
+                return hoveredSlot.getStack();
+            }
+        }
+
+        return null;
+    }
+
+    private Slot getHoveredSlot(ScreenHandler screenHandler, int mouseX, int mouseY) {
+        for (Slot slot : screenHandler.slots) {
+            if (isMouseOverSlot(slot, mouseX, mouseY)) {
+                return slot;
+            }
+        }
+        return null;
+    }
+
+    private boolean isMouseOverSlot(Slot slot, int mouseX, int mouseY) {
+        int slotX = slot.x;
+        int slotY = slot.y;
+        return mouseX >= slotX && mouseY >= slotY && mouseX < slotX + 16 && mouseY < slotY + 16;
     }
 }

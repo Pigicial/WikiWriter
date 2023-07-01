@@ -7,7 +7,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.gui.inventory.GuiEditSign;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -15,6 +17,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.input.Keyboard;
 
 import java.io.ByteArrayInputStream;
@@ -23,7 +26,7 @@ import java.util.Iterator;
 
 public class RawNBTExtractor {
 
-    private final KeyBinding keybind = new KeyBinding("Copy Raw NBT", Keyboard.KEY_J, "Wiki Writer");
+    private final KeyBinding keybind = new KeyBinding("Copy Raw NBT", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "WikiWriter");
     private final WikiWriter wikiWriter;
 
     public RawNBTExtractor(WikiWriter wikiWriter) {
