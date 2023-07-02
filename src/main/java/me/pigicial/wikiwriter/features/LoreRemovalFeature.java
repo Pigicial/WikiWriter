@@ -254,7 +254,11 @@ public enum LoreRemovalFeature {
         public boolean hasRemovedLore() {
             return !removedLore.isEmpty();
         }
+    }
 
-
+    @Data
+    public static class RemovedLore {
+        private final List<String> removedLoreBeforeRarity;
+        private final List<String> removedLoreAfterRarity;
     }
 }
