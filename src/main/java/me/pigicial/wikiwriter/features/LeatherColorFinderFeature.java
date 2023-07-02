@@ -1,7 +1,5 @@
 package me.pigicial.wikiwriter.features;
 
-import me.pigicial.wikiwriter.WikiWriter;
-
 import java.awt.*;
 import java.util.Map;
 import java.util.TreeMap;
@@ -31,28 +29,24 @@ public enum LeatherColorFinderFeature {
     }
 
     public static LeatherColorFinderFeature findColor(int comparingColorNumber) {
-
         if (comparingColorNumber == -1) {
             return DEFAULT;
         }
 
         Color comparingColor = new Color(comparingColorNumber, false);
-       // WikiWriter.getInstance().sendMessage("Comparing color: " + comparingColor + ", r: " + comparingColor.getRed() + ", g: " + comparingColor.getGreen() + ", b: " + comparingColor.getBlue());
 
         TreeMap<Double, LeatherColorFinderFeature> distanceMap = new TreeMap<>();
 
         for (LeatherColorFinderFeature colorFinderFeature : values()) {
-            long rDist = Math.abs(colorFinderFeature.color.getRed()) - comparingColor.getRed();
-            long gDist = Math.abs(colorFinderFeature.color.getGreen()) - comparingColor.getGreen();
-            long bDist = Math.abs(colorFinderFeature.color.getBlue()) - comparingColor.getBlue();
+            double rDist = Math.abs(colorFinderFeature.color.getRed()) - (double) comparingColor.getRed();
+            double gDist = Math.abs(colorFinderFeature.color.getGreen()) - (double) comparingColor.getGreen();
+            double bDist = Math.abs(colorFinderFeature.color.getBlue()) - (double) comparingColor.getBlue();
 
             distanceMap.put(Math.sqrt(rDist * rDist + gDist * gDist + bDist * bDist), colorFinderFeature);
         }
 
         Map.Entry<Double, LeatherColorFinderFeature> entry = distanceMap.firstEntry();
         LeatherColorFinderFeature value = entry.getValue();
-        if (value == null) value = DEFAULT;
-        return value;
+        return value == null ? DEFAULT : value;
     }
-
 }
