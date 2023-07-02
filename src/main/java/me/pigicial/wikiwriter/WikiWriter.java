@@ -34,7 +34,6 @@ public class WikiWriter implements ModInitializer {
     private final Config config;
 
     public WikiWriter() {
-        WikiWriter.instance = this;
         this.messagePrefix = Formatting.GRAY + "[" + Formatting.RED + "WikiWriter" + Formatting.GRAY + "]";
         this.logger = LogManager.getLogger(WikiWriter.class);
         this.config = new Config();
@@ -42,6 +41,7 @@ public class WikiWriter implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        WikiWriter.instance = this;
         config.preload();
 
         registerCommand();
