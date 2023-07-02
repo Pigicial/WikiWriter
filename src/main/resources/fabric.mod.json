@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "wikiwriter",
+  "version": "${version}",
+
+  "name": "WikiWriter",
+  "description": "Wiki Editor tools for the official Hypixel SkyBlock Wiki. Type /wikiwriter or /ww to get started.",
+  "authors": [
+    "Pigicial"
+  ],
+
+  "license": "CC0-1.0",
+  "icon": "assets/wikiwriter/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "me.pigicial.wikiwriter.WikiWriter"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17"
+  }
+}
