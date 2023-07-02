@@ -109,8 +109,7 @@ public class GUIStealerFeature extends KeyBindFeature {
 
         builder.append("{{Inventory\n")
                 .append("|name=").append(inventoryName).append("\n")
-                .append("|rows=").append(rows)
-                .append("\n");
+                .append("|rows=").append(rows).append("\n");
 
         for (int i = 0; i < size; i++) {
             ItemStack itemStack = items.get(i);

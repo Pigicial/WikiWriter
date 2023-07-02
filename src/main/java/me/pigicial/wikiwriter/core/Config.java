@@ -172,15 +172,6 @@ public class Config extends Vigilant {
     public boolean removeDungeonStats = true;
 
     @Property(
-            type = PropertyType.SELECTOR,
-            name = "Hide Close, Go Back, Level, and Page items",
-            description = "Toggles whether or close, go back, level, and page items should not clickable nor have any name or lore.",
-            category = "Text Filters",
-            options = {"Hide All", "Show Go Back to SkyBlock Menu", "Hide None"}
-    )
-    public int removeCloseGoBackAndPageItems = 0;
-
-    @Property(
             type = PropertyType.SWITCH,
             name = "Remove Crafting Table Data",
             description = "Toggles whether or not crafting table info below recipes should be stripped from item lore.",

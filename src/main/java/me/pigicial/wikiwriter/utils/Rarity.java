@@ -1,8 +1,14 @@
 package me.pigicial.wikiwriter.utils;
 
+import net.minecraft.util.Formatting;
+
+import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public enum Rarity {
     VERY_SPECIAL("veryspecial", 'c'),
@@ -16,7 +22,15 @@ public enum Rarity {
     COMMON("common", 'f'),
     NONE("", ' ');
 
-    public static final Set<Character> COLOR_CODES = Arrays.stream(values()).filter(rarity -> rarity != NONE).map(Rarity::getColorCode).collect(Collectors.toSet());
+    private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-ORX]");
+    private static final String RECOMBOBULATOR_SYMBOL = "#";
+
+    private static final Set<Rarity> REGULAR_ITEM_RARITIES;
+
+    static {
+        REGULAR_ITEM_RARITIES = new HashSet<>(Arrays.asList(Rarity.values()));
+        REGULAR_ITEM_RARITIES.remove(Rarity.NONE);
+    }
 
     private final String name;
     private final String check;
@@ -42,18 +56,72 @@ public enum Rarity {
     }
 
     public Rarity getPreviousRarity() {
-        switch (this) {
-            case COMMON:
-            case UNCOMMON:
-                return COMMON;
-            case RARE: return UNCOMMON;
-            case EPIC: return RARE;
-            case LEGENDARY: return EPIC;
-            case MYTHIC: return LEGENDARY;
-            case DIVINE: return MYTHIC;
-            case VERY_SPECIAL: return DIVINE;
-            default: return this;
+        return switch (this) {
+            case COMMON, UNCOMMON -> COMMON;
+            case RARE -> UNCOMMON;
+            case EPIC -> RARE;
+            case LEGENDARY -> EPIC;
+            case MYTHIC -> LEGENDARY;
+            case DIVINE -> MYTHIC;
+            case VERY_SPECIAL -> DIVINE;
+            default -> this;
+        };
+    }
 
+    public static Rarity parseRarity(List<String> lore, String name) {
+        Rarity rarity = getRarityFromLore(lore);
+        if (rarity == null) {
+            rarity = getRarityFromName(name);
         }
+
+        return rarity;
+    }
+
+    @Nullable
+    public static Rarity getRarityFromLore(List<String> lore) {
+        for (String line : lore) {
+            Rarity rarity = getRarityFromLine(line);
+            if (rarity != null) {
+                return rarity;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static Rarity getRarityFromLine(String line) {
+        line = Formatting.strip(line);
+        if (line == null) {
+            return null;
+        }
+
+        line = line.replace(RECOMBOBULATOR_SYMBOL, "").trim();
+
+        for (Rarity rarity : REGULAR_ITEM_RARITIES) {
+            if (line.contains(rarity.name())) {
+                return rarity;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static Rarity getRarityFromName(String name) {
+        Matcher colorCodeMatcher = STRIP_COLOR_PATTERN.matcher(name);
+
+        while (colorCodeMatcher.find()) {
+            String match = colorCodeMatcher.group();
+            char o = match.charAt(1);
+
+            for (Rarity rarity : REGULAR_ITEM_RARITIES) {
+                if (o == rarity.getColorCode()) {
+                    return rarity;
+                }
+            }
+        }
+
+        return null;
     }
 }
