@@ -1,12 +1,19 @@
 package me.pigicial.wikiwriter;
 
-import gg.essential.api.EssentialAPI;
-import me.pigicial.wikiwriter.commands.MainCommand;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import gg.essential.universal.UScreen;
+import gg.essential.vigilance.gui.SettingsGui;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
-import me.pigicial.wikiwriter.features.KeyBindFeature;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +21,6 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.List;
 
 public class WikiWriter implements ModInitializer {
     private static WikiWriter instance;
@@ -37,25 +43,37 @@ public class WikiWriter implements ModInitializer {
     @Override
     public void onInitialize() {
         config.preload();
-        new MainCommand().register();
 
-        List<? extends KeyBindFeature> features = List.of(
-                new CopyItemFeature(this),
-                new GUIStealerFeature(this)
-        );
+        registerCommand();
 
-        for (KeyBindFeature feature : features) {
-            feature.register();
-        }
-
-        // eventBus.register(new RawNBTExtractor(this));
+        new CopyItemFeature(this).register();
+        new GUIStealerFeature(this).register();
 
         this.logger.info("WikiWriter loaded.");
     }
 
+    private void registerCommand() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+
+            LiteralArgumentBuilder<ServerCommandSource> mainCommand = CommandManager.literal("wikiwriter").executes(context -> {
+                SettingsGui settingsGUI = WikiWriter.getInstance().getConfig().gui();
+                UScreen.displayScreen(settingsGUI);
+                return 1;
+            });
+
+            LiteralCommandNode<ServerCommandSource> node = dispatcher.register(mainCommand);
+            dispatcher.register(CommandManager.literal("ww").redirect(node));
+        });
+    }
+
     public void sendMessage(String... messages) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) {
+            return;
+        }
+
         for (String message : messages) {
-            EssentialAPI.getMinecraftUtil().sendMessage(messagePrefix + Formatting.RESET + " ", message);
+            player.sendMessage(Text.of(messagePrefix + Formatting.RESET + " " + message));
         }
     }
 
