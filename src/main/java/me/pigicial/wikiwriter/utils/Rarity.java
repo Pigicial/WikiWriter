@@ -1,8 +1,8 @@
 package me.pigicial.wikiwriter.utils;
 
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

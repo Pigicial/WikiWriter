@@ -4,27 +4,8 @@ plugins {
     id 'maven-publish'
     id 'io.freefair.lombok' version '6.6.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
-}
 
-loom {
-    /*launchConfigs {
-        getByName("client") {
-            arg "--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker"
-        }
-        "client" {
-            property("devauth.enabled", "true")
-            arg "--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker"
-        }
-    }*/
-
-    splitEnvironmentSourceSets()
-
-    mods {
-        "wikiwriter" {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
-        }
-    }
+    id 'org.jetbrains.kotlin.jvm' version '1.8.22'
 }
 
 repositories {
@@ -128,6 +109,12 @@ shadowJar {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 17
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = 17
+    }
 }
 
 processResources {
