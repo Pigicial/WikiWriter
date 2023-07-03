@@ -26,10 +26,14 @@ public class CopyItemFeature extends KeyBindFeature {
                 return;
             }
 
+            wikiWriter.sendMessage("1");
             ItemStack itemUnderCursor = getHoveredSlot(client);
             if (itemUnderCursor == null) {
+                wikiWriter.sendMessage("Null item");
                 return;
             }
+
+            wikiWriter.sendMessage("2");
 
             WikiItem wikiItem = new WikiItem(null, itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
             String text = wikiItem.convertToWikiItem();

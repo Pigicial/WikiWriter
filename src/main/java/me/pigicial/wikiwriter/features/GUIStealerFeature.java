@@ -103,10 +103,6 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
-        if (config.copiedInventoriesAreTemplates) {
-            builder.append("<noinclude>[[Category:Inventory_Templates]]</noinclude>\n");
-        }
-
         builder.append("{{Inventory\n")
                 .append("|name=").append(inventoryName).append("\n")
                 .append("|rows=").append(rows).append("\n");
