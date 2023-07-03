@@ -9,7 +9,6 @@ import java.io.File;
 
 public class Config extends Vigilant {
 
-    public static final String configLocation = "./config/wikiwriter.toml";
     @Property(
             type = PropertyType.SWITCH,
             name = "Mod Enabled",
@@ -336,16 +335,8 @@ public class Config extends Vigilant {
     )
     public boolean removeMuseumData = true;
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Debug Mode",
-            description = "Toggles console logs for certain actions.",
-            category = "Other"
-    )
-    public boolean debugMode = false;
-
     public Config() {
-        super(new File(configLocation), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
+        super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();
     }
 }
