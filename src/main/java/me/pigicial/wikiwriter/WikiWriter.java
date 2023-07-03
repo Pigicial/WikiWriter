@@ -10,6 +10,7 @@ import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -54,26 +55,28 @@ public class WikiWriter implements ModInitializer {
         this.logger.info("WikiWriter loaded.");
     }
 
+    private boolean menuQueued = false;
+
     private void registerCommand() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 
             LiteralArgumentBuilder<FabricClientCommandSource> mainCommand = literal("wikiwriter").executes(context -> {
-                SettingsGui gui = config.gui();
-
-                sendMessage("1");
-                sendMessage("null = " + (gui == null));
-                sendMessage("current screen = " + MinecraftClient.getInstance().currentScreen);
-
-                UScreen.displayScreen(gui);
-
-                sendMessage("2");
-                sendMessage("new current screen = " + MinecraftClient.getInstance().currentScreen);
-
+                // minecraft tries to close the gui on the same tick chat is closed, so
+                // if you try and open a gui in a command in the same tick, it won't open - therefore, you have to
+                // delay it by a tick
+                menuQueued = true;
                 return 1;
             });
 
-            LiteralCommandNode<FabricClientCommandSource> node = dispatcher.register(mainCommand);
-            dispatcher.register(literal("ww").redirect(node));
+            dispatcher.register(mainCommand);
+            dispatcher.register(literal("ww").executes(mainCommand.getCommand()));
+        });
+
+        ClientTickEvents.END_WORLD_TICK.register(world -> {
+            if (menuQueued) {
+                menuQueued = false;
+                UScreen.displayScreen(config.gui());
+            }
         });
     }
 
