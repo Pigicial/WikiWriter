@@ -8,11 +8,10 @@ import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +20,8 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class WikiWriter implements ModInitializer {
     private static WikiWriter instance;
@@ -41,8 +42,9 @@ public class WikiWriter implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        WikiWriter.instance = this;
-        config.preload();
+        instance = this;
+
+        config.initialize();
 
         registerCommand();
 
@@ -53,16 +55,25 @@ public class WikiWriter implements ModInitializer {
     }
 
     private void registerCommand() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 
-            LiteralArgumentBuilder<ServerCommandSource> mainCommand = CommandManager.literal("wikiwriter").executes(context -> {
-                SettingsGui settingsGUI = WikiWriter.getInstance().getConfig().gui();
-                UScreen.displayScreen(settingsGUI);
+            LiteralArgumentBuilder<FabricClientCommandSource> mainCommand = literal("wikiwriter").executes(context -> {
+                SettingsGui gui = config.gui();
+
+                sendMessage("1");
+                sendMessage("null = " + (gui == null));
+                sendMessage("current screen = " + MinecraftClient.getInstance().currentScreen);
+
+                UScreen.displayScreen(gui);
+
+                sendMessage("2");
+                sendMessage("new current screen = " + MinecraftClient.getInstance().currentScreen);
+
                 return 1;
             });
 
-            LiteralCommandNode<ServerCommandSource> node = dispatcher.register(mainCommand);
-            dispatcher.register(CommandManager.literal("ww").redirect(node));
+            LiteralCommandNode<FabricClientCommandSource> node = dispatcher.register(mainCommand);
+            dispatcher.register(literal("ww").redirect(node));
         });
     }
 
