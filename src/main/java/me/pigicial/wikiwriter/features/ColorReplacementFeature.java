@@ -55,9 +55,10 @@ public enum ColorReplacementFeature {
     public static String replace(String text) {
         text = text.replace('§', '&');
         List<ReplacementSection> replacementSections = getReplacementSections(text);
-        if (replacementSections.size() == 0) {
+        if (replacementSections.isEmpty()) {
             return text;
         }
+
         List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
 
         StringBuilder newString = new StringBuilder();

@@ -2,10 +2,16 @@ package me.pigicial.wikiwriter;
 
 import lombok.Getter;
 import me.pigicial.wikiwriter.core.Config;
-import me.pigicial.wikiwriter.features.*;
+import me.pigicial.wikiwriter.features.ColorReplacementFeature;
+import me.pigicial.wikiwriter.features.LeatherColorFinderFeature;
+import me.pigicial.wikiwriter.features.LoreRemovalFeature;
+import me.pigicial.wikiwriter.features.RegexTextReplacements;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.Rarity;
 import me.pigicial.wikiwriter.utils.TextUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -18,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,11 +80,17 @@ public class WikiItem {
         skyBlockId = extraAttributes.getString("id").toLowerCase();
 
         NbtCompound display = nbt.getCompound("display");
-        NbtList loreTag = display.getList("Lore", 8); // 8 is NBTTagString from NBTBase#createNewByType
+        NbtList loreTag = display.getList("Lore", NbtElement.STRING_TYPE);
 
         lore = new ArrayList<>();
         for (int i = 0; i < loreTag.size(); i++) {
-            lore.add(loreTag.getString(i));
+
+            String jsonLine = loreTag.getString(i);
+            Component asComponent = JSONComponentSerializer.json().deserialize(jsonLine);
+            String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(asComponent);
+            legacyLine = legacyLine.replace('&', '§');
+
+            lore.add(legacyLine);
         }
 
         nameWithColor = stack.getName().getString();
