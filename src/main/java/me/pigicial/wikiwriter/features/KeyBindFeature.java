@@ -3,11 +3,14 @@ package me.pigicial.wikiwriter.features;
 import me.pigicial.wikiwriter.WikiWriter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
-public abstract class KeyBindFeature implements ClientTickEvents.EndTick {
+public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPress {
 
     protected final WikiWriter wikiWriter;
     private final KeyBinding keyBinding;
@@ -19,13 +22,16 @@ public abstract class KeyBindFeature implements ClientTickEvents.EndTick {
 
     public void register() {
         KeyBindingHelper.registerKeyBinding(keyBinding);
-        ClientTickEvents.END_CLIENT_TICK.register(this);
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight)
+                -> ScreenKeyboardEvents.afterKeyPress(screen).register(this));
     }
 
     @Override
-    public void onEndTick(MinecraftClient client) {
-        if (keyBinding.wasPressed() && wikiWriter.getConfig().modEnabled) {
-            onKeyPress(client);
+    public void afterKeyPress(Screen screen, int key, int scancode, int modifiers) {
+        int currentlyBoundCode = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
+        if (key == currentlyBoundCode && wikiWriter.getConfig().modEnabled) {
+            onKeyPress(MinecraftClient.getInstance());
         }
     }
 
