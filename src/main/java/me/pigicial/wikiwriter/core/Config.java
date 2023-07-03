@@ -27,15 +27,6 @@ public class Config extends Vigilant {
     public boolean copyItems = true;
 
     @Property(
-            type = PropertyType.SELECTOR,
-            name = "Item Reference Mode (Copying Items into Single-Slot GUIs)",
-            description = "If enabled, when copying items into single-slot menus, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see Copying Inventories).",
-            category = "Copying Items",
-            options = {"Always", "When Copying Shop Items", "Never"}
-    )
-    public int referenceModeForSingleSlotItems = 0;
-
-    @Property(
             type = PropertyType.SWITCH,
             name = "Item Templates Mode",
             description = "When enabled, individually copied items will include the text <noinclude>[[Category:Item UI Templates]]</noinclude><includeonly> and </includeonly> to allow them to be used as item templates.",
@@ -108,14 +99,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Make Copied Inventories Templates",
-            description = "When enabled, inventories copied will automatically include the text [[Category:Inventory_Templates]] to mark them as a template.",
-            category = "Copying Inventories"
-    )
-    public boolean copiedInventoriesAreTemplates = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Automatic Recipe Format",
             description = "Automatically converts copied recipe GUIs to use the required recipe format.",
             category = "Copying Inventories"
@@ -145,14 +128,6 @@ public class Config extends Vigilant {
             category = "Copying Raw NBT"
     )
     public boolean rawNbtExtractionEnabled = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Copying Item Stats",
-            description = "Toggles whether or not the item stats of hovered items can be copied using a set keybind.",
-            category = "Copying Item Stats"
-    )
-    public boolean copyingItemStatsEnabled = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -260,26 +235,6 @@ public class Config extends Vigilant {
             options = {"Always", "When Copying Full Inventories", "When Copying Individual Items", "Never"}
     )
     public int removeShopNPCPriceText = 2;
-
-    @Property(
-            type = PropertyType.SELECTOR,
-            name = "Remove Fill Quiver Shop Price",
-            description = "Toggles whether or not specific text lines that involve the fill quiver shop price items should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters",
-            options = {"Always", "When Copying Full Inventories", "When Copying Individual Items", "Never"}
-    )
-    public int removeFillQuiverShopPrice = 0;
-
-    @Property(
-            type = PropertyType.SELECTOR,
-            name = "Remove Fill Quiver Notice",
-            description = "When toggled, the \"Added directly to your quiver\" text will be removed from Jax's shop menu items",
-            category = "Text Filters",
-            subcategory = "Lore Filters",
-            options = {"Always", "When Copying Full Inventories", "When Copying Individual Items", "Never"}
-    )
-    public int removeFillQuiverNotice = 2;
 
     @Property(
             type = PropertyType.SWITCH,
