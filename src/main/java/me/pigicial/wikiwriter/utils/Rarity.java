@@ -77,7 +77,6 @@ public enum Rarity {
         return rarity;
     }
 
-    @Nullable
     public static Rarity getRarityFromLore(List<String> lore) {
         for (String line : lore) {
             Rarity rarity = getRarityFromLine(line);
@@ -86,14 +85,13 @@ public enum Rarity {
             }
         }
 
-        return null;
+        return Rarity.NONE;
     }
 
-    @Nullable
     public static Rarity getRarityFromLine(String line) {
         line = Formatting.strip(line);
         if (line == null) {
-            return null;
+            return Rarity.NONE;
         }
 
         line = line.replace(RECOMBOBULATOR_SYMBOL, "").trim();
@@ -104,10 +102,9 @@ public enum Rarity {
             }
         }
 
-        return null;
+        return Rarity.NONE;
     }
 
-    @Nullable
     public static Rarity getRarityFromName(String name) {
         Matcher colorCodeMatcher = STRIP_COLOR_PATTERN.matcher(name);
 
@@ -122,6 +119,6 @@ public enum Rarity {
             }
         }
 
-        return null;
+        return Rarity.NONE;
     }
 }

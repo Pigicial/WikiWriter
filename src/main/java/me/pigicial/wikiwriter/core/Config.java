@@ -290,6 +290,14 @@ public class Config extends Vigilant {
     )
     public boolean removeMuseumData = true;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Text Below Item Rarity",
+            description = "When enabled, text below an item rarity will be stripped from item lore.",
+            category = "Text Filters"
+    )
+    public boolean removeTextBelowRarity = true;
+
     public Config() {
         super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();

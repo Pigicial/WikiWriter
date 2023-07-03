@@ -1,9 +1,7 @@
 package me.pigicial.wikiwriter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import gg.essential.universal.UScreen;
-import gg.essential.vigilance.gui.SettingsGui;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
@@ -97,6 +95,10 @@ public class WikiWriter implements ModInitializer {
 
     public void copyToClipboard(String text) {
         try {
+            // for some reason MC runs in headless mode (or at least it was right before I wrote this line)
+            // if it's in that, then the clipboard won't work
+            System.setProperty("java.awt.headless", "false");
+
             StringSelection selection = new StringSelection(text);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(selection, selection);
