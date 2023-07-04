@@ -2,6 +2,9 @@ package me.pigicial.wikiwriter.utils;
 
 import me.pigicial.wikiwriter.features.ColorReplacementFeature;
 import me.pigicial.wikiwriter.features.RegexTextReplacements;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 
@@ -29,5 +32,11 @@ public class TextUtils {
         if (s.startsWith("{") && s.endsWith("}")) s = s.substring(1, s.length() - 1);
 
         return unescapeText(s);
+    }
+
+    public static String convertJsonTextToLegacy(String jsonLine) {
+        Component asComponent = JSONComponentSerializer.json().deserialize(jsonLine);
+        String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(asComponent);
+        return legacyLine.replace('&', '§');
     }
 }

@@ -4,6 +4,7 @@ import me.pigicial.wikiwriter.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
@@ -148,7 +149,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             NbtList loreTag = shopItemNbt.getCompound("display").getList("Lore", NbtElement.STRING_TYPE);
             List<String> lore = new ArrayList<>();
             for (int i = 0; i < loreTag.size(); i++) {
-                lore.add(loreTag.getString(i));
+                lore.add(TextUtils.convertJsonTextToLegacy(loreTag.getString(i)));
             }
 
             LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, false, LoreRemovalFeature.SHOP_FILTERS);
@@ -204,7 +205,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             int slot = row * 9 - 9 + across - 1;
 
             ItemStack itemStack = items.get(slot);
-            if (itemStack == null) {
+            if (itemStack == null || itemStack.isEmpty()) {
                 // no more shop items
                 break;
             }

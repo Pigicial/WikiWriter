@@ -16,10 +16,6 @@ import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class WikiWriter implements ModInitializer {
@@ -95,13 +91,7 @@ public class WikiWriter implements ModInitializer {
 
     public void copyToClipboard(String text) {
         try {
-            // for some reason MC runs in headless mode (or at least it was right before I wrote this line)
-            // if it's in that, then the clipboard won't work
-            System.setProperty("java.awt.headless", "false");
-
-            StringSelection selection = new StringSelection(text);
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(selection, selection);
+            MinecraftClient.getInstance().keyboard.setClipboard(text);
         } catch (Exception e) {
             sendMessage("Failed to copy message to clipboard");
             e.printStackTrace();
