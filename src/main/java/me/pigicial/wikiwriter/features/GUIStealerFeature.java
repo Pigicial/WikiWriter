@@ -113,7 +113,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             int horizontalPosition = 1 + (i % 9);
             int verticalPosition = (i / 9);
 
-            WikiItem item = new WikiItem(inventoryName, itemStack, Action.COPYING_INVENTORY, false);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, false);
 
             boolean shopItem = item.isShopItem();
             boolean useReferenceMode = config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && shopItem;
@@ -152,7 +152,7 @@ public class GUIStealerFeature extends KeyBindFeature {
                 lore.add(TextUtils.convertJsonTextToLegacy(loreTag.getString(i)));
             }
 
-            LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_INVENTORY, lore, false, LoreRemovalFeature.SHOP_FILTERS);
+            LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_SHOP_INVENTORY, lore, false, LoreRemovalFeature.SHOP_FILTERS);
             boolean hasShopLore = !removeData.getRemovedLore().isEmpty();
 
             return hasShopLore && areTopAndBottomRowsCorrect(items, size);
@@ -179,11 +179,8 @@ public class GUIStealerFeature extends KeyBindFeature {
                 continue;
             }
 
-            if (bottomRowPosition == 5 && itemStack.getItem() != Items.HOPPER) {
-                return false;
-            }
-
-            if (bottomRowPosition != 5 && itemStack.getItem() != Items.BLACK_STAINED_GLASS_PANE) {
+            Item targetItem = bottomRowPosition == 5 ? Items.HOPPER : Items.BLACK_STAINED_GLASS_PANE;
+            if (itemStack.getItem() != targetItem) {
                 return false;
             }
         }
@@ -210,7 +207,7 @@ public class GUIStealerFeature extends KeyBindFeature {
                 break;
             }
 
-            WikiItem item = new WikiItem(inventoryName, itemStack, Action.COPYING_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, true);
 
             boolean shopItem = item.isShopItem();
             boolean useReferenceMode = config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && shopItem;
@@ -252,13 +249,13 @@ public class GUIStealerFeature extends KeyBindFeature {
                 continue;
             }
 
-            WikiItem item = new WikiItem("Craft Item", itemStack, Action.COPYING_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
             builder.append("|in").append(i).append("=").append(item.convertToReference())
                     .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
         }
 
         if (!product.isEmpty()) {
-            WikiItem item = new WikiItem("Craft Item", product, Action.COPYING_INVENTORY, true);
+            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
             builder.append("|out=").append(item.convertToReference())
                     .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
         }
@@ -301,14 +298,14 @@ public class GUIStealerFeature extends KeyBindFeature {
                 continue;
             }
 
-            WikiItem item = new WikiItem("Confirm Process", itemStack, Action.COPYING_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
             builder.append("|in").append(i).append("=").append(item.convertToReference())
                     .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
         }
 
         ItemStack product = items.get(16);
         if (!product.isEmpty()) {
-            WikiItem item = new WikiItem("Confirm Process", product, Action.COPYING_INVENTORY, true);
+            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
             builder.append("|out=").append(item.convertToReference())
                     .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
         }

@@ -131,14 +131,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Pet Levels and Change Pet Name",
-            description = "Toggle whether or not pet levels should be removed from pet names, as well as if pets should have the word \"Pet\" included in their name.",
-            category = "Text Filters"
-    )
-    public boolean removePetLevelsAndChangePetName = false;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Remove Dungeon Stats",
             description = "Toggles whether or not dungeon stats in dark gray should be stripped from item lore.",
             category = "Text Filters"
@@ -170,15 +162,6 @@ public class Config extends Vigilant {
             subcategory = "Lore Filters"
     )
     public boolean removePickaxeAbilities = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Auction Data",
-            description = "Toggles whether or not auction data should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeAuctionData = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -221,20 +204,18 @@ public class Config extends Vigilant {
             name = "Remove Shop Buy Text",
             description = "When toggled, lore that mentions clicking to purchase items will be removed when copied.",
             category = "Text Filters",
-            subcategory = "Lore Filters",
-            options = {"Always", "When Copying Full Inventories", "When Copying Individual Items", "Never"}
+            subcategory = "Lore Filters"
     )
-    public int removeShopNPCTradeText = 0;
+    public boolean removeShopNPCTradeText = true;
 
     @Property(
             type = PropertyType.SELECTOR,
             name = "Remove Shop Price",
             description = "When toggled, lore that mentions the prices and requirements of purchasing items will be removed when copied.",
             category = "Text Filters",
-            subcategory = "Lore Filters",
-            options = {"Always", "When Copying Full Inventories", "When Copying Individual Items", "Never"}
+            subcategory = "Lore Filters"
     )
-    public int removeShopNPCPriceText = 2;
+    public boolean removeShopNPCPriceText = false;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -253,42 +234,6 @@ public class Config extends Vigilant {
             subcategory = "Lore Filters"
     )
     public boolean removePetItems = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Fire Sale Data",
-            description = "Toggles whether or not fire sale info should be stripped from item lore.\n\nNote: Fire Sales already have additional lore above the item name and lore, and this does not remove that. You'll have to do that manually.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeFireSaleData = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Essence Shop Data",
-            description = "Toggles whether or not essence shop info should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeEssenceShopData = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Gemstone Guide Data",
-            description = "Toggles whether or not info from the Gemstone Guide menus should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeGemstoneGuideData = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Museum Item Data",
-            description = "Toggles whether or not info from the Museum menus should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeMuseumData = true;
 
     @Property(
             type = PropertyType.SWITCH,

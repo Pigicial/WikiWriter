@@ -1,5 +1,6 @@
 package me.pigicial.wikiwriter.utils;
 
+import me.pigicial.wikiwriter.WikiWriter;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,9 +64,9 @@ public enum Rarity {
     }
 
     public static Rarity parseRarity(List<String> lore, String name) {
-        Rarity rarity = getRarityFromLore(lore);
+        Rarity rarity = getRarityFromName(name);
         if (rarity == null) {
-            rarity = getRarityFromName(name);
+            rarity = getRarityFromLore(lore);
         }
 
         return rarity;
