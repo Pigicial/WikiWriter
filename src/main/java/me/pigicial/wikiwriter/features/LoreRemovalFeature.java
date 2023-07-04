@@ -4,7 +4,6 @@ import lombok.Data;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.LorePredicates;
 import net.minecraft.util.Formatting;
 
 import java.util.*;
@@ -59,26 +58,25 @@ public enum LoreRemovalFeature {
     ENCHANTMENTS_2(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", "apply.", ""),
     ENCHANTMENTS_3(config -> config.removeEnchantmentRequirementNotices, "Requires Enchanting", ""),
 
-    SHOP_1(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_2(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_3(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_4(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_5(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_6(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}", "{anything}"),
-    SHOP_7(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}", "{anything}"),
-    SHOP_8(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost", "{anything}"),
-    SHOP_9(LorePredicates.SHOP_PRICE_PREDICATE, "", "Cost:"),
+    SHOP_1(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
+    SHOP_2(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
+    SHOP_3(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
+    SHOP_4(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
+    SHOP_5(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}"),
+    SHOP_6(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}"),
+    SHOP_7(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}"),
+    SHOP_8(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}"),
+    SHOP_9(config -> config.removeShopNPCPriceText, "", "Cost:"),
 
-    BOTTOM_SHOP_1(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to purchase"),
-    BOTTOM_SHOP_2(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to trade"),
-    BOTTOM_SHOP_3(LorePredicates.SHOP_CLICK_PREDICATE, "", "You don't have enough coins"),
-    BOTTOM_SHOP_4(LorePredicates.SHOP_CLICK_PREDICATE, "Right-Click for more trading options"),
-    BOTTOM_SHOP_5(LorePredicates.SHOP_CLICK_PREDICATE, "Right-click to fill quiver"),
-    BOTTOM_SHOP_6(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to buy into quiver"),
-    BOTTOM_SHOP_7(LorePredicates.SHOP_CLICK_PREDICATE, "", "Not unlocked"),
-
-    BOTTOM_SHOP_8(LorePredicates.SHOP_CLICK_PREDICATE, "", "You don't have the required items"),
-    BOTTOM_SHOP_9(LorePredicates.SHOP_CLICK_PREDICATE, "", "Click to craft"),
+    BOTTOM_SHOP_1(config -> config.removeShopNPCTradeText, "", "Click to purchase"),
+    BOTTOM_SHOP_2(config -> config.removeShopNPCTradeText, "", "Click to trade"),
+    BOTTOM_SHOP_3(config -> config.removeShopNPCTradeText, "", "You don't have enough coins"),
+    BOTTOM_SHOP_4(config -> config.removeShopNPCTradeText, "Right-Click for more trading options"),
+    BOTTOM_SHOP_5(config -> config.removeShopNPCTradeText, "Right-click to fill quiver"),
+    BOTTOM_SHOP_6(config -> config.removeShopNPCTradeText, "", "Click to buy into quiver"),
+    BOTTOM_SHOP_7(config -> config.removeShopNPCTradeText, "", "Not unlocked"),
+    BOTTOM_SHOP_8(config -> config.removeShopNPCTradeText, "", "You don't have the required items"),
+    BOTTOM_SHOP_9(config -> config.removeShopNPCTradeText, "", "Click to craft"),
 
     PET_CANDY(config -> config.removePetCandy, "Pet Candy Used", ""),
 
@@ -86,78 +84,27 @@ public enum LoreRemovalFeature {
     PET_ITEMS_2(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", ""),
     PET_ITEMS_3(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", ""),
     PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", ""),
-    PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", ""),
+    PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "");
 
-    FIRE_SALES_1(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Items Sold", "", "This sale recently ended"),
-    FIRE_SALES_2(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Amount for Sale", "", "Starts in"),
-    FIRE_SALES_3(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Duration", "", "This sale recently ended"),
-    FIRE_SALES_4(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Duration", "", "Starts in"),
-
-    FIRE_SALES_5(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Items Sold", "", "Sold out in", "In"),
-    FIRE_SALES_6(config -> config.removeFireSaleData, "", "-------", "", "Cost", "Duration", "", "Amount Sold", "In"),
-
-    ESSENCE_SHOP_1(config -> config.removeEssenceShopData, "", "Convert to Dungeon Item", "Upgrade to", "Upgrade to", "Upgrade to", "Upgrade to", "Upgrade to"),
-    ESSENCE_SHOP_2(config -> config.removeEssenceShopData, "", "Upgrade to", "Upgrade to", "Upgrade to", "Upgrade to", "Upgrade to"),
-
-    GEMSTONE_GUIDE_1(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_2(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_3(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_4(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_5(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_6(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}", "{anything}"),
-    GEMSTONE_GUIDE_7(config -> config.removeGemstoneGuideData, "", "Available Gemstone Slot", "{anything}"),
-
-    MUSEUM_1(config -> config.removeMuseumData, "-------", "Armor Set Donated", "{anything}", "", "Armor Set Completed", "{anything}", "{anything}", "", "Armor Set Value", "{anything}", "", "Display Slot", "{anything}", "", "Left-click to retrieve items", "Right-click to view armor set"),
-    MUSEUM_2(config -> config.removeMuseumData, "-------", "Armor Set Donated", "{anything}", "", "Armor Set Completed", "{anything}", "{anything}", "", "Armor Set Value", "{anything}", "", "Left-click to retrieve items", "Right-click to view armor set"),
-
-    MUSEUM_3(config -> config.removeMuseumData, "-------", "Item Donated", "{anything}", "", "Item Created", "{anything}", "{anything}", "", "Item Value", "{anything}", "", "Display Slot", "{anything}", "", "Click to remove"),
-    MUSEUM_4(config -> config.removeMuseumData, "-------", "Item Donated", "{anything}", "", "Item Created", "{anything}", "{anything}", "", "Item Value", "{anything}", "", "Click to remove"),
-
-    MUSEUM_5(config -> config.removeMuseumData, "-------", "Item Donated", "{anything}", "", "Item Created", "{anything}", "{anything}", "", "Item Value", "{anything}", "", "Display Slot", "{anything}"),
-    MUSEUM_6(config -> config.removeMuseumData, "-------", "Item Donated", "{anything}", "", "Item Created", "{anything}", "{anything}", "", "Item Value", "{anything}"),
-
-    BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Ends in", "", "Click to inspect!"),
-    BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Ends in"),
-    ENDED_BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Status", "", "Click to inspect!"),
-    ENDED_BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "Status"),
-
-    PURCHASED_BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buyer", "", "Sold for", "", "Status", "", "Click to inspect!"),
-    PURCHASED_BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buyer", "", "Sold for", "", "Status"),
-
-    SELF_PURCHASED_BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buyer", "", "Sold for", "", "This is your own auction!", "", "Status", "", "Click to inspect!"),
-    SELF_PURCHASED_BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buyer", "", "Sold for", "", "This is your own auction!", "", "Status"),
-
-    SELF_BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "This is your own auction", "", "Ends in", "", "Click to inspect"),
-    SELF_BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "This is your own auction", "", "Ends in"),
-    ENDED_SELF_BIN_1(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "This is your own auction", "", "Status", "", "Click to inspect"),
-    ENDED_SELF_BIN_2(config -> config.removeAuctionData, "-----------------", "Seller", "Buy it now", "", "This is your own auction", "", "Status"),
-
-    NO_BIDS_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "Ends in", "", "Click to inspect!"),
-    NO_BIDS_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "Ends in"),
-    NO_BIDS_ENDED_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "Status", "", "Click to inspect!"),
-    NO_BIDS_ENDED_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "Status"),
-
-    SELF_NO_BIDS_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "This is your own auction", "", "Ends in", "", "Click to inspect!"),
-    SELF_NO_BIDS_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "This is your own auction", "", "Ends in"),
-    SELF_NO_BIDS_ENDED_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "This is your own auction", "", "Status", "", "Click to inspect!"),
-    SELF_NO_BIDS_ENDED_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Starting bid", "", "This is your own auction", "", "Status"),
-
-    SELF_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "This is your own auction", "", "Ends in", "", "Click to inspect!"),
-    SELF_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "This is your own auction", "", "Ends in"),
-    SELF_ENDED_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "This is your own auction", "", "Status", "", "Click to inspect!"),
-    SELF_ENDED_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "This is your own auction", "", "Status"),
-
-    BID_ON_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "Ends in", "", "Click to inspect!"),
-    BID_ON_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "Ends in"),
-    ENDED_BID_ON_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "Status", "", "Click to inspect!"),
-    ENDED_BID_ON_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "", "Status"),
-
-    SELF_BID_ON_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Ends in", "", "Click to inspect"),
-    SELF_BID_ON_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Ends in"),
-    SELF_BID_ON_ENDED_AUCTION_1(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Status", "", "Click to inspect"),
-    SELF_BID_ON_ENDED_AUCTION_2(config -> config.removeAuctionData, "-----------------", "Seller", "Bids", "", "Top bid", "Bidder", "Profile", "", "Status");
-
-    public static final LoreRemovalFeature[] SHOP_FILTERS = new LoreRemovalFeature[]{SHOP_1, SHOP_2, SHOP_3, SHOP_4, SHOP_5, SHOP_6, SHOP_7, SHOP_8, BOTTOM_SHOP_1, BOTTOM_SHOP_2, BOTTOM_SHOP_3, BOTTOM_SHOP_4, BOTTOM_SHOP_5, BOTTOM_SHOP_6, BOTTOM_SHOP_7, BOTTOM_SHOP_8, BOTTOM_SHOP_9};
+    public static final LoreRemovalFeature[] SHOP_FILTERS = new LoreRemovalFeature[]{
+            SHOP_1,
+            SHOP_2,
+            SHOP_3,
+            SHOP_4,
+            SHOP_5,
+            SHOP_6,
+            SHOP_7,
+            SHOP_8,
+            BOTTOM_SHOP_1,
+            BOTTOM_SHOP_2,
+            BOTTOM_SHOP_3,
+            BOTTOM_SHOP_4,
+            BOTTOM_SHOP_5,
+            BOTTOM_SHOP_6,
+            BOTTOM_SHOP_7,
+            BOTTOM_SHOP_8,
+            BOTTOM_SHOP_9
+    };
 
     private final BiPredicate<Config, Action> settingsFilter;
     private final List<String> textToFilter;

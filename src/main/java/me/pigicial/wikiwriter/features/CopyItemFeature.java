@@ -3,11 +3,10 @@ package me.pigicial.wikiwriter.features;
 import me.pigicial.wikiwriter.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.core.Config;
-import me.pigicial.wikiwriter.mixins.HoveredSlotAccessor;
+import me.pigicial.wikiwriter.mixins.FocusedSlotAccessor;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -35,7 +34,7 @@ public class CopyItemFeature extends KeyBindFeature {
                 return;
             }
 
-            WikiItem wikiItem = new WikiItem(null, itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
+            WikiItem wikiItem = new WikiItem(itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
             String text = wikiItem.convertToWikiItem();
 
             if (config.itemTemplatesMode) {
@@ -65,7 +64,7 @@ public class CopyItemFeature extends KeyBindFeature {
 
         if (currentScreenHandler != null && currentScreen instanceof HandledScreen<?> containerScreen) {
             wikiWriter.sendMessage("2");
-            Slot hoveredSlot = ((HoveredSlotAccessor) containerScreen).getFocusedSlot();
+            Slot hoveredSlot = ((FocusedSlotAccessor) containerScreen).getFocusedSlot();
             if (hoveredSlot == null) {
                 wikiWriter.sendMessage("3");
                 return null;
