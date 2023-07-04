@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.core.Config;
+import me.pigicial.wikiwriter.config.Config;
 
 public enum RegexTextReplacements {
     DUNGEON_STATS("&8\\([+-]?[\\d,.]+%?\\)", "", true),

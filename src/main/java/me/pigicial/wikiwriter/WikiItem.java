@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter;
 
 import lombok.Getter;
-import me.pigicial.wikiwriter.core.Config;
+import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.features.ColorReplacementFeature;
 import me.pigicial.wikiwriter.features.LeatherColorFinderFeature;
 import me.pigicial.wikiwriter.features.LoreRemovalFeature;
@@ -21,7 +21,6 @@ import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

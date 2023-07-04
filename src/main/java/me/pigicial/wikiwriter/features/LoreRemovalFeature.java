@@ -2,7 +2,7 @@ package me.pigicial.wikiwriter.features;
 
 import lombok.Data;
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.core.Config;
+import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.util.Formatting;
 
