@@ -19,17 +19,23 @@ public class TextUtils {
 
     public static String convertListToString(List<String> text) {
         List<String> newList = new ArrayList<>();
-        if (text.isEmpty()) return "";
+        if (text.isEmpty()){
+            return "";
+        }
 
         if (text.size() == 1) {
             newList.add(ColorReplacementFeature.replace(text.get(0)));
-        } else for (String s : text) {
-            String added = ColorReplacementFeature.replace(s);
-            newList.add(added);
+        } else {
+            for (String s : text) {
+                String added = ColorReplacementFeature.replace(s);
+                newList.add(added);
+            }
         }
 
         String s = RegexTextReplacements.replaceEverything(String.join("\", \"", newList), false);
-        if (s.startsWith("{") && s.endsWith("}")) s = s.substring(1, s.length() - 1);
+        if (s.startsWith("{") && s.endsWith("}")) {
+            s = s.substring(1, s.length() - 1);
+        }
 
         return unescapeText(s);
     }

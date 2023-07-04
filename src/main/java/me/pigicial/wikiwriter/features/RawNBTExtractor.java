@@ -1,17 +1,5 @@
 package me.pigicial.wikiwriter.features;
 
-import gg.essential.universal.UScreen;
-import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.core.Config;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Iterator;
-
 public class RawNBTExtractor {
 
     /*

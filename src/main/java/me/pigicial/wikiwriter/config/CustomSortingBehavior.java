@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.core;
+package me.pigicial.wikiwriter.config;
 
 import gg.essential.vigilance.data.Category;
 import gg.essential.vigilance.data.PropertyData;

@@ -2,7 +2,7 @@ package me.pigicial.wikiwriter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import gg.essential.universal.UScreen;
-import me.pigicial.wikiwriter.core.Config;
+import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import net.fabricmc.api.ModInitializer;

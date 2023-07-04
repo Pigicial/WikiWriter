@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.core;
+package me.pigicial.wikiwriter.config;
 
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
