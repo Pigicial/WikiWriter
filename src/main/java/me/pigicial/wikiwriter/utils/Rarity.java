@@ -19,18 +19,12 @@ public enum Rarity {
     EPIC("epic", '5'),
     RARE("rare", '9'),
     UNCOMMON("uncommon", 'a'),
-    COMMON("common", 'f'),
-    NONE("", ' ');
+    COMMON("common", 'f');
 
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-ORX]");
     private static final String RECOMBOBULATOR_SYMBOL = "#";
 
-    private static final Set<Rarity> REGULAR_ITEM_RARITIES;
-
-    static {
-        REGULAR_ITEM_RARITIES = new HashSet<>(Arrays.asList(Rarity.values()));
-        REGULAR_ITEM_RARITIES.remove(Rarity.NONE);
-    }
+    private static final Set<Rarity> REGULAR_ITEM_RARITIES = new HashSet<>(Arrays.asList(Rarity.values()));
 
     private final String name;
     private final String check;
@@ -52,7 +46,7 @@ public enum Rarity {
 
     @Override
     public String toString() {
-        return this == NONE ? "" : name;
+        return name;
     }
 
     public Rarity getPreviousRarity() {
@@ -85,13 +79,14 @@ public enum Rarity {
             }
         }
 
-        return Rarity.NONE;
+        return null;
     }
 
+    @Nullable
     public static Rarity getRarityFromLine(String line) {
         line = Formatting.strip(line);
         if (line == null) {
-            return Rarity.NONE;
+            return null;
         }
 
         line = line.replace(RECOMBOBULATOR_SYMBOL, "").trim();
@@ -102,9 +97,10 @@ public enum Rarity {
             }
         }
 
-        return Rarity.NONE;
+        return null;
     }
 
+    @Nullable
     public static Rarity getRarityFromName(String name) {
         Matcher colorCodeMatcher = STRIP_COLOR_PATTERN.matcher(name);
 
@@ -119,6 +115,6 @@ public enum Rarity {
             }
         }
 
-        return Rarity.NONE;
+        return null;
     }
 }

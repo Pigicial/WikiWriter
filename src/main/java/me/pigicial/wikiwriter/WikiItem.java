@@ -9,16 +9,12 @@ import me.pigicial.wikiwriter.features.RegexTextReplacements;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.Rarity;
 import me.pigicial.wikiwriter.utils.TextUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.resource.featuretoggle.FeatureFlags;
-import net.minecraft.resource.featuretoggle.FeatureSet;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -84,16 +80,13 @@ public class WikiItem {
 
         lore = new ArrayList<>();
         for (int i = 0; i < loreTag.size(); i++) {
-
             String jsonLine = loreTag.getString(i);
-            Component asComponent = JSONComponentSerializer.json().deserialize(jsonLine);
-            String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(asComponent);
-            legacyLine = legacyLine.replace('&', '§');
+            String legacyLine = TextUtils.convertJsonTextToLegacy(jsonLine);
 
             lore.add(legacyLine);
         }
 
-        nameWithColor = stack.getName().getString();
+        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
 
         // Removes lore (if not a reference or shop item), and tracks removed lore if a reference or shop item
         parseLore(action, referenceMode);
@@ -238,7 +231,7 @@ public class WikiItem {
     }
 
     private void fixIDs(ItemStack stack, NbtCompound display, NbtCompound extraAttributes) {
-        boolean hasEnchantments = stack.isItemEnabled(FeatureSet.of(FeatureFlags.VANILLA)) || skyBlockId.equalsIgnoreCase("potion");
+        boolean hasEnchantments = stack.hasEnchantments() || skyBlockId.equalsIgnoreCase("potion");
 
         if (skyBlockItem) {
             minecraftId = "head";
@@ -303,7 +296,7 @@ public class WikiItem {
     }
 
     private void updateStackSizes(boolean referenceMode, String guiName, NbtCompound extraAttributes) {
-        showRarity = rarity != Rarity.NONE;
+        showRarity = rarity != null;
         if (referenceMode && CONFIG.recipeMode || !showRarity || !CONFIG.guaranteedStackSizeToggled || !hasSkyBlockItemID) {
             return;
         }
@@ -340,7 +333,7 @@ public class WikiItem {
     }
 
     public String convertToReference() {
-        if (minecraftId.equals("")) return "";
+        if (minecraftId.equals("") || minecraftId.equals("air")) return "";
 
         if (pet) {
             return "{{Item_" + (recipeMode ? "pet_craft_" : "pet_") + petId + (!mysteryPet ? "_" + rarity.toString() : "") + "}}";
@@ -354,7 +347,7 @@ public class WikiItem {
     }
 
     public String convertToWikiItem() {
-        if (minecraftId.equals("")) return "";
+        if (minecraftId.equals("") || minecraftId.equals("air")) return "";
 
         return initialChar + typeText + "," + (!showRarity ? "" : rarity.toString()) + "," + textureLink + (emptyTitle ? "" : (minecraftId.equals(nameWithoutColor) ? "" : ":" + (showRarity ? nameWithoutColor : nameWithColor))) + (lore.isEmpty() && stackSize == 1 ? "" : ("," + NumberFormat.getInstance().format(stackSize) + (emptyTitle || lore.isEmpty() ? "" : "," + loreAsString)));
     }
