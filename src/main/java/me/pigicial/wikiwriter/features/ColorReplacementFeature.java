@@ -148,7 +148,7 @@ public enum ColorReplacementFeature {
             lastEndIndex = matcher.end();
         }
 
-        // accommodates for any remaining text that didn't have its style changed afterwards
+        // accommodates for any remaining text that didn't have its style changed before the end
         return text.length() > lastEndIndex && !text.substring(lastEndIndex).trim().isEmpty() && ++amountOfStylizedSections >= 2;
     }
 
