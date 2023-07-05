@@ -151,7 +151,7 @@ public class WikiItem {
             }
         }
 
-        if (hasCustomSkullTexture && skyBlockId.contains("backpack") && config.backpackColors && extraAttributes.contains("backpack_color", 8)) {
+        if (hasCustomSkullTexture && skyBlockId.contains("backpack") && extraAttributes.contains("backpack_color", 8)) {
             String backpackColor = extraAttributes.getString("backpack_color").toLowerCase();
             if (!backpackColor.equals("") && !backpackColor.equalsIgnoreCase("default")) {
                 skyBlockId = backpackColor + "_" + skyBlockId;
@@ -173,7 +173,7 @@ public class WikiItem {
     }
 
     private void updateStackSizes(boolean referenceMode, NbtCompound extraAttributes) {
-        if (referenceMode && config.recipeMode || !showRarity || !config.guaranteedStackSizeToggled || skyBlockId.isEmpty()) {
+        if (referenceMode || !showRarity || !config.guaranteedStackSizeToggled || skyBlockId.isEmpty()) {
             return;
         }
 
@@ -261,7 +261,7 @@ public class WikiItem {
 
         String amountString = lore.isEmpty() && extraLoreBelowRarity.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
-        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : TextUtils.unescapeText("\n")  + extraLoreBelowRarity;
+        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarity;
 
         return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString + potentialExtraLore;
     }

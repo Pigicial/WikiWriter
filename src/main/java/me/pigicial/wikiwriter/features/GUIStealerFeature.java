@@ -206,8 +206,7 @@ public class GUIStealerFeature extends KeyBindFeature {
     }
 
     private boolean isRecipeMode(int rows, String inventoryName, List<ItemStack> items) {
-        return wikiWriter.getConfig().recipeMode
-                && (inventoryName.equalsIgnoreCase("Craft Item") || inventoryName.endsWith("Recipe"))
+        return (inventoryName.equalsIgnoreCase("Craft Item") || inventoryName.endsWith("Recipe"))
                 && rows == 6
                 && !items.get(CRAFTING_TABLE_OR_RECIPE_REQUIRED_SLOT).isEmpty();
     }
@@ -244,10 +243,6 @@ public class GUIStealerFeature extends KeyBindFeature {
     }
 
     private ForgeRecipeType getForgeRecipeType(String inventoryName, List<ItemStack> items, int rows) {
-        if (!wikiWriter.getConfig().forgeRecipeMode) {
-            return null;
-        }
-
         if (rows == 6 && inventoryName.equalsIgnoreCase("Confirm Process")) {
             Item forgeRecipeTypeIndicatorItem = items.get(13).getItem();
 
