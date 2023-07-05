@@ -1,20 +1,27 @@
 package me.pigicial.wikiwriter.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
+import me.pigicial.wikiwriter.WikiWriter;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.Nullable;
 
-public record PetInfo(String type, boolean mysteryPet) {
+public record PetInfo(String type, @SerializedName("hideInfo") boolean mysteryPet) {
 
     @Nullable
     public static PetInfo getPetInfo(NbtCompound extraAttributes) {
-        NbtElement petInfoNbt = extraAttributes.get("petInfo");
-        if (petInfoNbt instanceof NbtCompound petInfo) {
-            String type = petInfo.getString("type").toLowerCase();
-            boolean hideInfo = petInfo.getBoolean("hideInfo");
-            return new PetInfo(type, hideInfo);
+        String petInfoNbt = extraAttributes.getString("petInfo");
+        if (petInfoNbt.isEmpty()) {
+            return null;
         }
 
-        return null;
+        try {
+            return new Gson().fromJson(petInfoNbt, PetInfo.class);
+        } catch (JsonSyntaxException e) {
+            WikiWriter.getInstance().sendMessage("Invalid petInfo NBT detected");
+            e.printStackTrace();
+            return null;
+        }
     }
 }
