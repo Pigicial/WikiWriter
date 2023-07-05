@@ -98,8 +98,6 @@ public enum Rarity {
             return null;
         }
 
-        line = line.replace(RECOMBOBULATOR_SYMBOL, "").trim();
-
         for (Rarity rarity : REGULAR_ITEM_RARITIES) {
             if (line.contains(rarity.name())) {
                 return rarity;

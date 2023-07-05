@@ -6,6 +6,7 @@ import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
@@ -66,12 +67,13 @@ public class GUIStealerFeature extends KeyBindFeature {
             }
 
             ScreenHandler currentScreenHandler = player.currentScreenHandler;
-            if (!(currentScreenHandler instanceof GenericContainerScreenHandler chestHandler)) {
+            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+            if (currentScreen == null || !(currentScreenHandler instanceof GenericContainerScreenHandler chestHandler)) {
                 return;
             }
 
             List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
-            String inventoryName = player.getInventory().getName().getString();
+            String inventoryName = currentScreen.getTitle().getString();
 
             process(items, inventoryName);
 
@@ -85,7 +87,6 @@ public class GUIStealerFeature extends KeyBindFeature {
         int size = items.size();
         int rows = size / 9;
 
-        Config config = wikiWriter.getConfig();
         StringBuilder builder = new StringBuilder();
 
         if (isShopMode(items, size, rows)) {
@@ -179,8 +180,6 @@ public class GUIStealerFeature extends KeyBindFeature {
     }
 
     protected void processShop(StringBuilder builder, String inventoryName, List<ItemStack> items, int rows) {
-        Config config = wikiWriter.getConfig();
-
         builder.append("{{Merchant")
                 .append("\n")
                 .append("|name=").append(inventoryName)

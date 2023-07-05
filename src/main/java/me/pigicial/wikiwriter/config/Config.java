@@ -176,21 +176,30 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Shop Buy Text",
-            description = "When toggled, lore that mentions clicking to purchase items will be removed when copied.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeShopNPCTradeText = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Remove Shop Price",
             description = "When toggled, lore that mentions the prices and requirements of purchasing items will be removed when copied.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
     public boolean removeShopNPCPriceText = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Shop Stock Text",
+            description = "When toggled, lore that mentions how much leftover stock you can purchase of an item will be removed.",
+            category = "Text Filters",
+            subcategory = "Lore Filters"
+    )
+    public boolean removeShopNPCStockText = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Shop Buy Text",
+            description = "When toggled, lore that mentions clicking to purchase items will be removed when copied.",
+            category = "Text Filters",
+            subcategory = "Lore Filters"
+    )
+    public boolean removeShopNPCTradeText = true;
 
     @Property(
             type = PropertyType.SWITCH,
