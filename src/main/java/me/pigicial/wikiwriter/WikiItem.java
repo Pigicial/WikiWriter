@@ -261,7 +261,7 @@ public class WikiItem {
 
         String amountString = lore.isEmpty() && extraLoreBelowRarity.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
-        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : "<nowiki>,</nowiki>" + extraLoreBelowRarity;
+        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : "\n" + extraLoreBelowRarity;
 
         return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString + potentialExtraLore;
     }
