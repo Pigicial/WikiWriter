@@ -30,14 +30,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Item Templates Mode",
-            description = "When enabled, individually copied items will include the text <noinclude>[[Category:Item UI Templates]]</noinclude><includeonly> and </includeonly> to allow them to be used as item templates.",
-            category = "Copying Items"
-    )
-    public boolean itemTemplatesMode = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Guaranteed Stack Size Toggle",
             description = "Toggle whether or not items copied should have their stack sizes forcefully set, up to their vanilla stack size limit.\n\nThis feature is disabled for recipes while recipe mode is enabled.",
             category = "Copying Items",
@@ -74,15 +66,6 @@ public class Config extends Vigilant {
     public boolean bypassStackSizeLimit = false;
 
     @Property(
-            type = PropertyType.SWITCH,
-            name = "Backpack Colors",
-            description = "Toggles whether or not backpack colors should be referenced in item references / textures.", // When copying recipe GUIs, the bottom Go Back arrow and Close barrier will simply be replaced with a lore-less arrow, which is required for recipes.
-            category = "Copying Items",
-            subcategory = "Misc"
-    )
-    public boolean backpackColors = true;
-
-    @Property(
             type = PropertyType.SELECTOR,
             name = "Item Reference Mode (Copying GUIs)",
             description = "If enabled, copied items will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
@@ -98,22 +81,6 @@ public class Config extends Vigilant {
             category = "Copying Inventories"
     )
     public boolean copyGUI = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Automatic Recipe Format",
-            description = "Automatically converts copied recipe GUIs to use the required recipe format.",
-            category = "Copying Inventories"
-    )
-    public boolean recipeMode = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Automatic Forge Recipe Format",
-            description = "Automatically converts copied forge recipe GUIs to use the required forge recipe format.",
-            category = "Copying Inventories"
-    )
-    public boolean forgeRecipeMode = true;
 
     @Property(
             type = PropertyType.SWITCH,
