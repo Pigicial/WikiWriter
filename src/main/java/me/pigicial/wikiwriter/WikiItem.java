@@ -211,7 +211,7 @@ public class WikiItem {
 
         if (petInfo != null) {
             boolean mysteryPet = petInfo.mysteryPet();
-            return "{{Item_" + (mysteryPet ? "pet_craft_" : "pet_") + petInfo.type() + (!mysteryPet ? "_" + rarity.toString() : "") + "}}";
+            return "{{Item_" + (mysteryPet ? "pet_craft_" : "pet_") + petInfo.type().toLowerCase() + (!mysteryPet ? "_" + rarity.toString() : "") + "}}";
         }
 
         boolean potion = skyBlockId.equalsIgnoreCase("potion");
@@ -278,7 +278,7 @@ public class WikiItem {
         if (!hasCustomSkullTexture) {
             return minecraftId;
         } else if (petInfo != null) {
-            return petInfo.type();
+            return petInfo.type().toLowerCase();
         } else {
             return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }

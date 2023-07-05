@@ -44,7 +44,7 @@ public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPre
     protected abstract void onKeyPress(MinecraftClient client);
 
     @Nullable
-    protected ItemStack getHoveredSlot(MinecraftClient client) {
+    protected final ItemStack getHoveredSlot(MinecraftClient client) {
         ClientPlayerEntity player = client.player;
         if (player == null) {
             return null;
