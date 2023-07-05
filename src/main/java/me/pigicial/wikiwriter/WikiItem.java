@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public class WikiItem {
     private final String loreAsString;
     private final String extraLoreBelowRarity;
 
-    private boolean showRarity;
+    private boolean showRarity = true;
 
     public WikiItem(@NotNull ItemStack stack, Action action, boolean referenceMode) {
         NbtCompound nbt = stack.getNbt();
@@ -107,7 +108,7 @@ public class WikiItem {
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
-        nameWithoutColor = Formatting.strip(nameWithReplacements);
+        nameWithoutColor = Objects.requireNonNull(Formatting.strip(nameWithReplacements)).replace('§', '&');
 
         if (showRarity && ColorReplacementFeature.hasMultipleStyles(nameWithColor)) {
             showRarity = false;
@@ -116,7 +117,6 @@ public class WikiItem {
         // Fixes various item ID quirks (and handles colors and whatnot)
         fixIDs(stack, display, extraAttributes);
 
-        assert nameWithoutColor != null;
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
     }
 

@@ -19,7 +19,6 @@ public enum Rarity {
     COMMON("common", 'f');
 
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-ORX]");
-    private static final String RECOMBOBULATOR_SYMBOL = "#";
 
     private static final Set<Rarity> REGULAR_ITEM_RARITIES = new HashSet<>(Arrays.asList(Rarity.values()));
 
@@ -110,7 +109,6 @@ public enum Rarity {
     @Nullable
     public static Rarity getRarityFromName(String name) {
         Matcher colorCodeMatcher = STRIP_COLOR_PATTERN.matcher(name);
-
         while (colorCodeMatcher.find()) {
             String match = colorCodeMatcher.group();
             char o = match.charAt(1);
