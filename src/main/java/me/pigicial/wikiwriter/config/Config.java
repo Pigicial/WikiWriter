@@ -16,8 +16,7 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Mod Enabled",
             description = "Global toggle for the features of this mod.",
-            category = "General",
-            options = {"Enabled", "Disabled"}
+            category = "General"
     )
     public boolean modEnabled = true;
 
@@ -90,7 +89,7 @@ public class Config extends Vigilant {
             category = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
     )
-    public int menuReferenceModeScenario = MENU_REFERENCE_MODE_COPYING_ITEMS;
+    public int menuReferenceModeScenario = 1;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -176,7 +175,7 @@ public class Config extends Vigilant {
     public boolean removeClickNotices = true;
 
     @Property(
-            type = PropertyType.SELECTOR,
+            type = PropertyType.SWITCH,
             name = "Remove Shop Buy Text",
             description = "When toggled, lore that mentions clicking to purchase items will be removed when copied.",
             category = "Text Filters",
@@ -185,7 +184,7 @@ public class Config extends Vigilant {
     public boolean removeShopNPCTradeText = true;
 
     @Property(
-            type = PropertyType.SELECTOR,
+            type = PropertyType.SWITCH,
             name = "Remove Shop Price",
             description = "When toggled, lore that mentions the prices and requirements of purchasing items will be removed when copied.",
             category = "Text Filters",
@@ -204,7 +203,7 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Text Below Item Rarity (Copying Items)",
+            name = "Remove Text Below Item Rarities in Items",
             description = "When enabled, text below an item rarity will be stripped from item lore.",
             category = "Text Filters"
     )
@@ -212,8 +211,8 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Text Below Item Rarity (Copying Menus)",
-            description = "When enabled, text below item rarity will be stripped from item lore.",
+            name = "Remove Text Below Item Rarities in Menus",
+            description = "When enabled, text below item rarities will be stripped from item lore.",
             category = "Text Filters"
     )
     public boolean removeTextBelowRarityWhenCopyingMenus = false;
