@@ -1,9 +1,6 @@
 package me.pigicial.wikiwriter.features;
 
-import lombok.Data;
-
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,15 +62,15 @@ public enum ColorReplacementFeature {
         int lastEnd = 0;
 
         for (ReplacementSection replacementSection : replacementSections) {
-            int start = replacementSection.getStart();
-            int end = replacementSection.getEnd();
+            int start = replacementSection.start();
+            int end = replacementSection.end();
 
-            ColorReplacementFeature feature = replacementSection.getFeature();
+            ColorReplacementFeature feature = replacementSection.feature();
             newString.append(text, lastEnd, start);
 
             if (feature.reset) {
                 for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-                    newString.append(currentlyAppliedSection.getFeature().end);
+                    newString.append(currentlyAppliedSection.feature().end);
                 }
 
                 currentlyAppliedSections.clear();
@@ -88,7 +85,7 @@ public enum ColorReplacementFeature {
         newString.append(text.substring(lastEnd));
 
         for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-            newString.append(currentlyAppliedSection.getFeature().end);
+            newString.append(currentlyAppliedSection.feature().end);
         }
 
         return newString.toString();
@@ -97,39 +94,67 @@ public enum ColorReplacementFeature {
     private static List<ReplacementSection> getReplacementSections(String text) {
         Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
         List<ReplacementSection> sections = new LinkedList<>();
+
         while (matcher.find()) {
             String check = matcher.group();
-            ReplacementSection replacementSection = byCode(check, matcher.start(), matcher.end());
+            ColorReplacementFeature style = byCode(check);
 
-            if (replacementSection.getFeature() != UNKNOWN) {
-                sections.add(replacementSection);
-
-                // remove unknown characters, basically
-                //text = text.substring(0, matcher.start()) + text.substring(matcher.end());
-                //matcher = stripColorPattern.matcher(text);
-            }// else {
-             //   sections.add(replacementSection);
-            //}
+            if (style != UNKNOWN) {
+                sections.add(new ReplacementSection(style, matcher.start(), matcher.end()));
+            }
         }
 
         return sections;
     }
 
-    public static ReplacementSection byCode(String key, int start, int end) {
+    public static ColorReplacementFeature byCode(String key) {
         for (ColorReplacementFeature feature : values()) {
             if (feature.key.equals(key)) {
-                return new ReplacementSection(feature, start, end);
+                return feature;
             }
         }
 
-        return new ReplacementSection(UNKNOWN, start, end);
+        return UNKNOWN;
     }
 
-    @Data
-    private static class ReplacementSection {
-        private final ColorReplacementFeature feature;
-        private final int start;
-        private final int end;
+    public static boolean hasMultipleStyles(String text) {
+        Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
+
+        Set<ColorReplacementFeature> currentStyles = new LinkedHashSet<>();
+        int lastEndIndex = 0;
+        int amountOfStylizedSections = 0;
+
+        while (matcher.find()) {
+            String code = matcher.group();
+            ColorReplacementFeature style = byCode(code);
+
+            if (currentStyles.isEmpty() && (style == RESET || style == WHITE)) {
+                lastEndIndex = matcher.end();
+                continue;
+            }
+
+            if (style.reset) {
+                currentStyles.clear();
+            } else if (!currentStyles.add(style)) {
+                lastEndIndex = matcher.end();
+                continue;
+            }
+
+            String textBetweenLastSearch = text.substring(lastEndIndex, matcher.start());
+            if (!textBetweenLastSearch.trim().isEmpty() && ++amountOfStylizedSections >= 2) {
+                return true;
+            }
+
+            lastEndIndex = matcher.end();
+        }
+
+        // accommodates for any remaining text that didn't have its style changed afterwards
+        return text.length() > lastEndIndex && !text.substring(lastEndIndex).trim().isEmpty() && ++amountOfStylizedSections >= 2;
+    }
+
+
+    private record ReplacementSection(ColorReplacementFeature feature, int start, int end) {
+
     }
 
 }

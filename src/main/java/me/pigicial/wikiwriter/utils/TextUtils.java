@@ -14,22 +14,17 @@ import java.util.List;
 public class TextUtils {
 
     public static String unescapeText(String text) {
-        return text.isEmpty() ? "" :  new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(text).replace("\\\"", "\""));
+        return text.isEmpty() ? "" : new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(text).replace("\\\"", "\""));
     }
 
-    public static String convertListToString(List<String> text) {
+    public static String convertListToString(List<String> textList) {
         List<String> newList = new ArrayList<>();
-        if (text.isEmpty()){
+        if (textList.isEmpty()) {
             return "";
         }
 
-        if (text.size() == 1) {
-            newList.add(ColorReplacementFeature.replace(text.get(0)));
-        } else {
-            for (String s : text) {
-                String added = ColorReplacementFeature.replace(s);
-                newList.add(added);
-            }
+        for (String text : textList) {
+            newList.add(ColorReplacementFeature.replace(text));
         }
 
         String s = RegexTextReplacements.replaceEverything(String.join("\", \"", newList), false);
