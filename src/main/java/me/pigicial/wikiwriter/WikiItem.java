@@ -56,7 +56,7 @@ public class WikiItem {
     private final String loreAsString;
     private final String extraLoreBelowRarity;
 
-    private boolean showRarity = false;
+    private boolean showRarity;
 
     public WikiItem(@NotNull ItemStack stack, Action action, boolean referenceMode) {
         NbtCompound nbt = stack.getNbt();
@@ -98,6 +98,8 @@ public class WikiItem {
 
         // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
+        showRarity = showRarity && rarity != null;
+
         petInfo = PetInfo.getPetInfo(extraAttributes);
 
         // Updates the stack sizes (and name if so) of the item based on various factors
@@ -171,7 +173,6 @@ public class WikiItem {
     }
 
     private void updateStackSizes(boolean referenceMode, NbtCompound extraAttributes) {
-        showRarity = rarity != null;
         if (referenceMode && config.recipeMode || !showRarity || !config.guaranteedStackSizeToggled || skyBlockId.isEmpty()) {
             return;
         }
