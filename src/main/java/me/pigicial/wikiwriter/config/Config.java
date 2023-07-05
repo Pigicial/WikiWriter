@@ -9,6 +9,9 @@ import java.io.File;
 
 public class Config extends Vigilant {
 
+    public static final int MENU_REFERENCE_MODE_ALWAYS = 0;
+    public static final int MENU_REFERENCE_MODE_COPYING_ITEMS = 1;
+
     @Property(
             type = PropertyType.SWITCH,
             name = "Mod Enabled",
@@ -83,11 +86,11 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SELECTOR,
             name = "Item Reference Mode (Copying GUIs)",
-            description = "If enabled, when copying items, their actual item template pages will be referenced (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
+            description = "If enabled, copied items will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
             category = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
     )
-    public int modifiedShopItemFormat = 1;
+    public int menuReferenceModeScenario = MENU_REFERENCE_MODE_COPYING_ITEMS;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -166,38 +169,11 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Right Click Notices",
-            description = "Toggles whether or not specific text lines that reference the act of right clicking should be stripped from item lore.",
+            description = "Toggles whether or not specific text lines that reference the act of clicking should be stripped from item lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
-    public boolean removeRightClickNotices = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Click to Toggle",
-            description = "Toggles whether or not \"Click to toggle\" should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeClickToToggle = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Click to Summon Pet Notice",
-            description = "Toggles whether or not \"Click to Summon.\" should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeClickToSummon = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Enchantment Requirement Notices",
-            description = "Toggles whether or not specific text lines that reference enchantment requirements should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeEnchantmentRequirementNotices = true;
+    public boolean removeClickNotices = true;
 
     @Property(
             type = PropertyType.SELECTOR,
@@ -219,15 +195,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Pet Candy",
-            description = "Toggles whether or not pet candy on pets should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removePetCandy = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Remove Pet Items",
             description = "Toggles whether or not pet items on pets should be stripped from item lore.",
             category = "Text Filters",
@@ -237,11 +204,19 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Text Below Item Rarity",
+            name = "Remove Text Below Item Rarity (Copying Items)",
             description = "When enabled, text below an item rarity will be stripped from item lore.",
             category = "Text Filters"
     )
-    public boolean removeTextBelowRarity = true;
+    public boolean removeTextBelowRarityWhenCopyingItems = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Text Below Item Rarity (Copying Menus)",
+            description = "When enabled, text below item rarity will be stripped from item lore.",
+            category = "Text Filters"
+    )
+    public boolean removeTextBelowRarityWhenCopyingMenus = false;
 
     public Config() {
         super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());

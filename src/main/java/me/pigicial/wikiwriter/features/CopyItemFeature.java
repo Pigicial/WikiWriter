@@ -35,7 +35,7 @@ public class CopyItemFeature extends KeyBindFeature {
             }
 
             WikiItem wikiItem = new WikiItem(itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
-            String text = wikiItem.convertToWikiItem();
+            String text = wikiItem.generateText(Action.COPYING_STANDALONE_ITEM);
 
             if (config.itemTemplatesMode) {
                 text = "<noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>\n" + text + "\n</includeonly>";

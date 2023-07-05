@@ -1,12 +1,10 @@
 package me.pigicial.wikiwriter.utils;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.Nullable;
 
-public record PetInfo(String type, @SerializedName("hideInfo") @Getter boolean mysteryPet) {
+public record PetInfo(String type, boolean mysteryPet) {
 
     @Nullable
     public static PetInfo getPetInfo(NbtCompound extraAttributes) {

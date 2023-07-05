@@ -1,6 +1,5 @@
 package me.pigicial.wikiwriter;
 
-import lombok.Getter;
 import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.features.ColorReplacementFeature;
 import me.pigicial.wikiwriter.features.LeatherColorFinderFeature;
@@ -38,26 +37,27 @@ public class WikiItem {
 
     private final Rarity rarity;
     private final List<String> lore;
+
     @Nullable
     private final PetInfo petInfo;
+
+    private final boolean shopItem;
+    private final boolean hasCustomSkullTexture;
+    private final boolean emptyTitle;
 
     private String minecraftId;
     private String skyBlockId;
 
-    @Getter
-    private int stackSize;
+    private final int originalStackSize;
+    private int currentStackSize;
 
     private String nameWithColor;
-    private String nameWithoutColor;
+    private final String nameWithoutColor;
 
     private final String loreAsString;
-    private final String removedLore;
+    private final String extraLoreBelowRarity;
 
-    private final boolean emptyTitle;
     private boolean showRarity = false;
-    private boolean hasCustomSkullTexture;
-    @Getter
-    private boolean shopItem = false;
 
     public WikiItem(@NotNull ItemStack stack, Action action, boolean referenceMode) {
         NbtCompound nbt = stack.getNbt();
@@ -66,7 +66,8 @@ public class WikiItem {
             nbt = new NbtCompound();
         }
 
-        stackSize = stack.getCount();
+        originalStackSize = stack.getCount();
+        currentStackSize = originalStackSize;
         minecraftId = Registries.ITEM.getId(stack.getItem()).getPath();
         hasCustomSkullTexture = stack.getItem() == Items.PLAYER_HEAD;
 
@@ -86,25 +87,18 @@ public class WikiItem {
 
         nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
 
+        // fix brackets in name plus replace amounts if necessary
+        updateName();
+
         // Removes certain lines of lore based on config settings, then stores them
-        LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(action, lore, LoreRemovalFeature.values());
+        LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, action);
         loreAsString = TextUtils.convertListToString(lore);
-        removedLore = TextUtils.convertListToString(removeData.getRemovedLore());
+        extraLoreBelowRarity = TextUtils.convertListToString(removeData.loreBelowRarityToPossibleAdd());
+        shopItem = removeData.hasShopLore();
 
-        // Removes the item amount from the name
-        if (config.removeItemAmountsFromItemNames) {
-            Matcher matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
-            while (matcher.find()) {
-                nameWithColor = nameWithColor.replace(matcher.group(), "");
-            }
-        }
-
-        // Figures out the rarity of the item based on the lore and item name
+        // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
         petInfo = PetInfo.getPetInfo(extraAttributes);
-
-        // Fixes various item ID quirks (and handles colors and whatnot)
-        fixIDs(stack, display, extraAttributes);
 
         // Updates the stack sizes (and name if so) of the item based on various factors
         updateStackSizes(referenceMode, extraAttributes);
@@ -113,18 +107,26 @@ public class WikiItem {
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
         nameWithoutColor = Formatting.strip(nameWithReplacements);
 
+        // Fixes various item ID quirks (and handles colors and whatnot)
+        fixIDs(stack, display, extraAttributes);
+
         assert nameWithoutColor != null;
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
+    }
 
-        if (hasCustomSkullTexture && skyBlockId.isEmpty()) {
-            hasCustomSkullTexture = false;
-        }
-
+    private void updateName() {
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
             showRarity = false;
             nameWithColor = "INSERT_LINK_HERE";
-            nameWithoutColor = "INSERT_LINK_HERE";
+        }
+
+        // Removes the item amount from the name
+        if (config.removeItemAmountsFromItemNames) {
+            Matcher matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
+            while (matcher.find()) {
+                nameWithColor = nameWithColor.replace(matcher.group(), "");
+            }
         }
     }
 
@@ -150,7 +152,7 @@ public class WikiItem {
             }
         }
 
-        if (hasEnchantments && !minecraftId.equalsIgnoreCase("head") && !minecraftId.startsWith("enchanted_")) {
+        if (hasEnchantments && !minecraftId.equalsIgnoreCase("player_head") && !minecraftId.startsWith("enchanted_")) {
             minecraftId = "enchanted_" + minecraftId;
         }
 
@@ -166,7 +168,7 @@ public class WikiItem {
             return;
         }
 
-        int maxStackSize = stackSize;
+        int maxStackSize = currentStackSize;
 
         if (extraAttributes.contains("uuid", NbtElement.STRING_TYPE)) {
             maxStackSize = 1;
@@ -177,19 +179,34 @@ public class WikiItem {
             setStackSize = maxStackSize;
         }
 
-        if (setStackSize != stackSize) {
-            stackSize = setStackSize;
+        if (setStackSize != currentStackSize) {
+            currentStackSize = setStackSize;
 
             Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(nameWithColor);
             nameWithColor = matcher.replaceAll(result -> {
                 String numberText = result.group(1);
-                return result.group().replace(numberText, String.valueOf(stackSize));
+                return result.group().replace(numberText, String.valueOf(currentStackSize));
             });
         }
     }
 
+    public String generateText(Action action) {
+        return switch (action) {
+            case COPYING_STANDALONE_ITEM -> convertToWikiItem();
+            case COPYING_RECIPE_INVENTORY -> {
+                String amountString = originalStackSize == 1 ? "" : "," + originalStackSize;
+                yield convertToReference() + amountString;
+            }
+            case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> {
+                boolean referenceMode = config.menuReferenceModeScenario == Config.MENU_REFERENCE_MODE_ALWAYS
+                        || (config.menuReferenceModeScenario == Config.MENU_REFERENCE_MODE_COPYING_ITEMS && shopItem);
 
-    public String convertToReference() {
+                yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
+            }
+        };
+    }
+
+    private String convertToReference() {
         if (minecraftId.equals("") || minecraftId.equals("air")) return "";
 
         if (petInfo != null) {
@@ -208,15 +225,15 @@ public class WikiItem {
         return "{{Item_" + referenceId.replace(" ", "_").toLowerCase() + "}}";
     }
 
-    public String convertToReferenceWithPotentialShopLore() {
+    private String convertToReferenceWithExtraText() {
         String reference = convertToReference();
-        String extraLore = removedLore.isEmpty() ? "" : TextUtils.unescapeText("\n") + removedLore;
-        String alternateAmountString = stackSize == 1 ? "" : "," + stackSize;
+        String extraLore = extraLoreBelowRarity.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarity;
+        String alternateAmountString = currentStackSize == 1 ? "" : "," + currentStackSize;
 
         return reference + extraLore + alternateAmountString;
     }
 
-    public String convertToWikiItem() {
+    private String convertToWikiItem() {
         if (minecraftId.equals("") || minecraftId.equals("air")) {
             return "";
         }
@@ -231,7 +248,7 @@ public class WikiItem {
             name = ":" + (showRarity ? nameWithoutColor : nameWithColor);
         }
 
-        String amountString = lore.isEmpty() && stackSize == 1 ? "" : "," + stackSize;
+        String amountString = lore.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
 
         return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString;
@@ -240,7 +257,7 @@ public class WikiItem {
     private String generateModifier() {
         if (emptyTitle && lore.isEmpty()) {
             return DONT_SHOW_TOOLTIP;
-        } else if (skyBlockId.isEmpty()) {
+        } else if (skyBlockId.isEmpty() && config.disableClicking) {
             return NOT_CLICKABLE;
         } else {
             return "";
@@ -263,7 +280,7 @@ public class WikiItem {
         } else if (petInfo != null) {
             return petInfo.type();
         } else {
-            return skyBlockId.toLowerCase();
+            return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }
     }
 }

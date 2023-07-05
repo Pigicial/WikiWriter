@@ -114,15 +114,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             int verticalPosition = (i / 9);
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, false);
-
-            boolean shopItem = item.isShopItem();
-            boolean useReferenceMode = config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && shopItem;
-            String text;
-            if (useReferenceMode) {
-                text = shopItem ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference();
-            } else {
-                text = item.convertToWikiItem();
-            }
+            String text = item.generateText(Action.COPYING_INVENTORY);
 
             builder.append("|")
                     .append(alphabet[verticalPosition])
@@ -152,10 +144,8 @@ public class GUIStealerFeature extends KeyBindFeature {
                 lore.add(TextUtils.convertJsonTextToLegacy(loreTag.getString(i)));
             }
 
-            LoreRemovalFeature.RemoveData removeData = LoreRemovalFeature.checkAndFilter(Action.COPYING_SHOP_INVENTORY, lore, false, LoreRemovalFeature.SHOP_FILTERS);
-            boolean hasShopLore = !removeData.getRemovedLore().isEmpty();
-
-            return hasShopLore && areTopAndBottomRowsCorrect(items, size);
+            LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
+            return removeData.hasShopLore() && areTopAndBottomRowsCorrect(items, size);
         }
 
         return false;
@@ -208,17 +198,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             }
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, true);
-
-            boolean shopItem = item.isShopItem();
-            boolean useReferenceMode = config.modifiedShopItemFormat == 0 || config.modifiedShopItemFormat == 1 && shopItem;
-            String text;
-            if (useReferenceMode) {
-                text = shopItem ? item.convertToReferenceWithPotentialShopLore() : item.convertToReference();
-            } else {
-                text = item.convertToWikiItem();
-            }
-
-            builder.append("|item").append(i + 1).append("=").append(text).append("\n");
+            builder.append("|item").append(i + 1).append("=").append(item.generateText(Action.COPYING_INVENTORY)).append("\n");
         }
 
         builder.append("}}\n<noinclude>[[Category:NPC UI Templates]]</noinclude>");
@@ -250,14 +230,12 @@ public class GUIStealerFeature extends KeyBindFeature {
             }
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|in").append(i).append("=").append(item.convertToReference())
-                    .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
+            builder.append("|in").append(i).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         if (!product.isEmpty()) {
             WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|out=").append(item.convertToReference())
-                    .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
+            builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         builder.append("}}\n<noinclude>[[Category:Recipe Templates]]</noinclude>");
@@ -299,15 +277,13 @@ public class GUIStealerFeature extends KeyBindFeature {
             }
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|in").append(i).append("=").append(item.convertToReference())
-                    .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
+            builder.append("|in").append(i).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         ItemStack product = items.get(16);
         if (!product.isEmpty()) {
             WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|out=").append(item.convertToReference())
-                    .append(item.getStackSize() > 1 ? "," + item.getStackSize() : "").append("\n");
+            builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
         builder.append("}}\n<noinclude>[[Category:Recipe Templates]]</noinclude>");
 
