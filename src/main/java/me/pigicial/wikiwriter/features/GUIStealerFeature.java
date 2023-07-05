@@ -196,8 +196,8 @@ public class GUIStealerFeature extends KeyBindFeature {
                 break;
             }
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, true);
-            builder.append("|item").append(i + 1).append("=").append(item.generateText(Action.COPYING_INVENTORY)).append("\n");
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_SHOP_INVENTORY, true);
+            builder.append("|item").append(i + 1).append("=").append(item.generateText(Action.COPYING_SHOP_INVENTORY)).append("\n");
         }
 
         builder.append("}}\n<noinclude>[[Category:NPC UI Templates]]</noinclude>");
