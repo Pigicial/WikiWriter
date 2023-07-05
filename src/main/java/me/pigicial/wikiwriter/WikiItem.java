@@ -107,6 +107,10 @@ public class WikiItem {
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
         nameWithoutColor = Formatting.strip(nameWithReplacements);
 
+        if (showRarity && ColorReplacementFeature.hasMultipleStyles(nameWithColor)) {
+            showRarity = false;
+        }
+
         // Fixes various item ID quirks (and handles colors and whatnot)
         fixIDs(stack, display, extraAttributes);
 
@@ -207,7 +211,9 @@ public class WikiItem {
     }
 
     private String convertToReference() {
-        if (minecraftId.equals("") || minecraftId.equals("air")) return "";
+        if (minecraftId.equals("") || minecraftId.equals("air")) {
+            return "";
+        }
 
         if (petInfo != null) {
             boolean mysteryPet = petInfo.mysteryPet();
