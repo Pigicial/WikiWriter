@@ -5,6 +5,7 @@ import gg.essential.universal.UScreen;
 import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
+import me.pigicial.wikiwriter.features.RawNBTExtractorFeature;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -45,6 +46,7 @@ public class WikiWriter implements ModInitializer {
 
         new CopyItemFeature(this).register();
         new GUIStealerFeature(this).register();
+        new RawNBTExtractorFeature(this).register();
 
         this.logger.info("WikiWriter loaded.");
     }
