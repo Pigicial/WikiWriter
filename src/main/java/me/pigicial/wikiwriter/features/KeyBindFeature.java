@@ -1,13 +1,20 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.mixins.FocusedSlotAccessor;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPress {
 
@@ -35,4 +42,29 @@ public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPre
     }
 
     protected abstract void onKeyPress(MinecraftClient client);
+
+    @Nullable
+    protected ItemStack getHoveredSlot(MinecraftClient client) {
+        ClientPlayerEntity player = client.player;
+        if (player == null) {
+            return null;
+        }
+
+        ScreenHandler currentScreenHandler = player.currentScreenHandler;
+        Screen currentScreen = client.currentScreen;
+
+        if (currentScreenHandler != null && currentScreen instanceof HandledScreen<?> containerScreen) {
+            Slot hoveredSlot = ((FocusedSlotAccessor) containerScreen).getFocusedSlot();
+            if (hoveredSlot == null) {
+                return null;
+            }
+
+            ItemStack hoveredItem = hoveredSlot.getStack();
+            if (hoveredItem != null && !hoveredItem.isEmpty()) {
+                return hoveredItem;
+            }
+        }
+
+        return null;
+    }
 }

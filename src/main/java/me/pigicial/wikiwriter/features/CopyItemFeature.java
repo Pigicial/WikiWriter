@@ -48,33 +48,4 @@ public class CopyItemFeature extends KeyBindFeature {
             e.printStackTrace();
         }
     }
-
-    @Nullable
-    public ItemStack getHoveredSlot(MinecraftClient client) {
-        ClientPlayerEntity player = client.player;
-        if (player == null) {
-            return null;
-        }
-
-        ScreenHandler currentScreenHandler = player.currentScreenHandler;
-        Screen currentScreen = client.currentScreen;
-
-        if (currentScreenHandler != null && currentScreen instanceof HandledScreen<?> containerScreen) {
-            wikiWriter.sendMessage("2");
-            Slot hoveredSlot = ((FocusedSlotAccessor) containerScreen).getFocusedSlot();
-            if (hoveredSlot == null) {
-                wikiWriter.sendMessage("3");
-                return null;
-            }
-
-            ItemStack hoveredItem = hoveredSlot.getStack();
-            if (hoveredItem != null && !hoveredItem.isEmpty()) {
-                wikiWriter.sendMessage("4");
-                return hoveredItem;
-            }
-        }
-
-        wikiWriter.sendMessage("5");
-        return null;
-    }
 }
