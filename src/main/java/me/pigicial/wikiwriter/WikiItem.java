@@ -14,7 +14,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -258,7 +257,7 @@ public class WikiItem {
             name = ":" + (showRarity ? nameWithoutColor : nameWithColor);
         }
 
-        String amountString = lore.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
+        String amountString = lore.isEmpty() && extraLoreBelowRarity.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
         String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : "," + extraLoreBelowRarity;
 
