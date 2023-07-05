@@ -1,13 +1,9 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.WikiWriter;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +77,18 @@ public enum Rarity {
         }
 
         return null;
+    }
+
+    public static OptionalInt getRarityIndexFromLore(List<String> lore) {
+        for (int i = 0, loreSize = lore.size(); i < loreSize; i++) {
+            String line = lore.get(i);
+            Rarity rarity = getRarityFromLine(line);
+            if (rarity != null) {
+                return OptionalInt.of(i);
+            }
+        }
+
+        return OptionalInt.empty();
     }
 
     @Nullable
