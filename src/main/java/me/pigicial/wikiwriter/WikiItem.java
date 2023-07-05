@@ -260,8 +260,9 @@ public class WikiItem {
 
         String amountString = lore.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
+        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : "," + extraLoreBelowRarity;
 
-        return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString;
+        return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString + potentialExtraLore;
     }
 
     private String generateModifier() {
