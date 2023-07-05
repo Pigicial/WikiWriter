@@ -1,11 +1,15 @@
 package me.pigicial.wikiwriter.features;
 
-import java.util.*;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum ColorReplacementFeature {
-    UNKNOWN(" ", "", "", false),
     RESET("&r", "", "", true),
     BLACK("&0", "&0", ""),
     DARK_BLUE("&1", "&1", ""),
@@ -99,7 +103,7 @@ public enum ColorReplacementFeature {
             String check = matcher.group();
             ColorReplacementFeature style = byCode(check);
 
-            if (style != UNKNOWN) {
+            if (style != null) {
                 sections.add(new ReplacementSection(style, matcher.start(), matcher.end()));
             }
         }
@@ -107,14 +111,15 @@ public enum ColorReplacementFeature {
         return sections;
     }
 
-    public static ColorReplacementFeature byCode(String key) {
+    @Nullable
+    private static ColorReplacementFeature byCode(String key) {
         for (ColorReplacementFeature feature : values()) {
             if (feature.key.equals(key)) {
                 return feature;
             }
         }
 
-        return UNKNOWN;
+        return null;
     }
 
     public static boolean hasMultipleStyles(String text) {
@@ -127,6 +132,9 @@ public enum ColorReplacementFeature {
         while (matcher.find()) {
             String code = matcher.group();
             ColorReplacementFeature style = byCode(code);
+            if (style == null) {
+                continue;
+            }
 
             if (currentStyles.isEmpty() && (style == RESET || style == WHITE)) {
                 lastEndIndex = matcher.end();
