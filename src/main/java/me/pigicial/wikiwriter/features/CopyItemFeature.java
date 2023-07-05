@@ -52,12 +52,9 @@ public class CopyItemFeature extends KeyBindFeature {
     @Nullable
     public ItemStack getHoveredSlot(MinecraftClient client) {
         ClientPlayerEntity player = client.player;
-        wikiWriter.sendMessage("0");
         if (player == null) {
             return null;
         }
-
-        wikiWriter.sendMessage("1");
 
         ScreenHandler currentScreenHandler = player.currentScreenHandler;
         Screen currentScreen = client.currentScreen;

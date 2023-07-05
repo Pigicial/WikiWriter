@@ -8,10 +8,7 @@ import me.pigicial.wikiwriter.utils.Rarity;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.function.Predicate;
 
 public enum LoreRemovalFeature {
@@ -40,67 +37,55 @@ public enum LoreRemovalFeature {
     CLICK_23(config -> config.removeClickNotices, "", "Click to view upgrades"),
     CLICK_24(config -> config.removeClickNotices, "", "Click to summon"),
 
-    SHOP_1(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_2(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_3(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_4(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_5(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}", "{anything}"),
-    SHOP_6(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}", "{anything}"),
-    SHOP_7(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}", "{anything}"),
-    SHOP_8(config -> config.removeShopNPCPriceText, "", "Cost", "{anything}"),
-    SHOP_9(config -> config.removeShopNPCPriceText, "", "Cost:"),
+    SHOP_1(config -> config.removeShopNPCPriceText, "", "Cost:"),
+    SHOP_2(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}"),
+    SHOP_3(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_4(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_5(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_6(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_7(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_8(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+    SHOP_9(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}"),
+
+    SHOP_STOCK_1(config -> config.removeShopNPCStockText, "", "Stock", "remaining"),
 
     BOTTOM_SHOP_1(config -> config.removeShopNPCTradeText, "", "Click to purchase"),
     BOTTOM_SHOP_2(config -> config.removeShopNPCTradeText, "", "Click to trade"),
     BOTTOM_SHOP_3(config -> config.removeShopNPCTradeText, "", "You don't have enough coins"),
-    BOTTOM_SHOP_4(config -> config.removeShopNPCTradeText, "Right-Click for more trading options"),
-    BOTTOM_SHOP_5(config -> config.removeShopNPCTradeText, "Right-click to fill quiver"),
-    BOTTOM_SHOP_6(config -> config.removeShopNPCTradeText, "", "Click to buy into quiver"),
-    BOTTOM_SHOP_7(config -> config.removeShopNPCTradeText, "", "Not unlocked"),
-    BOTTOM_SHOP_8(config -> config.removeShopNPCTradeText, "", "You don't have the required items"),
-    BOTTOM_SHOP_9(config -> config.removeShopNPCTradeText, "", "Click to craft"),
+    BOTTOM_SHOP_4(config -> config.removeShopNPCTradeText, "trading options"),
+    BOTTOM_SHOP_5(config -> config.removeShopNPCTradeText, "trading", "options"), // originally was in 1 line (above), now 2 it seems
+    BOTTOM_SHOP_6(config -> config.removeShopNPCTradeText, "Right-click to fill quiver"),
+    BOTTOM_SHOP_7(config -> config.removeShopNPCTradeText, "", "Click to buy into quiver"),
+    BOTTOM_SHOP_8(config -> config.removeShopNPCTradeText, "", "Not unlocked"),
+    BOTTOM_SHOP_9(config -> config.removeShopNPCTradeText, "", "You don't have the required items"),
+    BOTTOM_SHOP_10(config -> config.removeShopNPCTradeText, "", "Click to craft"),
 
     CRAFTING_TABLE_1(config -> config.removeCraftingTableData, "--------", "This is the item you are", "crafting"),
-    QUICK_CRAFTING_1(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_2(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "Click to craft"),
-    QUICK_CRAFTING_3(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_4(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_5(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_6(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_7(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_8(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "{anything}", "", "Click to craft"),
-    QUICK_CRAFTING_9(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{anything}", "", "Click to craft"),
+    QUICK_CRAFTING_1(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_2(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "Click to craft"),
+    QUICK_CRAFTING_3(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_4(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_5(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_6(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_7(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_8(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
+    QUICK_CRAFTING_9(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "", "Click to craft"),
 
     PICKAXE_ABILITY_1(config -> config.removePickaxeAbilities, "Ability: Mining Speed Boost", "Grants", "Speed", "Cooldown", ""),
-    PICKAXE_ABILITY_2(config -> config.removePickaxeAbilities, "Ability: Maniac Miner", "Spends", "{anything}", "every", "{anything}", "Cooldown", ""),
+    PICKAXE_ABILITY_2(config -> config.removePickaxeAbilities, "Ability: Maniac Miner", "Spends", "{any-not-empty}", "every", "{any-not-empty}", "Cooldown", ""),
     PICKAXE_ABILITY_3(config -> config.removePickaxeAbilities, "Ability: Pickobulus", "Throw your pickaxe", "explosion on impact", "ores within a", "radius", "Cooldown", ""),
     PICKAXE_ABILITY_4(config -> config.removePickaxeAbilities, "Ability: Vein Seeker", "Points in the direction", "nearest vein", "Mining Spread", "Cooldown", ""),
 
-    PET_ITEMS_1(config -> config.removePetItems, "Held Item:", "{anything}", ""),
-    PET_ITEMS_2(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", ""),
-    PET_ITEMS_3(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", ""),
-    PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", ""),
-    PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{anything}", "{anything}", "{anything}", "{anything}", "{anything}", "");
+    PET_ITEMS_1(config -> config.removePetItems, "Held Item:", "{any-not-empty}", ""),
+    PET_ITEMS_2(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", ""),
+    PET_ITEMS_3(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", ""),
+    PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", ""),
+    PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "");
 
-    public static final LoreRemovalFeature[] SHOP_FILTERS = new LoreRemovalFeature[]{
-            SHOP_1,
-            SHOP_2,
-            SHOP_3,
-            SHOP_4,
-            SHOP_5,
-            SHOP_6,
-            SHOP_7,
-            SHOP_8,
-            BOTTOM_SHOP_1,
-            BOTTOM_SHOP_2,
-            BOTTOM_SHOP_3,
-            BOTTOM_SHOP_4,
-            BOTTOM_SHOP_5,
-            BOTTOM_SHOP_6,
-            BOTTOM_SHOP_7,
-            BOTTOM_SHOP_8,
-            BOTTOM_SHOP_9
-    };
+    public static final LoreRemovalFeature[] SHOP_FILTERS = Arrays.stream(LoreRemovalFeature.values())
+            .filter(feature -> feature.name().contains("SHOP"))
+            .sorted(Comparator.comparing(Enum::ordinal))
+            .toArray(LoreRemovalFeature[]::new);
 
     private final Predicate<Config> settingsFilter;
     private final List<String> textToFilter;
@@ -137,10 +122,10 @@ public enum LoreRemovalFeature {
 
             if (rarityIndex.isPresent()) {
                 int index = rarityIndex.getAsInt();
-                if (index >= startIndex && index <= endIndex) {
+                if (index >= startIndex && index < endIndex) {
                     // rarity was removed
                     rarityIndex = OptionalInt.empty();
-                } else if (index > endIndex) {
+                } else if (index >= endIndex) {
                     // rarity was after removed text, therefore its index changed
                     rarityIndex = OptionalInt.of(index - removeData.amountOfLines);
                 } // otherwise, rarity index is the same
@@ -157,13 +142,15 @@ public enum LoreRemovalFeature {
             }
         }
 
-        boolean separateTextAfterRarity = action.shouldIncludeTextAfterRarity();
+        boolean includeTextAfterRarity = action.shouldIncludeTextAfterRarity();
         boolean hasTextAfterRarity = rarityIndex.isPresent() && lore.size() > rarityIndex.getAsInt() + 1;
 
-        if (separateTextAfterRarity && hasTextAfterRarity) {
+        if (hasTextAfterRarity) {
             List<String> textAfterRarity = lore.subList(rarityIndex.getAsInt() + 1, lore.size());
 
-            loreAfterRarityToPossibleAdd.addAll(textAfterRarity);
+            if (includeTextAfterRarity) {
+                loreAfterRarityToPossibleAdd.addAll(textAfterRarity);
+            }
 
             // clears from original list
             textAfterRarity.clear();
@@ -192,11 +179,12 @@ public enum LoreRemovalFeature {
                 continue;
             }
 
-            if (++linesMatched >= textToFilter.size()) {
-                int fromIndex = currentIndex - linesMatched;
-                lore.subList(fromIndex, currentIndex).clear();
+            if (++linesMatched == textToFilter.size()) {
+                int toIndex = currentIndex + 1;
+                int fromIndex = toIndex - textToFilter.size();
+                lore.subList(fromIndex, toIndex).clear();
 
-                return new RemovedSectionData(fromIndex, currentIndex, linesMatched);
+                return new RemovedSectionData(fromIndex, toIndex, textToFilter.size());
             }
         }
 
@@ -205,13 +193,14 @@ public enum LoreRemovalFeature {
 
     private static boolean matches(String textFromLore, String checkingAgainst) {
         boolean bothLinesEmpty = textFromLore.replace(" ", "").length() == 0 && checkingAgainst.replace(" ", "").length() == 0;
-        boolean containsText = textFromLore.contains(checkingAgainst) && checkingAgainst.length() >= 1;
-        boolean isAnythingAndNotEmpty = checkingAgainst.equals("{anything}") && textFromLore.replace(" ", "").length() > 0;
+        boolean containsText = textFromLore.contains(checkingAgainst) && checkingAgainst.length() > 0;
+        boolean isAnythingAndNotEmpty = checkingAgainst.equals("{any-not-empty}") && textFromLore.replace(" ", "").length() > 0;
 
         return bothLinesEmpty || containsText || isAnythingAndNotEmpty;
     }
 
-    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd, @Accessors(fluent = true) boolean hasShopLore) {
+    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd,
+                              @Accessors(fluent = true) boolean hasShopLore) {
 
     }
 
