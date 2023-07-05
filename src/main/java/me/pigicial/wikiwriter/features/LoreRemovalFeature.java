@@ -59,6 +59,7 @@ public enum LoreRemovalFeature {
     BOTTOM_SHOP_8(config -> config.removeShopNPCTradeText, "", "Not unlocked"),
     BOTTOM_SHOP_9(config -> config.removeShopNPCTradeText, "", "You don't have the required items"),
     BOTTOM_SHOP_10(config -> config.removeShopNPCTradeText, "", "Click to craft"),
+    BOTTOM_SHOP_11(config -> config.removeShopNPCTradeText, "", "Can't afford this"),
 
     CRAFTING_TABLE_1(config -> config.removeCraftingTableData, "--------", "This is the item you are", "crafting"),
     QUICK_CRAFTING_1(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
