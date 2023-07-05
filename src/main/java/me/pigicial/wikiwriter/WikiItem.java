@@ -68,7 +68,7 @@ public class WikiItem {
 
         originalStackSize = stack.getCount();
         currentStackSize = originalStackSize;
-        minecraftId = Registries.ITEM.getId(stack.getItem()).getPath();
+        minecraftId = stack.getItem().getName(stack).getString().toLowerCase().replace(" ", "_").replace("'", "");
         hasCustomSkullTexture = stack.getItem() == Items.PLAYER_HEAD;
 
         NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
@@ -135,7 +135,7 @@ public class WikiItem {
     }
 
     private void fixIDs(ItemStack stack, NbtCompound display, NbtCompound extraAttributes) {
-        boolean hasEnchantments = stack.hasEnchantments() || skyBlockId.equalsIgnoreCase("potion");
+        boolean hasEnchantments = stack.hasEnchantments() || stack.hasGlint() || skyBlockId.equalsIgnoreCase("potion");
 
         if (hasCustomSkullTexture) {
             minecraftId = "player_head";
@@ -156,8 +156,12 @@ public class WikiItem {
             }
         }
 
-        if (hasEnchantments && !minecraftId.equalsIgnoreCase("player_head") && !minecraftId.startsWith("enchanted_")) {
-            minecraftId = "enchanted_" + minecraftId;
+        if (hasEnchantments && !minecraftId.equalsIgnoreCase("player_head")) {
+            if (minecraftId.equals("book")) {
+                minecraftId = "enchanted_enchanted_book"; // the base book item is called this when its glowing
+            } else {
+                minecraftId = "enchanted_" + minecraftId;
+            }
         }
 
         if (hasCustomSkullTexture && skyBlockId.isEmpty() && nameWithoutColor.endsWith(" Minion")) {
