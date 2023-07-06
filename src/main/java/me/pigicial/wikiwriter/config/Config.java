@@ -22,17 +22,10 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Copying Items",
-            description = "Enable the ability to copy hovered items either individually or into a single-slot menu using a set keybind, which you can find in your controls menu.\n\nNote: Don't worry about any mods or settings that add additional lore to items. The data is taken directly from NBT, which mods don't affect!",
-            category = "Copying Items"
-    )
-    public boolean copyItems = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Set Item Amounts to 1",
             description = "Toggle whether or not individually-copied items will have their amounts set to 1.",
-            category = "Copying Items"
+            category = "General",
+            subcategory = "Copying Items"
     )
     public boolean setAmountsToOne = true;
 
@@ -40,7 +33,8 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Disable Clicking on Certain Items",
             description = "Disables the ability to click on items in menus that don't have an item ID or name. Items without a name and any lore already cannot be clicked nor hovered over, this doesn't change that.",
-            category = "Copying Items"
+            category = "General",
+            subcategory = "Copying Items"
     )
     public boolean disableClicking = true;
 
@@ -48,42 +42,20 @@ public class Config extends Vigilant {
             type = PropertyType.SELECTOR,
             name = "Item Reference Mode (Copying GUIs)",
             description = "If enabled, copied items will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
-            category = "Copying Inventories",
+            category = "General",
+            subcategory = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
     )
     public int menuReferenceModeScenario = 1;
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Copying Top GUI",
-            description = "Enable the ability to copy every item in your top GUI (so when you're in an inventory) using a set keybind, which you can find in your controls menu.\n\nNote: Don't worry about any mods or settings that add additional lore to items. The data is taken directly from NBT, which mods don't affect!",
-            category = "Copying Inventories"
-    )
-    public boolean copyGUI = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Automatic Shop Menu Format",
             description = "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop prices are affected by certain talismans, so make sure to remove them first!",
-            category = "Copying Inventories"
+            category = "General",
+            subcategory = "Copying Inventories"
     )
     public boolean shopMenuMode = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Copying Top GUI",
-            description = "Enable the ability to copy a recipe using a set keybind, which you can find in your controls menu.",
-            category = "Copying Inventories"
-    )
-    public boolean recipeTreeMode = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Copying Raw NBT",
-            description = "Toggles whether or not the raw NBT of hovered items can be copied using a set keybind.",
-            category = "Copying Raw NBT"
-    )
-    public boolean rawNbtExtractionEnabled = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -179,6 +151,7 @@ public class Config extends Vigilant {
             subcategory = "Lore Filters"
     )
     public boolean removePetItems = true;
+
     public Config() {
         super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();
