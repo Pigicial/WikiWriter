@@ -68,7 +68,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{{CollapsibleTree|{{{1|Item}}}\n");
-        builder.append("|itemimage = {{formatnum:{{{2|1|}}}}} [[File:").append(output.fileName)
+        builder.append("|itemimage = {{formatnum:{{{2|1}}}}} [[File:").append(output.fileName)
                 .append("|20px|link=").append(output.name).append("]]\n");
         builder.append("|itemname = [[").append(output.name).append("]]\n\n");
         builder.append("|resources = \n");
