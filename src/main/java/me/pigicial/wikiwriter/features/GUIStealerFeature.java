@@ -91,7 +91,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             int horizontalPosition = 1 + (i % 9);
             int verticalPosition = (i / 9);
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, false);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY);
             String text = item.generateText(Action.COPYING_INVENTORY);
 
             builder.append("|")
@@ -173,7 +173,7 @@ public class GUIStealerFeature extends KeyBindFeature {
                 break;
             }
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_SHOP_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_SHOP_INVENTORY);
             builder.append("|item").append(i + 1).append("=").append(item.generateText(Action.COPYING_SHOP_INVENTORY)).append("\n");
         }
 
@@ -198,12 +198,12 @@ public class GUIStealerFeature extends KeyBindFeature {
                 continue;
             }
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY);
             builder.append("|in").append(i + 1).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         if (!product.isEmpty()) {
-            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
+            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
             builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
@@ -241,13 +241,13 @@ public class GUIStealerFeature extends KeyBindFeature {
                 continue;
             }
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY);
             builder.append("|in").append(i + 1).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         ItemStack product = items.get(FORCE_RECIPE_RESULT_SLOT);
         if (!product.isEmpty()) {
-            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
+            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
             builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
         builder.append("}}\n<noinclude>[[Category:Recipe Templates]]</noinclude>");
