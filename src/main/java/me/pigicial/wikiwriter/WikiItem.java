@@ -118,14 +118,9 @@ public class WikiItem {
 
             Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(nameWithColor);
             nameWithColor = matcher.replaceAll("");
-        }
 
-        // Removes the item amount from the name
-        if (config.removeItemAmountsFromItemNames || setToOne) {
-            Matcher matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
-            while (matcher.find()) {
-                nameWithColor = nameWithColor.replace(matcher.group(), "");
-            }
+            matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
+            nameWithColor = matcher.replaceAll("");
         }
     }
 
