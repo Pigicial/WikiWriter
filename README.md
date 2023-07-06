@@ -45,6 +45,7 @@ Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Templa
 
 ## Shops
 Similar to recipes, shop inventories can be converted into [Inventory Templates](https://wiki.hypixel.net/Category:NPC_UI_Templates) using a [similar style](https://wiki.hypixel.net/Template:Merchant) of syntax.
+
 ![Ulyn](src/main/resources/assets/wikiwriter/ulyn.png)
 ###### [Merchant Template:](https://wiki.hypixel.net/Template:Merchant)
 ```
@@ -62,6 +63,7 @@ Similar to recipes, shop inventories can be converted into [Inventory Templates]
 
 ## Other Inventories
 Inventories that are not categorized as shops or recipes use the standard [Inventory Template](https://wiki.hypixel.net/Template:Inventory), though the syntax is often messier as a result.
+
 ![Kuudra Gatekeeper](src/main/resources/assets/wikiwriter/kuudra_gatekeeper.png)
 ###### [Inventory Template:](https://wiki.hypixel.net/Template:Inventory)
 ```
@@ -109,4 +111,5 @@ Inventories that are not categorized as shops or recipes use the standard [Inven
 
 ## Lore Filters and Configuration
 WikiWriter contains a variety of options, many of which control what lore is shown or hidden in certain scenarios. This menu can be accessed with the `/wikiwriter` or `/ww` commands.
+
 ![config.png](src/main/resources/assets/wikiwriter/config.png)
