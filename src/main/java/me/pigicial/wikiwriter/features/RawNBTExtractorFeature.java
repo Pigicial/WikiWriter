@@ -15,25 +15,26 @@ public class RawNBTExtractorFeature extends KeyBindFeature {
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        try {
-            Config config = wikiWriter.getConfig();
-            if (!config.rawNbtExtractionEnabled) {
-                return;
-            }
-
-            ItemStack itemUnderCursor = getHoveredSlot(client);
-            if (itemUnderCursor == null) {
-                return;
-            }
-
-            NbtCompound nbt = itemUnderCursor.getNbt();
-            if (nbt != null) {
-                WikiWriter.getInstance().copyToClipboard(nbt.toString());
-                wikiWriter.sendMessage("Copied hovered item NBT to clipboard.");
-            }
-        } catch (Exception e) {
-            wikiWriter.sendMessage("Something went wrong when trying to copy this item's NBT, please report this with your latest.log file!");
-            e.printStackTrace();
+        Config config = wikiWriter.getConfig();
+        if (!config.rawNbtExtractionEnabled) {
+            return;
         }
+
+        ItemStack itemUnderCursor = getHoveredSlot(client);
+        if (itemUnderCursor == null) {
+            return;
+        }
+
+        NbtCompound nbt = itemUnderCursor.getNbt();
+        if (nbt != null) {
+            WikiWriter.getInstance().copyToClipboard(nbt.toString());
+            wikiWriter.sendMessage("Copied hovered item NBT to clipboard.");
+        }
+    }
+
+    @Override
+    protected void handleException(Exception exception) {
+        wikiWriter.sendMessage("Something went wrong when trying to copy this item's NBT, please report this with your latest.log file!");
+        exception.printStackTrace();
     }
 }

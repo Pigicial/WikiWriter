@@ -21,66 +21,43 @@ import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static me.pigicial.wikiwriter.features.RecipeUtils.*;
 
 public class GUIStealerFeature extends KeyBindFeature {
 
-    private static final int CRAFTING_TABLE_OR_RECIPE_REQUIRED_SLOT = 23;
-
     private final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-    private final Map<Integer, Integer> craftingTablePositionToSlotMap = new HashMap<>();
-    private final Map<Integer, Integer> forgePositionToSlotMap = new HashMap<>();
 
     public GUIStealerFeature(WikiWriter wikiWriter) {
         super(wikiWriter, "Copy Top GUI", GLFW.GLFW_KEY_I);
-
-        craftingTablePositionToSlotMap.put(1, 10);
-        craftingTablePositionToSlotMap.put(2, 11);
-        craftingTablePositionToSlotMap.put(3, 12);
-        craftingTablePositionToSlotMap.put(4, 19);
-        craftingTablePositionToSlotMap.put(5, 20);
-        craftingTablePositionToSlotMap.put(6, 21);
-        craftingTablePositionToSlotMap.put(7, 28);
-        craftingTablePositionToSlotMap.put(8, 29);
-        craftingTablePositionToSlotMap.put(9, 30);
-
-        forgePositionToSlotMap.put(1, 10);
-        forgePositionToSlotMap.put(2, 11);
-        forgePositionToSlotMap.put(3, 19);
-        forgePositionToSlotMap.put(4, 20);
-        forgePositionToSlotMap.put(5, 28);
-        forgePositionToSlotMap.put(6, 29);
-        forgePositionToSlotMap.put(7, 37);
-        forgePositionToSlotMap.put(8, 38);
     }
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        try {
-            Config config = wikiWriter.getConfig();
-            ClientPlayerEntity player = client.player;
+        Config config = wikiWriter.getConfig();
+        ClientPlayerEntity player = client.player;
 
-            if (!config.copyGUI || player == null) {
-                return;
-            }
-
-            ScreenHandler currentScreenHandler = player.currentScreenHandler;
-            Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-            if (currentScreen == null || !(currentScreenHandler instanceof GenericContainerScreenHandler chestHandler)) {
-                return;
-            }
-
-            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
-            String inventoryName = currentScreen.getTitle().getString();
-
-            process(items, inventoryName);
-
-        } catch (Exception e) {
-            wikiWriter.sendMessage("Something went wrong when trying to clone this GUI, please report this with your latest.log file!");
-            e.printStackTrace();
+        if (!config.copyGUI || player == null) {
+            return;
         }
+
+        ScreenHandler currentScreenHandler = player.currentScreenHandler;
+        Screen currentScreen = MinecraftClient.getInstance().currentScreen;
+        if (currentScreen == null || !(currentScreenHandler instanceof GenericContainerScreenHandler chestHandler)) {
+            return;
+        }
+
+        List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
+        String inventoryName = currentScreen.getTitle().getString();
+
+        process(items, inventoryName);
+    }
+
+    @Override
+    protected void handleException(Exception exception) {
+        wikiWriter.sendMessage("Something went wrong when trying to clone this GUI, please report this with your latest.log file!");
+        exception.printStackTrace();
     }
 
     protected void process(List<ItemStack> items, String inventoryName) {
@@ -94,7 +71,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
-        if (isRecipeMode(rows, inventoryName, items)) {
+        if (isRecipeMenu(rows, inventoryName, items)) {
             processRecipe(builder, inventoryName, items);
             return;
         }
@@ -146,13 +123,13 @@ public class GUIStealerFeature extends KeyBindFeature {
             }
 
             LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
-            return removeData.hasShopLore() && areTopAndBottomRowsCorrect(items, size);
+            return removeData.detectedShopLore() && areTopAndBottomRowsCorrectForShop(items, size);
         }
 
         return false;
     }
 
-    private boolean areTopAndBottomRowsCorrect(List<ItemStack> items, int size) {
+    private boolean areTopAndBottomRowsCorrectForShop(List<ItemStack> items, int size) {
         for (int i = 0; i <= 8; i++) {
             ItemStack itemStack = items.get(i);
             if (!itemStack.isEmpty() && itemStack.getItem() != Items.BLACK_STAINED_GLASS_PANE) {
@@ -205,12 +182,6 @@ public class GUIStealerFeature extends KeyBindFeature {
         wikiWriter.copyToClipboard(builder.toString());
     }
 
-    private boolean isRecipeMode(int rows, String inventoryName, List<ItemStack> items) {
-        return (inventoryName.equalsIgnoreCase("Craft Item") || inventoryName.endsWith("Recipe"))
-                && rows == 6
-                && !items.get(CRAFTING_TABLE_OR_RECIPE_REQUIRED_SLOT).isEmpty();
-    }
-
     protected void processRecipe(StringBuilder builder, String inventoryName, List<ItemStack> items) {
         boolean craftItem = inventoryName.equalsIgnoreCase("Craft Item");
         ItemStack product = craftItem ? items.get(23) : items.get(25);
@@ -220,15 +191,15 @@ public class GUIStealerFeature extends KeyBindFeature {
         }
 
         builder.append("{{Craft Item").append("\n");
-        for (int i = 1; i <= 9; i++) {
-            Integer integer = craftingTablePositionToSlotMap.get(i);
+        for (int i = 0; i < CRAFTING_TABLE_INGREDIENT_SLOTS.length; i++) {
+            int integer = CRAFTING_TABLE_INGREDIENT_SLOTS[i];
             ItemStack itemStack = items.get(integer);
             if (itemStack.isEmpty()) {
                 continue;
             }
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|in").append(i).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
+            builder.append("|in").append(i + 1).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         if (!product.isEmpty()) {
@@ -262,19 +233,19 @@ public class GUIStealerFeature extends KeyBindFeature {
                 .append("|type=").append(forgeRecipeType.name().toLowerCase())
                 .append("\n");
 
-        for (int i = 1; i <= 8; i++) {
-            Integer integer = forgePositionToSlotMap.get(i);
-            ItemStack itemStack = items.get(integer);
+        for (int i = 0; i < FORGE_POSITION_TO_SLOT_MAP.length; i++) {
+            int position = FORGE_POSITION_TO_SLOT_MAP[i];
+            ItemStack itemStack = items.get(position);
             if (itemStack.getItem() == Items.BLACK_STAINED_GLASS_PANE) {
                 // menu glass item, skip!
                 continue;
             }
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_RECIPE_INVENTORY, true);
-            builder.append("|in").append(i).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
+            builder.append("|in").append(i + 1).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
-        ItemStack product = items.get(16);
+        ItemStack product = items.get(FORCE_RECIPE_RESULT_SLOT);
         if (!product.isEmpty()) {
             WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY, true);
             builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");

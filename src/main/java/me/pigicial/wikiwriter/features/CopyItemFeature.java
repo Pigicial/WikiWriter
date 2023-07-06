@@ -16,26 +16,27 @@ public class CopyItemFeature extends KeyBindFeature {
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        try {
-            Config config = wikiWriter.getConfig();
-            if (!config.copyItems) {
-                return;
-            }
-
-            ItemStack itemUnderCursor = getHoveredSlot(client);
-            if (itemUnderCursor == null) {
-                return;
-            }
-
-            WikiItem wikiItem = new WikiItem(itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
-            String baseText = wikiItem.generateText(Action.COPYING_STANDALONE_ITEM);
-            String text = "<noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>\n" + baseText + "\n</includeonly>";
-
-            wikiWriter.copyToClipboard(text);
-            wikiWriter.sendMessage("Copied hovered item to clipboard.");
-        } catch (Exception e) {
-            wikiWriter.sendMessage("Something went wrong when trying to copy this item, please report this with your latest.log file!");
-            e.printStackTrace();
+        Config config = wikiWriter.getConfig();
+        if (!config.copyItems) {
+            return;
         }
+
+        ItemStack itemUnderCursor = getHoveredSlot(client);
+        if (itemUnderCursor == null) {
+            return;
+        }
+
+        WikiItem wikiItem = new WikiItem(itemUnderCursor, Action.COPYING_STANDALONE_ITEM, false);
+        String baseText = wikiItem.generateText(Action.COPYING_STANDALONE_ITEM);
+        String text = "<noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>\n" + baseText + "\n</includeonly>";
+
+        wikiWriter.copyToClipboard(text);
+        wikiWriter.sendMessage("Copied hovered item to clipboard.");
+    }
+
+    @Override
+    protected void handleException(Exception exception) {
+        wikiWriter.sendMessage("Something went wrong when trying to copy this item, please report this with your latest.log file!");
+        exception.printStackTrace();
     }
 }

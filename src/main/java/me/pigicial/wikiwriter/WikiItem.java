@@ -13,13 +13,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -76,26 +74,16 @@ public class WikiItem {
         // 1.7 ids use dots instead of colon symbols with tor's automation system
 
         NbtCompound display = nbt.getCompound("display");
-        NbtList loreTag = display.getList("Lore", NbtElement.STRING_TYPE);
-
-        lore = new ArrayList<>();
-        for (int i = 0; i < loreTag.size(); i++) {
-            String jsonLine = loreTag.getString(i);
-            String legacyLine = TextUtils.convertJsonTextToLegacy(jsonLine);
-
-            lore.add(legacyLine);
-        }
+        lore = TextUtils.parseJsonLore(display);
 
         nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
-
-        // fix brackets in name plus replace amounts if necessary
-        updateName();
+        updateName(); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
         LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, action);
         loreAsString = TextUtils.convertListToString(lore);
         extraLoreBelowRarity = TextUtils.convertListToString(removeData.loreBelowRarityToPossibleAdd());
-        shopItem = removeData.hasShopLore();
+        shopItem = removeData.detectedShopLore();
 
         // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
