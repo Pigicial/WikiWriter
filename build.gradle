@@ -72,14 +72,20 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // embed "gg.essential:loader-launchwrapper:1.1.3"
+    modImplementation(include("gg.essential:elementa-1.18.1-fabric:592")) {
+        exclude group: "gg.essential", module: "universalcraft-1.18.1-fabric"
+    }
     modImplementation(include("gg.essential:vigilance-1.18.1-fabric:284")) {
         exclude group: "gg.essential", module: "universalcraft-1.18.1-fabric"
     }
     modImplementation(include("gg.essential:universalcraft-${project.minecraft_version}-fabric:277"))
 
-    // for Minecraft 1.19.4 - used for lore text conversion
+    // used for text json conversion
+    modImplementation include("net.kyori:adventure-platform-fabric:5.8.0")
+    modImplementation include("net.kyori:adventure-api:4.14.0")
     modImplementation include("net.kyori:adventure-text-serializer-legacy:4.14.0")
     modImplementation include("net.kyori:adventure-text-serializer-gson:4.14.0")
+    modImplementation include("net.kyori:adventure-text-serializer-json:4.14.0")
 
     modRuntimeOnly "me.djtheredstoner:DevAuth-fabric:1.1.2"
 
