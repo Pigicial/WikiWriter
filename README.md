@@ -15,10 +15,10 @@ mc,uncommon,fishing_rod:Grappling Hook ,1,&7Travel around in style using\n&7this
 ```
 
 ## Recipes and Recipe Trees
-Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Category:Recipe_Templates) and [Recipe Trees](https://wiki.hypixel.net/Category:CollapsibleTree). Here is an example using an [Enchanted Eye of Ender](https://wiki.hypixel.net/Enchanted_Eye_Of_Ender).
+Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Template:Craft_Item) and [Recipe Trees](https://wiki.hypixel.net/Template:CollapsibleTree). Here is an example using an [Enchanted Eye of Ender](https://wiki.hypixel.net/Enchanted_Eye_Of_Ender).
 
 ![Enchanted Eye Of Ender](src/main/resources/assets/wikiwriter/enchanted_eye_of_ender_recipe.png)
-###### [Recipe Template:](https://wiki.hypixel.net/Category:Recipe_Templates)
+###### [Recipe Template:](https://wiki.hypixel.net/Template:Craft_Item)
 ```
 {{Craft Item
 |in2={{Item_blaze_powder}},16
@@ -30,7 +30,7 @@ Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Catego
 }}
 <noinclude>[[Category:Recipe Templates]]</noinclude>
 ```
-###### [Collapsible Tree Template:](https://wiki.hypixel.net/Category:CollapsibleTree)
+###### [Collapsible Tree Template:](https://wiki.hypixel.net/Template:CollapsibleTree)
 ```
 {{CollapsibleTree|{{{1|Item}}}
 |itemimage = {{formatnum:{{{2|1|}}}}} [[File:SkyBlock_items_enchanted_eye_of_ender.gif|20px|link=Enchanted Eye of Ender]]
@@ -46,7 +46,7 @@ Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Catego
 ## Shops
 Similar to recipes, shop inventories can be converted into [Inventory Templates](https://wiki.hypixel.net/Category:NPC_UI_Templates) using a [similar style](https://wiki.hypixel.net/Template:Merchant) of syntax.
 ![Ulyn](src/main/resources/assets/wikiwriter/ulyn.png)
-###### [Merchant Template:](https://wiki.hypixel.net/Category:NPC_UI_Templates)
+###### [Merchant Template:](https://wiki.hypixel.net/Template:Merchant)
 ```
 {{Merchant
 |name=Ulyn
