@@ -67,14 +67,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Item Amounts (in names) from Shop Menus",
-            description = "When enabled, the \"x64\" (or lower) text will be removed from item names, which can be found in shop menus.",
-            category = "Text Filters"
-    )
-    public boolean removeItemAmountsFromItemNames = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Remove Text Below Item Rarities in Items",
             description = "When enabled, text below an item rarity will be stripped from item lore.",
             category = "Text Filters"
