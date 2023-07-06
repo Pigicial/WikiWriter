@@ -76,6 +76,9 @@ public class WikiItem {
         lore = TextUtils.parseJsonLore(display);
 
         nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
+        // Figures out the rarity of the item based on the item name or lore
+        rarity = Rarity.parseRarity(lore, nameWithColor);
+
         updateNameAndStackSize(action); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
@@ -84,8 +87,6 @@ public class WikiItem {
         extraLoreBelowRarity = TextUtils.convertListToString(removeData.loreBelowRarityToPossibleAdd());
         shopItem = removeData.detectedShopLore();
 
-        // Figures out the rarity of the item based on the item name or lore
-        rarity = Rarity.parseRarity(lore, nameWithColor);
         showRarity = showRarity && rarity != null;
 
         petInfo = PetInfo.getPetInfo(extraAttributes);
@@ -168,8 +169,11 @@ public class WikiItem {
                 yield convertToReference() + amountString;
             }
             case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> {
-                boolean referenceMode = config.menuReferenceModeScenario == Config.MENU_REFERENCE_MODE_ALWAYS
-                        || (config.menuReferenceModeScenario == Config.MENU_REFERENCE_MODE_COPYING_ITEMS && shopItem);
+                int mode = config.menuReferenceModeScenario;
+
+                boolean always = mode == Config.MENU_REFERENCE_MODE_ALWAYS;
+                boolean onlyOnShopItemsAndIsShopItem = mode == Config.MENU_REFERENCE_MODE_COPYING_ITEMS && shopItem;
+                boolean referenceMode = !skyBlockId.isEmpty() && (always || onlyOnShopItemsAndIsShopItem);
 
                 yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
             }

@@ -41,7 +41,12 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SELECTOR,
             name = "Item Reference Mode (Copying GUIs)",
-            description = "When enabled, copied items in menus will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nThis setting does not affect recipe menus copied, as those always use reference mode.",
+            description = """
+                    Toggles when copied items in menus should use template references instead (i.e. {{Item_diamond_sword}}).
+                    
+                    Notes:
+                    1. This setting does not affect recipe menus copied, as those always use reference mode.
+                    2. Items that don't have a SkyBlock ID never use reference mode.""",
             category = "General",
             subcategory = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
