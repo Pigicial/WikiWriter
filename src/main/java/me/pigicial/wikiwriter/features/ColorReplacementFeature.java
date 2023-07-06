@@ -9,49 +9,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum ColorReplacementFeature {
-    RESET("&r", "", "", true),
-    BLACK("&0", "&0", ""),
-    DARK_BLUE("&1", "&1", ""),
-    DARK_GREEN("&2", "&2", ""),
-    DARK_AQUA("&3", "&3", ""),
-    DARK_RED("&4", "&4", ""),
-    DARK_PURPLE("&5", "&5", ""),
-    GOLD("&6", "&6", ""),
-    GRAY("&7", "&7", ""),
-    DARK_GRAY("&8", "&8", ""),
-    BLUE("&9", "&9", ""),
-    GREEN("&a", "&a", ""),
-    AQUA("&b", "&b", ""),
-    RED("&c", "&c", ""),
-    LIGHT_PURPLE("&d", "&d", ""),
-    YELLOW("&e", "&e", ""),
-    WHITE("&f", "&f", ""),
-    BOLD("&l", "'''", "'''", false),
-    UNDERLINE("&n", "<ins>", "</ins>", false),
-    ITALICS("&o", "''", "''", false),
-    OBFUSCATION("&k", "", "", false),
-    STRIKETHROUGH("&m", "<s>", "</s>", false);
+public class ColorReplacementFeature {
 
     public static final Pattern STRIPPED_COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-ORX]");
 
-    private final String key;
-    private final String start;
-    private final String end;
-    private final boolean reset;
-    private final boolean addSpaces;
-
-    ColorReplacementFeature(String key, String start, String end) {
-        this(key, start, end, true);
-    }
-
-    ColorReplacementFeature(String key, String start, String end, boolean reset) {
-        this.key = key;
-        this.start = start;
-        this.end = end;
-        this.reset = reset;
-        this.addSpaces = start.equals("'''") || start.equals("''");
-    }
+    private static final Style[] STYLE_VALUES = Style.values();
 
     public static String replace(String text) {
         text = text.replace('§', '&');
@@ -69,7 +31,7 @@ public enum ColorReplacementFeature {
             int start = replacementSection.start();
             int end = replacementSection.end();
 
-            ColorReplacementFeature feature = replacementSection.feature();
+            Style feature = replacementSection.feature();
             newString.append(text, lastEnd, start);
 
             if (feature.reset) {
@@ -101,7 +63,7 @@ public enum ColorReplacementFeature {
 
         while (matcher.find()) {
             String check = matcher.group();
-            ColorReplacementFeature style = byCode(check);
+            Style style = getStyleByCode(check);
 
             if (style != null) {
                 sections.add(new ReplacementSection(style, matcher.start(), matcher.end()));
@@ -112,8 +74,8 @@ public enum ColorReplacementFeature {
     }
 
     @Nullable
-    private static ColorReplacementFeature byCode(String key) {
-        for (ColorReplacementFeature feature : values()) {
+    private static ColorReplacementFeature.Style getStyleByCode(String key) {
+        for (Style feature : STYLE_VALUES) {
             if (feature.key.equals(key)) {
                 return feature;
             }
@@ -125,18 +87,18 @@ public enum ColorReplacementFeature {
     public static boolean hasMultipleStyles(String text) {
         Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
 
-        Set<ColorReplacementFeature> currentStyles = new LinkedHashSet<>();
+        Set<Style> currentStyles = new LinkedHashSet<>();
         int lastEndIndex = 0;
         int amountOfStylizedSections = 0;
 
         while (matcher.find()) {
             String code = matcher.group();
-            ColorReplacementFeature style = byCode(code);
+            Style style = getStyleByCode(code);
             if (style == null) {
                 continue;
             }
 
-            if (currentStyles.isEmpty() && (style == RESET || style == WHITE)) {
+            if (currentStyles.isEmpty() && (style == Style.RESET || style == Style.WHITE)) {
                 lastEndIndex = matcher.end();
                 continue;
             }
@@ -160,9 +122,51 @@ public enum ColorReplacementFeature {
         return text.length() > lastEndIndex && !text.substring(lastEndIndex).trim().isEmpty() && ++amountOfStylizedSections >= 2;
     }
 
+    private record ReplacementSection(Style feature, int start, int end) {
 
-    private record ReplacementSection(ColorReplacementFeature feature, int start, int end) {
+    }
 
+    private enum Style {
+        RESET("&r", "", "", true),
+        BLACK("&0", "&0", ""),
+        DARK_BLUE("&1", "&1", ""),
+        DARK_GREEN("&2", "&2", ""),
+        DARK_AQUA("&3", "&3", ""),
+        DARK_RED("&4", "&4", ""),
+        DARK_PURPLE("&5", "&5", ""),
+        GOLD("&6", "&6", ""),
+        GRAY("&7", "&7", ""),
+        DARK_GRAY("&8", "&8", ""),
+        BLUE("&9", "&9", ""),
+        GREEN("&a", "&a", ""),
+        AQUA("&b", "&b", ""),
+        RED("&c", "&c", ""),
+        LIGHT_PURPLE("&d", "&d", ""),
+        YELLOW("&e", "&e", ""),
+        WHITE("&f", "&f", ""),
+        BOLD("&l", "'''", "'''", false),
+        UNDERLINE("&n", "<ins>", "</ins>", false),
+        ITALICS("&o", "''", "''", false),
+        OBFUSCATION("&k", "", "", false),
+        STRIKETHROUGH("&m", "<s>", "</s>", false);
+
+        private final String key;
+        private final String start;
+        private final String end;
+        private final boolean reset;
+        private final boolean addSpaces;
+
+        Style(String key, String start, String end) {
+            this(key, start, end, true);
+        }
+
+        Style(String key, String start, String end, boolean reset) {
+            this.key = key;
+            this.start = start;
+            this.end = end;
+            this.reset = reset;
+            this.addSpaces = start.equals("'''") || start.equals("''");
+        }
     }
 
 }
