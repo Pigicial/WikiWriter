@@ -26,7 +26,7 @@ repositories {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-version = "1.8"
+version = "${mod_version}-MC-${minecraft_version}"
 group = "me.pigicial"
 archivesBaseName = "WikiWriter"
 
@@ -121,14 +121,12 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 processResources {
-    inputs.property "version", project.version
+    inputs.property "version", mod_version
     inputs.property "mcversion", minecraft_version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": mod_version
     }
-
-    from(file("LICENSE"))
 }
 
 java {
@@ -140,12 +138,6 @@ java {
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_wikiwriter"}
-    }
-}
 
 publishing {
     publications {
