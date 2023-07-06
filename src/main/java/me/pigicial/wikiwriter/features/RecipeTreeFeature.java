@@ -1,5 +1,6 @@
 package me.pigicial.wikiwriter.features;
 
+import lombok.AllArgsConstructor;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -67,7 +68,8 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{{CollapsibleTree|{{{1|Item}}}\n");
-        builder.append("|itemimage = {{formatnum:{{{2|1|}}}}} {{Image|IMAGE_HERE|20px|link=").append(output.name).append("}}\n");
+        builder.append("|itemimage = {{formatnum:{{{2|1|}}}}} [[File:").append(output.fileName)
+                .append("|20px|link=").append(output.name).append("]]\n");
         builder.append("|itemname = [[").append(output.name).append("]]\n\n");
         builder.append("|resources = \n");
 
@@ -109,18 +111,13 @@ public class RecipeTreeFeature extends KeyBindFeature {
         exception.printStackTrace();
     }
 
+    @AllArgsConstructor
     private static final class ItemInfo {
         private final String name;
+        private final String fileName;
         private final String id;
         private final boolean hasRecipes;
         private int amount;
-
-        private ItemInfo(String name, String id, boolean hasRecipes, int amount) {
-            this.name = name;
-            this.id = id;
-            this.hasRecipes = hasRecipes;
-            this.amount = amount;
-        }
 
         private int getAmount() {
             return amount;
@@ -130,7 +127,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             if (hasRecipes) {
                 return "{{CollapsibleTree/Item/" + id.toLowerCase() + "|Item|{{#expr:" + amount + " * {{{2|1}}}}}}}";
             } else {
-                return "{{CollapsibleTree/Base/{{formatnum:{{#expr:" + amount + " * {{{2|1}}}}}}} {{Item/" + id + "|is=20}}}}";
+                return "{{CollapsibleTree/Base|{{formatnum:{{#expr:" + amount + " * {{{2|1}}}}}}} {{Item/" + id + "|is=20}}}}";
             }
         }
 
@@ -143,14 +140,27 @@ public class RecipeTreeFeature extends KeyBindFeature {
             String name = Formatting.strip(TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(itemStack.getName())));
 
             NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
-            String id = extraAttributes.getString("id").replace(":", ".");
+            String skyBlockId = extraAttributes.getString("id").replace(":", ".");
             int amount = itemStack.getCount();
 
             List<String> lore = TextUtils.parseJsonLore(nbt.getCompound("display"));
             boolean hasRecipes = LoreRemovalFeature.checkAndFilter(lore, Action.COPYING_RECIPE_INVENTORY)
                     .hasFeatures(LoreRemovalFeature.VIEW_RECIPE, LoreRemovalFeature.VIEW_RECIPES);
 
-            return new ItemInfo(name, id, hasRecipes, amount);
+            String minecraftId = itemStack.getItem().getName(itemStack).getString()
+                    .toLowerCase().replace(" ", "_").replace("'", "");
+
+            // not perfect, but good enough for 98% of items
+            String fileName;
+            if (itemStack.getItem() == Items.PLAYER_HEAD) {
+                fileName = "SkyBlock_items_" + skyBlockId + ".png";
+            } else if (itemStack.hasGlint()) {
+                fileName = "SkyBlock_items_enchanted_" + minecraftId + ".gif";
+            } else {
+                fileName = "Minecraft_items_" + minecraftId + ".png";
+            }
+
+            return new ItemInfo(name, fileName, skyBlockId, hasRecipes, amount);
         }
     }
 }
