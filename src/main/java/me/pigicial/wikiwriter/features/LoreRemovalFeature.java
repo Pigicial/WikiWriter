@@ -1,6 +1,5 @@
 package me.pigicial.wikiwriter.features;
 
-import lombok.experimental.Accessors;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
@@ -16,8 +15,8 @@ public enum LoreRemovalFeature {
     CLICK_2(config -> config.removeClickNotices, "Right click to view recipes", ""),
     CLICK_3(config -> config.removeClickNotices, "Right-click to view recipes!"),
     CLICK_4(config -> config.removeClickNotices, "Right click to view recipes"),
-    CLICK_5(config -> config.removeClickNotices, "", "Click to view recipe!"),
-    CLICK_6(config -> config.removeClickNotices, "", "Click to view recipes!"),
+    VIEW_RECIPE(config -> config.removeClickNotices, "", "Click to view recipe!"),
+    VIEW_RECIPES(config -> config.removeClickNotices, "", "Click to view recipes!"),
     CLICK_7(config -> config.removeClickNotices, "Right click on your pet to", "give it this item!", ""),
     CLICK_8(config -> config.removeClickNotices, "Right click on your pet to", "feed it this candy!", ""),
     CLICK_9(config -> config.removeClickNotices, "Right-click to add this pet to", "your pet menu!", ""),
@@ -97,29 +96,26 @@ public enum LoreRemovalFeature {
     }
 
     public static RemovedLore checkAndFilter(List<String> lore, Action action) {
-        Config config = WikiWriter.getInstance().getConfig();
+        // This doesn't necessarily mean removed features, just ones that were in the lore. They are then
+        // used for shop item and recipe detection systems
+        Set<LoreRemovalFeature> detectedFeatures = new HashSet<>();
 
         List<String> loreAfterRarityToPossibleAdd = new ArrayList<>();
-        boolean loreHasShopData = false;
-
         OptionalInt rarityIndex = Rarity.getRarityIndexFromLore(lore);
 
         for (LoreRemovalFeature removalType : LoreRemovalFeature.values()) {
-            if (!removalType.settingsFilter.test(config)) {
+            RemovedSectionData sectionData = removalType.remove(lore);
+            if (sectionData == null) {
                 continue;
             }
 
-            RemovedSectionData removeData = removalType.remove(lore);
-            if (removeData == null) {
+            detectedFeatures.add(removalType);
+            if (!sectionData.actuallyRemoved) {
                 continue;
             }
 
-            if (removalType.name().contains("SHOP")) {
-                loreHasShopData = true;
-            }
-
-            int startIndex = removeData.startIndex;
-            int endIndex = removeData.endIndex;
+            int startIndex = sectionData.startIndex;
+            int endIndex = sectionData.endIndex;
 
             if (rarityIndex.isPresent()) {
                 int index = rarityIndex.getAsInt();
@@ -128,18 +124,8 @@ public enum LoreRemovalFeature {
                     rarityIndex = OptionalInt.empty();
                 } else if (index >= endIndex) {
                     // rarity was after removed text, therefore its index changed
-                    rarityIndex = OptionalInt.of(index - removeData.amountOfLines);
+                    rarityIndex = OptionalInt.of(index - sectionData.amountOfLines);
                 } // otherwise, rarity index is the same
-            }
-        }
-
-        if (!loreHasShopData) { // before, this would only be true if shop lore was removed
-            List<String> loreCopy = new ArrayList<>(lore);
-            for (LoreRemovalFeature shopFilter : SHOP_FILTERS) {
-                if (shopFilter.remove(loreCopy) != null) {
-                    loreHasShopData = true;
-                    break;
-                }
             }
         }
 
@@ -157,7 +143,7 @@ public enum LoreRemovalFeature {
             textAfterRarity.clear();
         }
 
-        return new RemovedLore(loreAfterRarityToPossibleAdd, loreHasShopData);
+        return new RemovedLore(loreAfterRarityToPossibleAdd, detectedFeatures);
     }
 
     @Nullable
@@ -166,6 +152,7 @@ public enum LoreRemovalFeature {
             return null;
         }
 
+        boolean shouldRemoveFromLore = settingsFilter.test(WikiWriter.getInstance().getConfig());
         int linesMatched = 0;
 
         for (int currentIndex = 0, loreSize = lore.size(); currentIndex < loreSize; currentIndex++) {
@@ -183,9 +170,11 @@ public enum LoreRemovalFeature {
             if (++linesMatched == textToFilter.size()) {
                 int toIndex = currentIndex + 1;
                 int fromIndex = toIndex - textToFilter.size();
-                lore.subList(fromIndex, toIndex).clear();
+                if (shouldRemoveFromLore) {
+                    lore.subList(fromIndex, toIndex).clear();
+                }
 
-                return new RemovedSectionData(fromIndex, toIndex, textToFilter.size());
+                return new RemovedSectionData(fromIndex, toIndex, textToFilter.size(), shouldRemoveFromLore);
             }
         }
 
@@ -200,12 +189,24 @@ public enum LoreRemovalFeature {
         return bothLinesEmpty || containsText || isAnythingAndNotEmpty;
     }
 
-    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd,
-                              @Accessors(fluent = true) boolean hasShopLore) {
+    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd, Set<LoreRemovalFeature> detectedFeatures) {
 
+        public boolean detectedShopLore() {
+            return hasFeatures(SHOP_FILTERS);
+        }
+
+        public boolean hasFeatures(LoreRemovalFeature... features) {
+            for (LoreRemovalFeature feature : features) {
+                if (detectedFeatures.contains(feature)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
-    private record RemovedSectionData(int startIndex, int endIndex, int amountOfLines) {
+    private record RemovedSectionData(int startIndex, int endIndex, int amountOfLines, boolean actuallyRemoved) {
 
     }
 }

@@ -92,6 +92,14 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Copying Top GUI",
+            description = "Enable the ability to copy a recipe using a set keybind, which you can find in your controls menu.",
+            category = "Copying Inventories"
+    )
+    public boolean recipeTreeMode = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Copying Raw NBT",
             description = "Toggles whether or not the raw NBT of hovered items can be copied using a set keybind.",
             category = "Copying Raw NBT"
@@ -108,20 +116,36 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Remove Item Amounts (in names) from Shop Menus",
+            description = "When enabled, the \"x64\" (or lower) text will be removed from item names, which can be found in shop menus.",
+            category = "Text Filters"
+    )
+    public boolean removeItemAmountsFromItemNames = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Text Below Item Rarities in Items",
+            description = "When enabled, text below an item rarity will be stripped from item lore.",
+            category = "Text Filters"
+    )
+    public boolean removeTextBelowRarityWhenCopyingItems = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Text Below Item Rarities in Menus",
+            description = "When enabled, text below item rarities will be stripped from item lore.",
+            category = "Text Filters"
+    )
+    public boolean removeTextBelowRarityWhenCopyingMenus = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Remove Crafting Table Data",
             description = "Toggles whether or not crafting table info below recipes should be stripped from item lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
     public boolean removeCraftingTableData = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Item Amounts (in names) from Shop Menus",
-            description = "When enabled, the \"x64\" (or lower) text will be removed from item names, which can be found in shop menus.",
-            category = "Text Filters"
-    )
-    public boolean removeItemAmountsFromItemNames = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -176,23 +200,6 @@ public class Config extends Vigilant {
             subcategory = "Lore Filters"
     )
     public boolean removePetItems = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Text Below Item Rarities in Items",
-            description = "When enabled, text below an item rarity will be stripped from item lore.",
-            category = "Text Filters"
-    )
-    public boolean removeTextBelowRarityWhenCopyingItems = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Text Below Item Rarities in Menus",
-            description = "When enabled, text below item rarities will be stripped from item lore.",
-            category = "Text Filters"
-    )
-    public boolean removeTextBelowRarityWhenCopyingMenus = false;
-
     public Config() {
         super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();

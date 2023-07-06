@@ -4,10 +4,10 @@ import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.Config;
 
 public enum Action {
+    COPYING_STANDALONE_ITEM,
     COPYING_INVENTORY,
     COPYING_SHOP_INVENTORY,
-    COPYING_RECIPE_INVENTORY,
-    COPYING_STANDALONE_ITEM;
+    COPYING_RECIPE_INVENTORY;
 
     public boolean shouldIncludeTextAfterRarity() {
         Config config = WikiWriter.getInstance().getConfig();

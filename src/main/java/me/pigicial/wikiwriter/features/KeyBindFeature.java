@@ -37,11 +37,17 @@ public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPre
     public void afterKeyPress(Screen screen, int key, int scancode, int modifiers) {
         int currentlyBoundCode = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
         if (key == currentlyBoundCode && wikiWriter.getConfig().modEnabled) {
-            onKeyPress(MinecraftClient.getInstance());
+            try {
+                onKeyPress(MinecraftClient.getInstance());
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         }
     }
 
     protected abstract void onKeyPress(MinecraftClient client);
+
+    protected abstract void handleException(Exception exception);
 
     @Nullable
     protected final ItemStack getHoveredSlot(MinecraftClient client) {
