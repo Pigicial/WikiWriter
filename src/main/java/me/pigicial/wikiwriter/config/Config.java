@@ -15,7 +15,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Mod Enabled",
-            description = "Global toggle for the features of this mod.",
+            description = "Enabled the features of this mod.",
             category = "General"
     )
     public boolean modEnabled = true;
@@ -32,7 +32,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Disable Clicking on Certain Items",
-            description = "Disables the ability to click on items in menus that don't have an item ID or name. Items without a name and any lore already cannot be clicked nor hovered over, this doesn't change that.",
+            description = "Disables the ability to click on items in menus that don't have an item ID or name. (Items without a name and any lore already cannot be clicked nor hovered over. This doesn't change that.)",
             category = "General",
             subcategory = "Copying Items"
     )
@@ -41,17 +41,17 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SELECTOR,
             name = "Item Reference Mode (Copying GUIs)",
-            description = "If enabled, copied items will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nNote: This setting does not affect recipe menus copied, those items always try to use this format, assuming their automatic formats are enabled (see below).",
+            description = "When enabled, copied items in menus will use their template references instead (i.e. {{Item_diamond_sword}}), and if they're shop items, their shop lore will be placed at the bottom, if they're not removed (see Text Filters).\n\nThis setting does not affect recipe menus copied, as those always use reference mode.",
             category = "General",
             subcategory = "Copying Inventories",
             options = {"Always", "When Copying Shop Items", "Never"}
     )
-    public int menuReferenceModeScenario = 1;
+    public int menuReferenceModeScenario = MENU_REFERENCE_MODE_COPYING_ITEMS;
 
     @Property(
             type = PropertyType.SWITCH,
             name = "Automatic Shop Menu Format",
-            description = "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop prices are affected by certain talismans, so make sure to remove them first!",
+            description = "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop prices are affected by certain accessories, so make sure to remove them first.",
             category = "General",
             subcategory = "Copying Inventories"
     )
@@ -60,7 +60,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Dungeon Stats",
-            description = "Toggles whether or not dungeon stats in dark gray should be stripped from item lore.",
+            description = "When enabled, dungeon stats in dark gray text will be removed from item lore.",
             category = "Text Filters"
     )
     public boolean removeDungeonStats = true;
@@ -68,7 +68,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Text Below Item Rarities in Items",
-            description = "When enabled, text below an item rarity will be stripped from item lore.",
+            description = "When enabled, text below item rarities will be removed from lore.",
             category = "Text Filters"
     )
     public boolean removeTextBelowRarityWhenCopyingItems = true;
@@ -76,7 +76,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Text Below Item Rarities in Menus",
-            description = "When enabled, text below item rarities will be stripped from item lore.",
+            description = "When enabled, text below item rarities will be removed from lore.",
             category = "Text Filters"
     )
     public boolean removeTextBelowRarityWhenCopyingMenus = false;
@@ -84,7 +84,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Right Click Notices",
-            description = "Toggles whether or not specific text lines that reference the act of clicking should be stripped from item lore.",
+            description = "When enabled, specific text lines that reference the act of clicking will be stripped from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
@@ -93,7 +93,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Shop Price",
-            description = "When toggled, lore that mentions the prices and requirements of purchasing items will be removed when copied.",
+            description = "When enabled, text that mentions the prices and requirements of purchasing items will be removed from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
@@ -102,7 +102,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Shop Stock Text",
-            description = "When toggled, lore that mentions how much leftover stock you can purchase of an item will be removed.",
+            description = "When enabled, text that mentions how much leftover stock you can purchase of an item will be removed from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
@@ -111,7 +111,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Shop Buy Text",
-            description = "When toggled, lore that mentions clicking to purchase items will be removed when copied.",
+            description = "When enabled, text that mentions clicking to purchase items will be removed from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
@@ -120,7 +120,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Pickaxe Abilities",
-            description = "Toggles whether or not pickaxe abilities should be stripped from item lore.",
+            description = "When enabled, pickaxe abilities will be removed from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
@@ -129,7 +129,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Remove Pet Items",
-            description = "Toggles whether or not pet items on pets should be stripped from item lore.",
+            description = "When enabled, pet items will be removed from lore.",
             category = "Text Filters",
             subcategory = "Lore Filters"
     )
