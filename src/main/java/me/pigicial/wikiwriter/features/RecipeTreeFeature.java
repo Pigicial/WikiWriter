@@ -153,7 +153,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             // not perfect, but good enough for 98% of items
             String fileName;
             if (itemStack.getItem() == Items.PLAYER_HEAD) {
-                fileName = "SkyBlock_items_" + skyBlockId + ".png";
+                fileName = "SkyBlock_items_" + skyBlockId.toLowerCase() + ".png";
             } else if (itemStack.hasGlint()) {
                 fileName = "SkyBlock_items_enchanted_" + minecraftId + ".gif";
             } else {
