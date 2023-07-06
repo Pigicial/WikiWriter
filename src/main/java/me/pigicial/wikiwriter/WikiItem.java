@@ -12,7 +12,6 @@ import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +56,7 @@ public class WikiItem {
 
     private boolean showRarity = true;
 
-    public WikiItem(@NotNull ItemStack stack, Action action, boolean referenceMode) {
+    public WikiItem(@NotNull ItemStack stack, Action action) {
         NbtCompound nbt = stack.getNbt();
         // I don't think this can be null but there's null checks in ItemStack so just in case
         if (nbt == null) {
@@ -77,7 +76,7 @@ public class WikiItem {
         lore = TextUtils.parseJsonLore(display);
 
         nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
-        updateName(); // fix brackets in name plus replace amounts if necessary
+        updateNameAndStackSize(action); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
         LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, action);
@@ -90,9 +89,6 @@ public class WikiItem {
         showRarity = showRarity && rarity != null;
 
         petInfo = PetInfo.getPetInfo(extraAttributes);
-
-        // Updates the stack sizes (and name if so) of the item based on various factors
-        updateStackSizes(referenceMode, extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
@@ -108,15 +104,24 @@ public class WikiItem {
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
     }
 
-    private void updateName() {
+    private void updateNameAndStackSize(Action action) {
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
             showRarity = false;
             nameWithColor = "INSERT_LINK_HERE";
+            return;
+        }
+
+        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.setAmountsToOne;
+        if (setToOne) {
+            currentStackSize = 1;
+
+            Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(nameWithColor);
+            nameWithColor = matcher.replaceAll("");
         }
 
         // Removes the item amount from the name
-        if (config.removeItemAmountsFromItemNames) {
+        if (config.removeItemAmountsFromItemNames || setToOne) {
             Matcher matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
             while (matcher.find()) {
                 nameWithColor = nameWithColor.replace(matcher.group(), "");
@@ -157,33 +162,6 @@ public class WikiItem {
         if (hasCustomSkullTexture && skyBlockId.isEmpty() && nameWithoutColor.endsWith(" Minion")) {
             // for the crafted minions menu basically
             skyBlockId = nameWithoutColor.substring(0, nameWithoutColor.length() - 7) + "_GENERATOR_1";
-        }
-    }
-
-    private void updateStackSizes(boolean referenceMode, NbtCompound extraAttributes) {
-        if (referenceMode || !showRarity || !config.guaranteedStackSizeToggled || skyBlockId.isEmpty()) {
-            return;
-        }
-
-        int maxStackSize = currentStackSize;
-
-        if (extraAttributes.contains("uuid", NbtElement.STRING_TYPE)) {
-            maxStackSize = 1;
-        }
-
-        int setStackSize = config.setStackSize;
-        if (!config.bypassStackSizeLimit && setStackSize > maxStackSize) {
-            setStackSize = maxStackSize;
-        }
-
-        if (setStackSize != currentStackSize) {
-            currentStackSize = setStackSize;
-
-            Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(nameWithColor);
-            nameWithColor = matcher.replaceAll(result -> {
-                String numberText = result.group(1);
-                return result.group().replace(numberText, String.valueOf(currentStackSize));
-            });
         }
     }
 

@@ -30,12 +30,11 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Guaranteed Stack Size Toggle",
-            description = "Toggle whether or not items copied should have their stack sizes forcefully set, up to their vanilla stack size limit.\n\nThis feature is disabled for recipes while recipe mode is enabled.",
-            category = "Copying Items",
-            subcategory = "Changing Item Amounts"
+            name = "Set Item Amounts to 1",
+            description = "Toggle whether or not individually-copied items will have their amounts set to 1.",
+            category = "Copying Items"
     )
-    public boolean guaranteedStackSizeToggled = false;
+    public boolean setAmountsToOne = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -44,26 +43,6 @@ public class Config extends Vigilant {
             category = "Copying Items"
     )
     public boolean disableClicking = true;
-
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "Guaranteed Stack Size",
-            description = "The guaranteed stack size of items. Items will not go higher than their vanilla stack size limit.\n\nWarning: Items copied from Auction GUIs that have a stack size that isn't one will have their references break.",
-            category = "Copying Items",
-            subcategory = "Changing Item Amounts",
-            min = 1,
-            max = 64
-    )
-    public int setStackSize = 1;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Bypass Stack Size Limit",
-            description = "Toggle whether or not items with the amounts changed can have their stack sizes be forcefully set to above their vanilla stack size limit. Items with a UUID have a max stack size of 1.",
-            category = "Copying Items",
-            subcategory = "Changing Item Amounts"
-    )
-    public boolean bypassStackSizeLimit = false;
 
     @Property(
             type = PropertyType.SELECTOR,
