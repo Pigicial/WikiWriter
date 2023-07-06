@@ -83,24 +83,6 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Remove Crafting Table Data",
-            description = "Toggles whether or not crafting table info below recipes should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removeCraftingTableData = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Pickaxe Abilities",
-            description = "Toggles whether or not pickaxe abilities should be stripped from item lore.",
-            category = "Text Filters",
-            subcategory = "Lore Filters"
-    )
-    public boolean removePickaxeAbilities = true;
-
-    @Property(
-            type = PropertyType.SWITCH,
             name = "Remove Right Click Notices",
             description = "Toggles whether or not specific text lines that reference the act of clicking should be stripped from item lore.",
             category = "Text Filters",
@@ -134,6 +116,15 @@ public class Config extends Vigilant {
             subcategory = "Lore Filters"
     )
     public boolean removeShopNPCTradeText = true;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Pickaxe Abilities",
+            description = "Toggles whether or not pickaxe abilities should be stripped from item lore.",
+            category = "Text Filters",
+            subcategory = "Lore Filters"
+    )
+    public boolean removePickaxeAbilities = true;
 
     @Property(
             type = PropertyType.SWITCH,
