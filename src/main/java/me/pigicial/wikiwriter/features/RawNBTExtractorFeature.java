@@ -1,7 +1,6 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -15,11 +14,6 @@ public class RawNBTExtractorFeature extends KeyBindFeature {
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        Config config = wikiWriter.getConfig();
-        if (!config.rawNbtExtractionEnabled) {
-            return;
-        }
-
         ItemStack itemUnderCursor = getHoveredSlot(client);
         if (itemUnderCursor == null) {
             return;

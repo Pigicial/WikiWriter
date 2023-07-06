@@ -2,7 +2,6 @@ package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
@@ -35,10 +34,8 @@ public class GUIStealerFeature extends KeyBindFeature {
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        Config config = wikiWriter.getConfig();
         ClientPlayerEntity player = client.player;
-
-        if (!config.copyGUI || player == null) {
+        if (player == null) {
             return;
         }
 

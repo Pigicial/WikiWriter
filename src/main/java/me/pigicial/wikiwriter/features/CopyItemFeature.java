@@ -2,7 +2,6 @@ package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
@@ -16,11 +15,6 @@ public class CopyItemFeature extends KeyBindFeature {
 
     @Override
     protected void onKeyPress(MinecraftClient client) {
-        Config config = wikiWriter.getConfig();
-        if (!config.copyItems) {
-            return;
-        }
-
         ItemStack itemUnderCursor = getHoveredSlot(client);
         if (itemUnderCursor == null) {
             return;
