@@ -133,9 +133,9 @@ public class WikiItem {
 
         long color = display.getLong("color");
         if (minecraftId.startsWith("leather") && color != 0) {
-            LeatherColorFinderFeature colorFinderFeature = LeatherColorFinderFeature.findColor((int) color);
-            if (colorFinderFeature != LeatherColorFinderFeature.DEFAULT) {
-                minecraftId = minecraftId + "_" + colorFinderFeature.name().toLowerCase();
+            LeatherColorFinderFeature.LeatherArmorColor armorColor = LeatherColorFinderFeature.findColor(color);
+            if (armorColor != LeatherColorFinderFeature.LeatherArmorColor.DEFAULT) {
+                minecraftId = minecraftId + "_" + armorColor.name().toLowerCase();
             }
         }
 
