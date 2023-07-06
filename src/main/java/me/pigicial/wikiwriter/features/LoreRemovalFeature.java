@@ -71,7 +71,7 @@ public enum LoreRemovalFeature {
     PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", ""),
     PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "");
 
-    public static final LoreRemovalFeature[] SHOP_FILTERS = Arrays.stream(LoreRemovalFeature.values())
+    private static final LoreRemovalFeature[] SHOP_FILTERS = Arrays.stream(LoreRemovalFeature.values())
             .filter(feature -> feature.name().contains("SHOP"))
             .sorted(Comparator.comparing(Enum::ordinal))
             .toArray(LoreRemovalFeature[]::new);
