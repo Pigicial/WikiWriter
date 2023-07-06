@@ -26,7 +26,7 @@ repositories {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-version = "${mod_version}-MC-${minecraft_version}"
+version = "${mod_version}-for-MC-${minecraft_version}"
 group = "me.pigicial"
 archivesBaseName = "WikiWriter"
 
