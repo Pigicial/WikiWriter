@@ -35,6 +35,7 @@ public enum LoreRemovalFeature {
     CLICK_22(config -> config.removeClickNotices, "", "Right-click to configure!"),
     CLICK_23(config -> config.removeClickNotices, "", "Click to view upgrades"),
     CLICK_24(config -> config.removeClickNotices, "", "Click to summon"),
+    CLICK_25(config -> config.removeClickNotices, "", "Click to craft"),
 
     SHOP_1(config -> config.removeShopNPCPriceText, "", "Cost:"),
     SHOP_2(config -> config.removeShopNPCPriceText, "", "Cost", "{any-not-empty}"),
@@ -57,19 +58,7 @@ public enum LoreRemovalFeature {
     BOTTOM_SHOP_7(config -> config.removeShopNPCTradeText, "", "Click to buy into quiver"),
     BOTTOM_SHOP_8(config -> config.removeShopNPCTradeText, "", "Not unlocked"),
     BOTTOM_SHOP_9(config -> config.removeShopNPCTradeText, "", "You don't have the required items"),
-    BOTTOM_SHOP_10(config -> config.removeShopNPCTradeText, "", "Click to craft"),
     BOTTOM_SHOP_11(config -> config.removeShopNPCTradeText, "", "Can't afford this"),
-
-    CRAFTING_TABLE_1(config -> config.removeCraftingTableData, "--------", "This is the item you are", "crafting"),
-    QUICK_CRAFTING_1(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_2(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "Click to craft"),
-    QUICK_CRAFTING_3(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_4(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_5(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_6(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_7(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_8(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "{any-not-empty}", "", "Click to craft"),
-    QUICK_CRAFTING_9(config -> config.removeCraftingTableData, "", "--------", "Ingredients", "{any-not-empty}", "", "Click to craft"),
 
     PICKAXE_ABILITY_1(config -> config.removePickaxeAbilities, "Ability: Mining Speed Boost", "Grants", "Speed", "Cooldown", ""),
     PICKAXE_ABILITY_2(config -> config.removePickaxeAbilities, "Ability: Maniac Miner", "Spends", "{any-not-empty}", "every", "{any-not-empty}", "Cooldown", ""),
