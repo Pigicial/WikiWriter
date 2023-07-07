@@ -79,7 +79,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
-        builder.append("{{Inventory\n")
+        builder.append("<noinclude>[[Category:Inventory Templates]]</noinclude>\n{{Inventory\n")
                 .append("|name=").append(inventoryName).append("\n")
                 .append("|rows=").append(rows).append("\n");
 

@@ -100,7 +100,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             builder.append(ingredient.convertToCollapsibleTreeResource()).append("\n");
         }
 
-        builder.append("}}\n<noinclude>[[Category:CollapsibleTree]]</noinclude>");
+        builder.append("}}<noinclude>[[Category:CollapsibleTree]]</noinclude>");
         wikiWriter.sendMessage("Copied recipe tree to clipboard.");
         wikiWriter.copyToClipboard(builder.toString());
     }
