@@ -5,10 +5,7 @@ import me.pigicial.wikiwriter.features.ColorReplacementFeature;
 import me.pigicial.wikiwriter.features.LeatherColorFinderFeature;
 import me.pigicial.wikiwriter.features.LoreRemovalFeature;
 import me.pigicial.wikiwriter.features.RegexTextReplacements;
-import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.PetInfo;
-import me.pigicial.wikiwriter.utils.Rarity;
-import me.pigicial.wikiwriter.utils.TextUtils;
+import me.pigicial.wikiwriter.utils.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -37,6 +34,7 @@ public class WikiItem {
 
     @Nullable
     private final PetInfo petInfo;
+    private final RuneData runeData;
 
     private final boolean shopItem;
     private final boolean hasCustomSkullTexture;
@@ -90,6 +88,7 @@ public class WikiItem {
         showRarity = showRarity && rarity != null;
 
         petInfo = PetInfo.getPetInfo(extraAttributes);
+        runeData = RuneData.getRuneData(extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
@@ -190,6 +189,10 @@ public class WikiItem {
             return "{{Item_" + (mysteryPet ? "pet_craft_" : "pet_") + petInfo.type().toLowerCase() + (!mysteryPet ? "_" + rarity.toString() : "") + "}}";
         }
 
+        if (runeData != null) {
+            return "{{Item_" + runeData.texture() + "_" + runeData.level() + "}}";
+        }
+
         boolean potion = skyBlockId.equalsIgnoreCase("potion");
         String referenceId;
         if (!hasCustomSkullTexture && (skyBlockId.isEmpty() || potion)) {
@@ -256,6 +259,8 @@ public class WikiItem {
             return minecraftId;
         } else if (petInfo != null) {
             return petInfo.type().toLowerCase();
+        } else if (runeData != null) {
+            return runeData.texture();
         } else {
             return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }
