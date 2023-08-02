@@ -6,6 +6,7 @@ import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
@@ -39,16 +40,15 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
-        ScreenHandler currentScreenHandler = player.currentScreenHandler;
-        Screen currentScreen = MinecraftClient.getInstance().currentScreen;
-        if (currentScreen == null || !(currentScreenHandler instanceof GenericContainerScreenHandler chestHandler)) {
-            return;
+        ScreenHandler handler = player.currentScreenHandler;
+        Screen screen = MinecraftClient.getInstance().currentScreen;
+
+        if (screen instanceof GenericContainerScreen && handler instanceof GenericContainerScreenHandler chestHandler) {
+            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
+            String inventoryName = screen.getTitle().getString();
+
+            process(items, inventoryName);
         }
-
-        List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
-        String inventoryName = currentScreen.getTitle().getString();
-
-        process(items, inventoryName);
     }
 
     @Override
