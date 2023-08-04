@@ -2,7 +2,9 @@ package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.Config;
-import me.pigicial.wikiwriter.utils.*;
+import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
+import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -30,8 +32,7 @@ public class WikiItem {
     private final List<String> lore;
 
     @Nullable
-    private final PetInfo petInfo;
-    private final RuneData runeData;
+    private final TextureAndReferenceData textureAndReferenceData;
 
     private final boolean shopItem;
     private final boolean hasCustomSkullTexture;
@@ -84,8 +85,7 @@ public class WikiItem {
 
         showRarity = showRarity && rarity != null;
 
-        petInfo = PetInfo.getPetInfo(extraAttributes);
-        runeData = RuneData.getRuneData(extraAttributes);
+        textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = StyleReplacer.replace(nameWithReplacements);
@@ -181,13 +181,8 @@ public class WikiItem {
             return "";
         }
 
-        if (petInfo != null) {
-            boolean mysteryPet = petInfo.mysteryPet();
-            return "{{Item_" + (mysteryPet ? "pet_craft_" : "pet_") + petInfo.type().toLowerCase() + (!mysteryPet ? "_" + rarity.toString() : "") + "}}";
-        }
-
-        if (runeData != null) {
-            return "{{Item_" + runeData.texture() + "_" + runeData.level() + "}}";
+        if (textureAndReferenceData != null) {
+            return textureAndReferenceData.getTemplateReference();
         }
 
         boolean potion = skyBlockId.equalsIgnoreCase("potion");
@@ -242,22 +237,18 @@ public class WikiItem {
     }
 
     private String generateTextureType() {
-        if (petInfo != null) {
-            return "sbpet";
-        } else if (hasCustomSkullTexture) {
-            return "sb";
-        } else {
-            return "mc";
+        if (textureAndReferenceData != null) {
+            return textureAndReferenceData.getTextureType();
         }
+
+        return hasCustomSkullTexture ? "sb" : "mc";
     }
 
     private String generateTextureLink() {
         if (!hasCustomSkullTexture) {
             return minecraftId;
-        } else if (petInfo != null) {
-            return petInfo.type().toLowerCase();
-        } else if (runeData != null) {
-            return runeData.texture();
+        } else if (textureAndReferenceData != null) {
+            return textureAndReferenceData.getTextureLink();
         } else {
             return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }
