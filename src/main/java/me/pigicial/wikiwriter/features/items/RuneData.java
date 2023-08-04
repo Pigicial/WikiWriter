@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.utils;
+package me.pigicial.wikiwriter.features.items;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.nbt.NbtCompound;

@@ -1,6 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
-import me.pigicial.wikiwriter.WikiItem;
+import me.pigicial.wikiwriter.features.items.LoreFilters;
+import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -22,8 +23,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static me.pigicial.wikiwriter.features.RecipeUtils.*;
 
 public class GUIStealerFeature extends KeyBindFeature {
 
@@ -119,7 +118,7 @@ public class GUIStealerFeature extends KeyBindFeature {
                 lore.add(TextUtils.convertJsonTextToLegacy(loreTag.getString(i)));
             }
 
-            LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
+            LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
             return removeData.detectedShopLore() && areTopAndBottomRowsCorrectForShop(items, size);
         }
 

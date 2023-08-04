@@ -2,6 +2,7 @@ package me.pigicial.wikiwriter.features;
 
 import lombok.AllArgsConstructor;
 import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.features.items.LoreFilters;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
@@ -19,8 +20,6 @@ import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
-
-import static me.pigicial.wikiwriter.features.RecipeUtils.CRAFTING_TABLE_INGREDIENT_SLOTS;
 
 public class RecipeTreeFeature extends KeyBindFeature {
 
@@ -44,7 +43,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             int size = items.size();
             int rows = size / 9;
 
-            if (RecipeUtils.isRecipeMenu(rows, inventoryName, items)) {
+            if (isRecipeMenu(rows, inventoryName, items)) {
                 processRecipe(inventoryName, items);
             }
         }
@@ -143,8 +142,8 @@ public class RecipeTreeFeature extends KeyBindFeature {
             int amount = itemStack.getCount();
 
             List<String> lore = TextUtils.parseJsonLore(nbt.getCompound("display"));
-            boolean hasRecipes = LoreRemovalFeature.checkAndFilter(lore, Action.COPYING_RECIPE_INVENTORY)
-                    .hasFeatures(LoreRemovalFeature.VIEW_RECIPE, LoreRemovalFeature.VIEW_RECIPES);
+            boolean hasRecipes = LoreFilters.checkAndFilter(lore, Action.COPYING_RECIPE_INVENTORY)
+                    .hasFeatures(LoreFilters.VIEW_RECIPE, LoreFilters.VIEW_RECIPES);
 
             String minecraftId = itemStack.getItem().getName(itemStack).getString()
                     .toLowerCase().replace(" ", "_").replace("'", "");

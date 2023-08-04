@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.utils;
+package me.pigicial.wikiwriter.features.items;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

@@ -1,10 +1,7 @@
-package me.pigicial.wikiwriter;
+package me.pigicial.wikiwriter.features.items;
 
+import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.Config;
-import me.pigicial.wikiwriter.features.ColorReplacementFeature;
-import me.pigicial.wikiwriter.features.LeatherColorFinderFeature;
-import me.pigicial.wikiwriter.features.LoreRemovalFeature;
-import me.pigicial.wikiwriter.features.RegexTextReplacements;
 import me.pigicial.wikiwriter.utils.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -80,7 +77,7 @@ public class WikiItem {
         updateNameAndStackSize(action); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
-        LoreRemovalFeature.RemovedLore removeData = LoreRemovalFeature.checkAndFilter(lore, action);
+        LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, action);
         loreAsString = TextUtils.convertListToString(lore);
         extraLoreBelowRarity = TextUtils.convertListToString(removeData.loreBelowRarityToPossibleAdd());
         shopItem = removeData.detectedShopLore();
@@ -91,10 +88,10 @@ public class WikiItem {
         runeData = RuneData.getRuneData(extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
-        nameWithColor = ColorReplacementFeature.replace(nameWithReplacements);
+        nameWithColor = StyleReplacer.replace(nameWithReplacements);
         nameWithoutColor = Objects.requireNonNull(Formatting.strip(nameWithReplacements)).replace('§', '&');
 
-        if (showRarity && ColorReplacementFeature.hasMultipleStyles(nameWithColor)) {
+        if (showRarity && StyleReplacer.hasMultipleStyles(nameWithColor)) {
             showRarity = false;
         }
 
@@ -133,8 +130,8 @@ public class WikiItem {
 
         long color = display.getLong("color");
         if (minecraftId.startsWith("leather") && color != 0) {
-            LeatherColorFinderFeature.LeatherArmorColor armorColor = LeatherColorFinderFeature.findColor(color);
-            if (armorColor != LeatherColorFinderFeature.LeatherArmorColor.DEFAULT) {
+            LeatherArmorColor armorColor = LeatherArmorColor.findColor(color);
+            if (armorColor != LeatherArmorColor.DEFAULT) {
                 minecraftId = minecraftId + "_" + armorColor.name().toLowerCase();
             }
         }
