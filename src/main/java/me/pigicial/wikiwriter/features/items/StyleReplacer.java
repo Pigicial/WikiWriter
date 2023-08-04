@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.features;
+package me.pigicial.wikiwriter.features.items;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ColorReplacementFeature {
+public class StyleReplacer {
 
     public static final Pattern STRIPPED_COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-ORX]");
 
@@ -74,7 +74,7 @@ public class ColorReplacementFeature {
     }
 
     @Nullable
-    private static ColorReplacementFeature.Style getStyleByCode(String key) {
+    private static StyleReplacer.Style getStyleByCode(String key) {
         for (Style feature : STYLE_VALUES) {
             if (feature.key.equals(key)) {
                 return feature;

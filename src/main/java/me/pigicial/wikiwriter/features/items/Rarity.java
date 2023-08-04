@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.utils;
+package me.pigicial.wikiwriter.features.items;
 
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
@@ -23,17 +23,11 @@ public enum Rarity {
     private static final Set<Rarity> REGULAR_ITEM_RARITIES = new HashSet<>(Arrays.asList(Rarity.values()));
 
     private final String name;
-    private final String check;
     private final char code;
 
     Rarity(String name, char code) {
         this.name = name;
-        this.check = "&" + code + "&l" + name().replace("_", " ");
         this.code = code;
-    }
-
-    public String getCheck() {
-        return check;
     }
 
     public char getColorCode() {
@@ -43,19 +37,6 @@ public enum Rarity {
     @Override
     public String toString() {
         return name;
-    }
-
-    public Rarity getPreviousRarity() {
-        return switch (this) {
-            case COMMON, UNCOMMON -> COMMON;
-            case RARE -> UNCOMMON;
-            case EPIC -> RARE;
-            case LEGENDARY -> EPIC;
-            case MYTHIC -> LEGENDARY;
-            case DIVINE -> MYTHIC;
-            case VERY_SPECIAL -> DIVINE;
-            default -> this;
-        };
     }
 
     public static Rarity parseRarity(List<String> lore, String name) {

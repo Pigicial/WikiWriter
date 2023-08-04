@@ -1,16 +1,15 @@
-package me.pigicial.wikiwriter.features;
+package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.Config;
 import me.pigicial.wikiwriter.utils.Action;
-import me.pigicial.wikiwriter.utils.Rarity;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-public enum LoreRemovalFeature {
+public enum LoreFilters {
     CLICK_1(config -> config.removeClickNotices, "Right-click to view recipes!", ""),
     CLICK_2(config -> config.removeClickNotices, "Right click to view recipes", ""),
     CLICK_3(config -> config.removeClickNotices, "Right-click to view recipes!"),
@@ -71,15 +70,15 @@ public enum LoreRemovalFeature {
     PET_ITEMS_4(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", ""),
     PET_ITEMS_5(config -> config.removePetItems, "Held Item:", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "{any-not-empty}", "");
 
-    private static final LoreRemovalFeature[] SHOP_FILTERS = Arrays.stream(LoreRemovalFeature.values())
+    private static final LoreFilters[] SHOP_FILTERS = Arrays.stream(LoreFilters.values())
             .filter(feature -> feature.name().contains("SHOP"))
             .sorted(Comparator.comparing(Enum::ordinal))
-            .toArray(LoreRemovalFeature[]::new);
+            .toArray(LoreFilters[]::new);
 
     private final Predicate<Config> settingsFilter;
     private final List<String> textToFilter;
 
-    LoreRemovalFeature(Predicate<Config> settingsFilter, String... textToFilter) {
+    LoreFilters(Predicate<Config> settingsFilter, String... textToFilter) {
         this.settingsFilter = settingsFilter;
         this.textToFilter = Arrays.asList(textToFilter);
     }
@@ -87,42 +86,40 @@ public enum LoreRemovalFeature {
     public static RemovedLore checkAndFilter(List<String> lore, Action action) {
         // This doesn't necessarily mean removed features, just ones that were in the lore. They are then
         // used for shop item and recipe detection systems
-        Set<LoreRemovalFeature> detectedFeatures = new HashSet<>();
+        Set<LoreFilters> detectedFeatures = new HashSet<>();
 
         List<String> loreAfterRarityToPossibleAdd = new ArrayList<>();
-        OptionalInt rarityIndex = Rarity.getRarityIndexFromLore(lore);
+        OptionalInt optionalRarityIndex = Rarity.getRarityIndexFromLore(lore);
 
-        for (LoreRemovalFeature removalType : LoreRemovalFeature.values()) {
+        for (LoreFilters removalType : LoreFilters.values()) {
             RemovedSectionData sectionData = removalType.remove(lore);
             if (sectionData == null) {
                 continue;
             }
 
             detectedFeatures.add(removalType);
-            if (!sectionData.actuallyRemoved) {
+            if (!sectionData.removedFromLore || optionalRarityIndex.isEmpty()) {
                 continue;
             }
 
             int startIndex = sectionData.startIndex;
             int endIndex = sectionData.endIndex;
 
-            if (rarityIndex.isPresent()) {
-                int index = rarityIndex.getAsInt();
-                if (index >= startIndex && index < endIndex) {
-                    // rarity was removed
-                    rarityIndex = OptionalInt.empty();
-                } else if (index >= endIndex) {
-                    // rarity was after removed text, therefore its index changed
-                    rarityIndex = OptionalInt.of(index - sectionData.amountOfLines);
-                } // otherwise, rarity index is the same
-            }
+            int rarityIndex = optionalRarityIndex.getAsInt();
+            if (rarityIndex >= startIndex && rarityIndex < endIndex) {
+                // rarity was removed
+                optionalRarityIndex = OptionalInt.empty();
+            } else if (rarityIndex >= endIndex) {
+                // rarity was after removed text, therefore its index changed
+                optionalRarityIndex = OptionalInt.of(rarityIndex - sectionData.amountOfLines);
+            } // otherwise, rarity index is the same
         }
 
         boolean includeTextAfterRarity = action.shouldIncludeTextAfterRarity();
-        boolean hasTextAfterRarity = rarityIndex.isPresent() && lore.size() > rarityIndex.getAsInt() + 1;
+        boolean hasTextAfterRarity = optionalRarityIndex.isPresent() && lore.size() > optionalRarityIndex.getAsInt() + 1;
 
         if (hasTextAfterRarity) {
-            List<String> textAfterRarity = lore.subList(rarityIndex.getAsInt() + 1, lore.size());
+            List<String> textAfterRarity = lore.subList(optionalRarityIndex.getAsInt() + 1, lore.size());
 
             if (includeTextAfterRarity) {
                 loreAfterRarityToPossibleAdd.addAll(textAfterRarity);
@@ -178,14 +175,14 @@ public enum LoreRemovalFeature {
         return bothLinesEmpty || containsText || isAnythingAndNotEmpty;
     }
 
-    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd, Set<LoreRemovalFeature> detectedFeatures) {
+    public record RemovedLore(List<String> loreBelowRarityToPossibleAdd, Set<LoreFilters> detectedFeatures) {
 
         public boolean detectedShopLore() {
             return hasFeatures(SHOP_FILTERS);
         }
 
-        public boolean hasFeatures(LoreRemovalFeature... features) {
-            for (LoreRemovalFeature feature : features) {
+        public boolean hasFeatures(LoreFilters... features) {
+            for (LoreFilters feature : features) {
                 if (detectedFeatures.contains(feature)) {
                     return true;
                 }
@@ -195,7 +192,7 @@ public enum LoreRemovalFeature {
         }
     }
 
-    private record RemovedSectionData(int startIndex, int endIndex, int amountOfLines, boolean actuallyRemoved) {
+    private record RemovedSectionData(int startIndex, int endIndex, int amountOfLines, boolean removedFromLore) {
 
     }
 }
