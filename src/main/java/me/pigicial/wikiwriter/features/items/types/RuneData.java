@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.features.items;
+package me.pigicial.wikiwriter.features.items.types;
 
 import com.google.common.collect.Iterators;
 import net.minecraft.nbt.NbtCompound;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public record RuneData(String texture, int level) {
+public record RuneData(String texture, int level) implements TextureAndReferenceData {
 
     @Nullable
     public static RuneData getRuneData(NbtCompound extraAttributes) {
@@ -31,5 +31,20 @@ public record RuneData(String texture, int level) {
 
         int runeLevel = runeInfo.getInt(runeId);
         return new RuneData(texture, runeLevel);
+    }
+
+    @Override
+    public String getTemplateReference() {
+        return "{{Item_" + texture + "_" + level + "}}";
+    }
+
+    @Override
+    public String getTextureLink() {
+        return texture;
+    }
+
+    @Override
+    public String getTextureType() {
+        return "sb";
     }
 }
