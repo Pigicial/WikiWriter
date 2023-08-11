@@ -52,17 +52,17 @@ public class WikiItem {
 
     private boolean showRarity = true;
 
-    public WikiItem(@NotNull ItemStack stack, Action action) {
-        NbtCompound nbt = stack.getNbt();
+    public WikiItem(@NotNull ItemStack itemStack, Action action) {
+        NbtCompound nbt = itemStack.getNbt();
         // I don't think this can be null but there's null checks in ItemStack so just in case
         if (nbt == null) {
             nbt = new NbtCompound();
         }
 
-        originalStackSize = stack.getCount();
+        originalStackSize = itemStack.getCount();
         currentStackSize = originalStackSize;
-        minecraftId = stack.getItem().getName(stack).getString().toLowerCase().replace(" ", "_").replace("'", "");
-        hasCustomSkullTexture = stack.getItem() == Items.PLAYER_HEAD;
+        minecraftId = itemStack.getItem().getName(itemStack).getString().toLowerCase().replace(" ", "_").replace("'", "");
+        hasCustomSkullTexture = itemStack.getItem() == Items.PLAYER_HEAD;
 
         NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
         skyBlockId = extraAttributes.getString("id").toLowerCase().replace(":", ".");
@@ -71,7 +71,7 @@ public class WikiItem {
         NbtCompound display = nbt.getCompound("display");
         lore = TextUtils.parseJsonLore(display);
 
-        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(stack.getName()));
+        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(itemStack.getName()));
         // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
 
@@ -85,7 +85,7 @@ public class WikiItem {
 
         showRarity = showRarity && rarity != null;
 
-        textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(extraAttributes);
+        textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(itemStack, extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = StyleReplacer.replace(nameWithReplacements);
@@ -96,7 +96,7 @@ public class WikiItem {
         }
 
         // Fixes various item ID quirks (and handles colors and whatnot)
-        fixIDs(stack, display, extraAttributes);
+        fixIDs(itemStack, display, extraAttributes);
 
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
     }
@@ -245,10 +245,10 @@ public class WikiItem {
     }
 
     private String generateTextureLink() {
-        if (!hasCustomSkullTexture) {
-            return minecraftId;
-        } else if (textureAndReferenceData != null) {
+        if (textureAndReferenceData != null) {
             return textureAndReferenceData.getTextureLink();
+        } else if (!hasCustomSkullTexture) {
+            return minecraftId;
         } else {
             return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }
