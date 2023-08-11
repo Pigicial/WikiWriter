@@ -1,5 +1,6 @@
 package me.pigicial.wikiwriter.features.items.types;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
 public interface TextureAndReferenceData {
@@ -9,7 +10,7 @@ public interface TextureAndReferenceData {
 
     String getTextureType();
 
-    static TextureAndReferenceData getFromExtraAttributes(NbtCompound extraAttributes) {
+    static TextureAndReferenceData getFromExtraAttributes(ItemStack itemStack, NbtCompound extraAttributes) {
         PetData petInfo = PetData.getPetInfo(extraAttributes);
         if (petInfo != null) {
             return petInfo;
@@ -20,6 +21,11 @@ public interface TextureAndReferenceData {
             return runeData;
         }
 
-        return AbicaseData.getAbicaseData(extraAttributes);
+        AbicaseData abicaseData = AbicaseData.getAbicaseData(extraAttributes);
+        if (abicaseData != null) {
+            return abicaseData;
+        }
+
+        return EnchantedBookData.getEnchantedBookData(itemStack, extraAttributes);
     }
 }
