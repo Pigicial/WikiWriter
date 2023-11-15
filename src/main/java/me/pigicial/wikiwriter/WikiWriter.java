@@ -11,6 +11,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -87,6 +92,26 @@ public class WikiWriter implements ModInitializer {
         for (String message : messages) {
             player.sendMessage(Text.of(messagePrefix + Formatting.RESET + " " + message));
         }
+    }
+
+    public void suggestPageLink(String pageName) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) {
+            return;
+        }
+
+        String editUrl = "https://wiki.hypixel.net/index.php?title=" + pageName + "&action=edit&section=0";
+
+        TextComponent hoverText = Component.text("Click to edit ")
+                .append(Component.text(pageName).color(NamedTextColor.GRAY));
+
+        TextComponent primaryText = Component.text(messagePrefix)
+                .append(Component.text(" Suggested Page: "))
+                .append(Component.text(pageName).color(NamedTextColor.GRAY)
+                        .hoverEvent(HoverEvent.showText(hoverText))
+                        .clickEvent(ClickEvent.openUrl(editUrl)));
+
+        player.sendMessage(primaryText);
     }
 
     public Config getConfig() {

@@ -198,15 +198,22 @@ public class GUIStealerFeature extends KeyBindFeature {
             builder.append("|in").append(i + 1).append("=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
-        if (!product.isEmpty()) {
-            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
-            builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
+        WikiItem resultItem = product.isEmpty() ? null : new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
+        if (resultItem != null) {
+            builder.append("|out=").append(resultItem.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
 
         builder.append("}}\n<noinclude>[[Category:Recipe Templates]]</noinclude>");
 
         wikiWriter.sendMessage("Copied top GUI recipe to clipboard.");
         wikiWriter.copyToClipboard(builder.toString());
+
+        if (resultItem != null) {
+            String templatePageName = resultItem.getItemTemplatePageName();
+            if (!templatePageName.isEmpty()) {
+                wikiWriter.suggestPageLink(templatePageName);
+            }
+        }
     }
 
     private ForgeRecipeType getForgeRecipeType(String inventoryName, List<ItemStack> items, int rows) {
