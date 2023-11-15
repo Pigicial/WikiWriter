@@ -204,6 +204,12 @@ public class WikiItem {
         return reference + extraLore + alternateAmountString;
     }
 
+    @NotNull
+    public String getItemTemplatePageName() {
+        String id = convertToReference().replace("{{", "").replace("}}", "");
+        return id.isEmpty() ? "" : "Template:" + id;
+    }
+
     private String convertToWikiItem() {
         if (minecraftId.equals("") || minecraftId.equals("air")) {
             return "";

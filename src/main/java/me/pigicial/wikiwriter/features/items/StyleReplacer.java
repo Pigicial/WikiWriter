@@ -22,8 +22,9 @@ public class StyleReplacer {
             return text;
         }
 
-        List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
+        text = placeInitialSpacingAfterStyling(text);
 
+        List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
         StringBuilder newString = new StringBuilder();
         int lastEnd = 0;
 
@@ -55,6 +56,53 @@ public class StyleReplacer {
         }
 
         return newString.toString();
+    }
+
+    // For lore on wiki, if there are spaces at the start of a line and there's no style applied
+    private static String placeInitialSpacingAfterStyling(String text) {
+        if (!text.startsWith(" ")) {
+            return text;
+        }
+
+        char[] charArray = text.toCharArray();
+        boolean isStyle = false;
+        boolean hasHadStyleBefore = false;
+        int amountOfSpaces = 0;
+
+        for (int index = 0, charArrayLength = charArray.length; index < charArrayLength; index++) {
+            char character = charArray[index];
+            if (Character.isSpaceChar(character)) {
+                amountOfSpaces++;
+                continue;
+            }
+
+            if (character == '&') {
+                isStyle = true;
+                continue;
+            }
+
+            if (isStyle) {
+                isStyle = false;
+                hasHadStyleBefore = true;
+                continue;
+            }
+
+            // has had style before, not in style now, and not a space character
+            if (hasHadStyleBefore) {
+                if (amountOfSpaces == 0) {
+                    // no spaces detected
+                    return text;
+                }
+
+                String styles = text.substring(0, index).replace(" ", "");
+                String spaceText = " ".repeat(amountOfSpaces);
+                String textAfterStyles = text.substring(index);
+
+                return styles + spaceText + textAfterStyles;
+            }
+        }
+
+        return text;
     }
 
     private static List<ReplacementSection> getReplacementSections(String text) {
