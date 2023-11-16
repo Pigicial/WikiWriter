@@ -103,7 +103,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
         wikiWriter.copyToClipboard(builder.toString());
 
         if (!output.id.isEmpty()) {
-            String recipeTreeTemplate = "Template:CollapsibleTree/Item/" + output.id;
+            String recipeTreeTemplate = "Template:CollapsibleTree/Item/" + output.id.toLowerCase();
             wikiWriter.suggestPageLink(recipeTreeTemplate);
         }
     }

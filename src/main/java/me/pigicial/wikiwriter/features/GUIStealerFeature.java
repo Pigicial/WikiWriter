@@ -209,7 +209,7 @@ public class GUIStealerFeature extends KeyBindFeature {
         wikiWriter.copyToClipboard(builder.toString());
 
         if (resultItem != null) {
-            String templatePageName = resultItem.getItemTemplatePageName();
+            String templatePageName = resultItem.getItemTemplatePageName().replace("Item_", "Recipe_");
             if (!templatePageName.isEmpty()) {
                 wikiWriter.suggestPageLink(templatePageName);
             }
@@ -249,14 +249,22 @@ public class GUIStealerFeature extends KeyBindFeature {
         }
 
         ItemStack product = items.get(FORCE_RECIPE_RESULT_SLOT);
-        if (!product.isEmpty()) {
-            WikiItem item = new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
-            builder.append("|out=").append(item.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
+        WikiItem resultItem = product.isEmpty() ? null : new WikiItem(product, Action.COPYING_RECIPE_INVENTORY);
+        if (resultItem != null) {
+            builder.append("|out=").append(resultItem.generateText(Action.COPYING_RECIPE_INVENTORY)).append("\n");
         }
+
         builder.append("}}\n<noinclude>[[Category:Recipe Templates]]</noinclude>");
 
         wikiWriter.sendMessage("Copied top GUI forge recipe to clipboard.");
         wikiWriter.copyToClipboard(builder.toString());
+
+        if (resultItem != null) {
+            String templatePageName = resultItem.getItemTemplatePageName().replace("Item_", "Recipe_");
+            if (!templatePageName.isEmpty()) {
+                wikiWriter.suggestPageLink(templatePageName);
+            }
+        }
     }
 
     private enum ForgeRecipeType {

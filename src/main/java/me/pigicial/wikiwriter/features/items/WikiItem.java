@@ -206,8 +206,8 @@ public class WikiItem {
 
     @NotNull
     public String getItemTemplatePageName() {
-        String id = convertToReference().replace("{{", "").replace("}}", "");
-        return id.isEmpty() ? "" : "Template:" + id;
+        String itemReference = convertToReference().replace("{{", "").replace("}}", "");
+        return itemReference.isEmpty() ? "" : "Template:" + itemReference;
     }
 
     private String convertToWikiItem() {
