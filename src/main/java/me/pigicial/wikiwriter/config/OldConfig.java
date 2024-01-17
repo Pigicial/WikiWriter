@@ -1,14 +1,9 @@
 package me.pigicial.wikiwriter.config;
-
-import gg.essential.vigilance.Vigilant;
-import gg.essential.vigilance.data.JVMAnnotationPropertyCollector;
-import gg.essential.vigilance.data.Property;
-import gg.essential.vigilance.data.PropertyType;
-
 import java.io.File;
 
-public class Config extends Vigilant {
+public class OldConfig /*extends Vigilant*/ {
 
+    /*
     public static final int MENU_REFERENCE_MODE_ALWAYS = 0;
     public static final int MENU_REFERENCE_MODE_COPYING_ITEMS = 1;
 
@@ -140,8 +135,10 @@ public class Config extends Vigilant {
     )
     public boolean removePetItems = true;
 
-    public Config() {
+    public OldConfig() {
         super(new File("./config/wikiwriter.toml"), "WikiWriter", new JVMAnnotationPropertyCollector(), new CustomSortingBehavior());
         initialize();
     }
+
+     */
 }

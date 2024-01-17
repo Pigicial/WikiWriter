@@ -39,7 +39,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
         if (screen instanceof GenericContainerScreen && handler instanceof GenericContainerScreenHandler chestHandler) {
             String inventoryName = screen.getTitle().getString();
 
-            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
+            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).getHeldStacks();
             int size = items.size();
             int rows = size / 9;
 
@@ -140,7 +140,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
                 nbt = new NbtCompound();
             }
 
-            String name = Formatting.strip(TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(itemStack.getName())));
+            String name = Formatting.strip(TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName())));
 
             NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
             String skyBlockId = extraAttributes.getString("id").replace(":", ".");
