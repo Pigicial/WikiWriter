@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.Config;
+import me.pigicial.wikiwriter.config.ModConfig;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -26,7 +26,7 @@ public class WikiItem {
     private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("§7-?(\\d+)x ");
     private static final Pattern SHOP_NAME_ITEM_COUNT = Pattern.compile("§8x(\\d\\d?)");
 
-    private final Config config = WikiWriter.getInstance().getConfig();
+    private final ModConfig config = WikiWriter.getInstance().getConfig();
 
     private final Rarity rarity;
     private final List<String> lore;
@@ -71,7 +71,7 @@ public class WikiItem {
         NbtCompound display = nbt.getCompound("display");
         lore = TextUtils.parseJsonLore(display);
 
-        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serializer.toJson(itemStack.getName()));
+        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName()));
         // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
 
@@ -109,7 +109,7 @@ public class WikiItem {
             return;
         }
 
-        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.setAmountsToOne;
+        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.getCopyingItemsConfig().setAmountsToOne;
         if (setToOne) {
             currentStackSize = 1;
 
@@ -165,10 +165,10 @@ public class WikiItem {
                 yield convertToReference() + amountString;
             }
             case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> {
-                int mode = config.menuReferenceModeScenario;
+                ModConfig.ReferenceModeScenario mode = config.getCopyingInventoriesConfig().menuReferenceModeScenario;
 
-                boolean always = mode == Config.MENU_REFERENCE_MODE_ALWAYS;
-                boolean onlyOnShopItemsAndIsShopItem = mode == Config.MENU_REFERENCE_MODE_COPYING_ITEMS && shopItem;
+                boolean always = mode == ModConfig.ReferenceModeScenario.ALWAYS;
+                boolean onlyOnShopItemsAndIsShopItem = mode == ModConfig.ReferenceModeScenario.WHEN_COPYING_SHOP_ITEMS && shopItem;
                 boolean referenceMode = !skyBlockId.isEmpty() && (always || onlyOnShopItemsAndIsShopItem);
 
                 yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
@@ -177,7 +177,7 @@ public class WikiItem {
     }
 
     private String convertToReference() {
-        if (minecraftId.equals("") || minecraftId.equals("air")) {
+        if (minecraftId.isEmpty() || minecraftId.equals("air")) {
             return "";
         }
 
@@ -211,7 +211,7 @@ public class WikiItem {
     }
 
     private String convertToWikiItem() {
-        if (minecraftId.equals("") || minecraftId.equals("air")) {
+        if (minecraftId.isEmpty() || minecraftId.equals("air")) {
             return "";
         }
 
@@ -235,7 +235,7 @@ public class WikiItem {
     private String generateModifier() {
         if (emptyTitle && lore.isEmpty()) {
             return DONT_SHOW_TOOLTIP;
-        } else if (skyBlockId.isEmpty() && config.disableClicking) {
+        } else if (skyBlockId.isEmpty() && config.getCopyingItemsConfig().disableClicking) {
             return NOT_CLICKABLE;
         } else {
             return "";

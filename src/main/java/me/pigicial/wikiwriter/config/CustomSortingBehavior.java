@@ -1,15 +1,12 @@
 package me.pigicial.wikiwriter.config;
 
-import gg.essential.vigilance.data.Category;
-import gg.essential.vigilance.data.PropertyData;
-import gg.essential.vigilance.data.SortingBehavior;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class CustomSortingBehavior extends SortingBehavior {
+public class CustomSortingBehavior {} /* extends SortingBehavior {
 
     @NotNull
     @Override
@@ -29,3 +26,4 @@ public class CustomSortingBehavior extends SortingBehavior {
         return Comparator.comparing(a -> 0);
     }
 }
+*/

@@ -3,9 +3,9 @@ pluginManagement {
         mavenCentral()
         mavenLocal()
         gradlePluginPortal()
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
+        //maven {
+        //    url 'https://oss.sonatype.org/content/repositories/snapshots'
+        //}
         maven {
             url 'https://maven.architectury.dev/'
         }
@@ -20,6 +20,12 @@ pluginManagement {
         }
         maven {
             url 'https://repo.essential.gg/repository/maven-public/'
+        }
+        maven {
+            url "https://maven.shedaniel.me/"
+        }
+        maven {
+            url "https://maven.terraformersmc.com/releases/"
         }
     }
 

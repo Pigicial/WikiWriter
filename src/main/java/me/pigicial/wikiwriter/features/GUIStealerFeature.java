@@ -43,7 +43,7 @@ public class GUIStealerFeature extends KeyBindFeature {
         Screen screen = MinecraftClient.getInstance().currentScreen;
 
         if (screen instanceof GenericContainerScreen && handler instanceof GenericContainerScreenHandler chestHandler) {
-            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).stacks;
+            List<ItemStack> items = ((SimpleInventory) chestHandler.getInventory()).getHeldStacks();
             String inventoryName = screen.getTitle().getString();
 
             process(items, inventoryName);
@@ -103,7 +103,7 @@ public class GUIStealerFeature extends KeyBindFeature {
     }
 
     private boolean isShopMode(List<ItemStack> items, int size, int rows) {
-        if (!wikiWriter.getConfig().shopMenuMode || rows < 3) {
+        if (!wikiWriter.getConfig().getCopyingInventoriesConfig().shopMenuMode || rows < 3) {
             return false;
         }
 

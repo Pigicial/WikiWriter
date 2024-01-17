@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.Config;
+import me.pigicial.wikiwriter.config.ModConfig;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
@@ -75,10 +75,10 @@ public enum LoreFilters {
             .sorted(Comparator.comparing(Enum::ordinal))
             .toArray(LoreFilters[]::new);
 
-    private final Predicate<Config> settingsFilter;
+    private final Predicate<ModConfig.LoreFiltersConfig> settingsFilter;
     private final List<String> textToFilter;
 
-    LoreFilters(Predicate<Config> settingsFilter, String... textToFilter) {
+    LoreFilters(Predicate<ModConfig.LoreFiltersConfig> settingsFilter, String... textToFilter) {
         this.settingsFilter = settingsFilter;
         this.textToFilter = Arrays.asList(textToFilter);
     }
@@ -138,7 +138,7 @@ public enum LoreFilters {
             return null;
         }
 
-        boolean shouldRemoveFromLore = settingsFilter.test(WikiWriter.getInstance().getConfig());
+        boolean shouldRemoveFromLore = settingsFilter.test(WikiWriter.getInstance().getConfig().getTextFiltersConfig().getLoreFiltersConfig());
         int linesMatched = 0;
 
         for (int currentIndex = 0, loreSize = lore.size(); currentIndex < loreSize; currentIndex++) {
@@ -168,9 +168,9 @@ public enum LoreFilters {
     }
 
     private static boolean matches(String textFromLore, String checkingAgainst) {
-        boolean bothLinesEmpty = textFromLore.replace(" ", "").length() == 0 && checkingAgainst.replace(" ", "").length() == 0;
-        boolean containsText = textFromLore.contains(checkingAgainst) && checkingAgainst.length() > 0;
-        boolean isAnythingAndNotEmpty = checkingAgainst.equals("{any-not-empty}") && textFromLore.replace(" ", "").length() > 0;
+        boolean bothLinesEmpty = textFromLore.replace(" ", "").isEmpty() && checkingAgainst.replace(" ", "").isEmpty();
+        boolean containsText = textFromLore.contains(checkingAgainst) && !checkingAgainst.isEmpty();
+        boolean isAnythingAndNotEmpty = checkingAgainst.equals("{any-not-empty}") && !textFromLore.replace(" ", "").isEmpty();
 
         return bothLinesEmpty || containsText || isAnythingAndNotEmpty;
     }

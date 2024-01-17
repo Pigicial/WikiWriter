@@ -1,5 +1,5 @@
 # WikiWriter
-WikiWriter is a 1.20.1 Fabric (previously 1.8.9 Forge) mod that converts Hypixel SkyBlock items, menus, shops, and recipe trees into MediaWiki syntax for use on the official [Hypixel Wiki](https://wiki.hypixel.net).
+WikiWriter is a 1.20.4 Fabric (previously 1.8.9 Forge) mod that converts Hypixel SkyBlock items, menus, shops, and recipe trees into MediaWiki syntax for use on the official [Hypixel Wiki](https://wiki.hypixel.net).
 
 ----
 
