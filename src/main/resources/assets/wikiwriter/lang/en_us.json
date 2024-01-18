@@ -11,6 +11,8 @@
   "yacl3.config.wikiwriter:config.category.general.group.copyingInventories.desc": "Settings related to copying inventories.",
   "yacl3.config.wikiwriter:config.category.general.group.textFilters": "Text Filters",
   "yacl3.config.wikiwriter:config.category.general.group.textFilters.desc": "Settings related to text and lore filters.",
+  "yacl3.config.wikiwriter:config.category.general.group.links": "Links",
+  "yacl3.config.wikiwriter:config.category.general.group.links.desc": "Miscellaneous settings.",
 
   "yacl3.config.wikiwriter:config.modEnabled": "Mod Enabled",
   "yacl3.config.wikiwriter:config.modEnabled.desc": "Enabled the features of this mod.",
@@ -39,5 +41,10 @@
   "yacl3.config.wikiwriter:config.removePickaxeAbilities": "Remove Pickaxe Abilities",
   "yacl3.config.wikiwriter:config.removePickaxeAbilities.desc": "When enabled, pickaxe abilities will be removed from lore.",
   "yacl3.config.wikiwriter:config.removePetItems": "Remove Pet Items",
-  "yacl3.config.wikiwriter:config.removePetItems.desc": "When enabled, pet items will be removed from lore."
+  "yacl3.config.wikiwriter:config.removePetItems.desc": "When enabled, pet items will be removed from lore.",
+  "yacl3.config.wikiwriter:config.autoOpenSuggestedBrowserEditLinks": "Auto-Open Suggested Browser Links",
+  "yacl3.config.wikiwriter:config.autoOpenSuggestedBrowserEditLinks.desc": "When enabled, when you copy an item template, recipe template, or recipe tree template, the edit link sent in chat will automatically be opened in your browser.",
+
+  "yacl3.config.wikiwriter:config.skipConfirmScreenForBrowserEditLinks": "Skip Confirm Screen",
+  "yacl3.config.wikiwriter:config.skipConfirmScreenForBrowserEditLinks.desc": "When enabled, auto-opening links will bypass the confirm screen."
 }
