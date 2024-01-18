@@ -1,8 +1,8 @@
 package me.pigicial.wikiwriter.features;
 
+import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
 import me.pigicial.wikiwriter.features.items.WikiItem;
-import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
@@ -103,7 +103,7 @@ public class GUIStealerFeature extends KeyBindFeature {
     }
 
     private boolean isShopMode(List<ItemStack> items, int size, int rows) {
-        if (!wikiWriter.getConfig().getCopyingInventoriesConfig().shopMenuMode || rows < 3) {
+        if (!wikiWriter.getConfig().shopMenuMode || rows < 3) {
             return false;
         }
 

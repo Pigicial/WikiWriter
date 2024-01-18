@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.ModConfig;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 
 public enum RegexTextReplacements {
     DUNGEON_STATS("&8\\([+-]?[\\d,.]+%?\\)", "", true),
@@ -19,9 +19,9 @@ public enum RegexTextReplacements {
     }
 
     public static String replaceEverything(String text, boolean name) {
-        ModConfig config = WikiWriter.getInstance().getConfig();
+        WikiWriterConfig config = WikiWriter.getInstance().getConfig();
         for (RegexTextReplacements replacement : RegexTextReplacements.values()) {
-            if (replacement == DUNGEON_STATS && (!config.getTextFiltersConfig().removeDungeonStats || !text.contains(":"))) continue;
+            if (replacement == DUNGEON_STATS && (!config.removeDungeonStats || !text.contains(":"))) continue;
             if (name && replacement == STRAY_COMMAS) continue;
             text = replacement.replace(text);
         }

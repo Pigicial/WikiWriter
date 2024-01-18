@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.ModConfig;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
@@ -75,10 +75,10 @@ public enum LoreFilters {
             .sorted(Comparator.comparing(Enum::ordinal))
             .toArray(LoreFilters[]::new);
 
-    private final Predicate<ModConfig.LoreFiltersConfig> settingsFilter;
+    private final Predicate<WikiWriterConfig> settingsFilter;
     private final List<String> textToFilter;
 
-    LoreFilters(Predicate<ModConfig.LoreFiltersConfig> settingsFilter, String... textToFilter) {
+    LoreFilters(Predicate<WikiWriterConfig> settingsFilter, String... textToFilter) {
         this.settingsFilter = settingsFilter;
         this.textToFilter = Arrays.asList(textToFilter);
     }
@@ -138,7 +138,7 @@ public enum LoreFilters {
             return null;
         }
 
-        boolean shouldRemoveFromLore = settingsFilter.test(WikiWriter.getInstance().getConfig().getTextFiltersConfig().getLoreFiltersConfig());
+        boolean shouldRemoveFromLore = settingsFilter.test(WikiWriter.getInstance().getConfig());
         int linesMatched = 0;
 
         for (int currentIndex = 0, loreSize = lore.size(); currentIndex < loreSize; currentIndex++) {

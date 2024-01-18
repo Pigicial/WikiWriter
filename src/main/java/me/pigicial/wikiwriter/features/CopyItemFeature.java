@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
-import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
