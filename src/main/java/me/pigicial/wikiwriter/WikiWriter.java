@@ -1,20 +1,12 @@
 package me.pigicial.wikiwriter;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
 import lombok.Getter;
-import me.pigicial.wikiwriter.config.ModConfig;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.CopyItemFeature;
 import me.pigicial.wikiwriter.features.GUIStealerFeature;
 import me.pigicial.wikiwriter.features.RawNBTExtractorFeature;
 import me.pigicial.wikiwriter.features.RecipeTreeFeature;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
-import me.shedaniel.autoconfig.gui.registry.api.GuiTransformer;
-import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
-import me.shedaniel.clothconfig2.impl.builders.EnumSelectorBuilder;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -32,12 +24,6 @@ import net.minecraft.util.Formatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
-import java.sql.Ref;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class WikiWriter implements ModInitializer {
@@ -47,14 +33,15 @@ public class WikiWriter implements ModInitializer {
 
     private final String messagePrefix;
     private final Logger logger;
-    private final ModConfig config;
+    @Getter
+    private final WikiWriterConfig config;
 
     public WikiWriter() {
         this.messagePrefix = Formatting.GRAY + "[" + Formatting.RED + "WikiWriter" + Formatting.GRAY + "]";
         this.logger = LogManager.getLogger(WikiWriter.class);
 
-        AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
-        this.config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        this.config = WikiWriterConfig.HANDLER.instance();
+        WikiWriterConfig.HANDLER.load();
     }
 
     @Override
@@ -91,7 +78,9 @@ public class WikiWriter implements ModInitializer {
         ClientTickEvents.END_WORLD_TICK.register(world -> {
             if (menuQueued) {
                 menuQueued = false;
-                Screen screen = AutoConfig.getConfigScreen(ModConfig.class, MinecraftClient.getInstance().currentScreen).get();
+                // Screen screen = AutoConfig.getConfigScreen(ModConfig.class, MinecraftClient.getInstance().currentScreen).get();
+
+                Screen screen = config.createGui(MinecraftClient.getInstance().currentScreen);
                 MinecraftClient.getInstance().setScreen(screen);
             }
         });
@@ -126,10 +115,6 @@ public class WikiWriter implements ModInitializer {
                         .clickEvent(ClickEvent.openUrl(editUrl)));
 
         player.sendMessage(primaryText);
-    }
-
-    public ModConfig getConfig() {
-        return config;
     }
 
     public void copyToClipboard(String text) {

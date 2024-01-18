@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.features.items.StyleReplacer;
 import me.pigicial.wikiwriter.features.items.RegexTextReplacements;
+import me.pigicial.wikiwriter.features.items.StyleReplacer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

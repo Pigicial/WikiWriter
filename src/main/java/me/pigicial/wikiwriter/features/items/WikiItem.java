@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.ModConfig;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -26,7 +26,7 @@ public class WikiItem {
     private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("§7-?(\\d+)x ");
     private static final Pattern SHOP_NAME_ITEM_COUNT = Pattern.compile("§8x(\\d\\d?)");
 
-    private final ModConfig config = WikiWriter.getInstance().getConfig();
+    private final WikiWriterConfig config = WikiWriter.getInstance().getConfig();
 
     private final Rarity rarity;
     private final List<String> lore;
@@ -109,7 +109,7 @@ public class WikiItem {
             return;
         }
 
-        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.getCopyingItemsConfig().setAmountsToOne;
+        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.setAmountsToOne;
         if (setToOne) {
             currentStackSize = 1;
 
@@ -138,7 +138,7 @@ public class WikiItem {
 
         if (hasCustomSkullTexture && skyBlockId.contains("backpack") && extraAttributes.contains("backpack_color", 8)) {
             String backpackColor = extraAttributes.getString("backpack_color").toLowerCase();
-            if (!backpackColor.equals("") && !backpackColor.equalsIgnoreCase("default")) {
+            if (!backpackColor.isEmpty() && !backpackColor.equalsIgnoreCase("default")) {
                 skyBlockId = backpackColor + "_" + skyBlockId;
             }
         }
@@ -165,10 +165,10 @@ public class WikiItem {
                 yield convertToReference() + amountString;
             }
             case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> {
-                ModConfig.ReferenceModeScenario mode = config.getCopyingInventoriesConfig().menuReferenceModeScenario;
+                WikiWriterConfig.ReferenceModeScenario mode = config.menuReferenceModeScenario;
 
-                boolean always = mode == ModConfig.ReferenceModeScenario.ALWAYS;
-                boolean onlyOnShopItemsAndIsShopItem = mode == ModConfig.ReferenceModeScenario.WHEN_COPYING_SHOP_ITEMS && shopItem;
+                boolean always = mode == WikiWriterConfig.ReferenceModeScenario.ALWAYS;
+                boolean onlyOnShopItemsAndIsShopItem = mode == WikiWriterConfig.ReferenceModeScenario.WHEN_COPYING_SHOP_ITEMS && shopItem;
                 boolean referenceMode = !skyBlockId.isEmpty() && (always || onlyOnShopItemsAndIsShopItem);
 
                 yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
@@ -235,7 +235,7 @@ public class WikiItem {
     private String generateModifier() {
         if (emptyTitle && lore.isEmpty()) {
             return DONT_SHOW_TOOLTIP;
-        } else if (skyBlockId.isEmpty() && config.getCopyingItemsConfig().disableClicking) {
+        } else if (skyBlockId.isEmpty() && config.disableClicking) {
             return NOT_CLICKABLE;
         } else {
             return "";

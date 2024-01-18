@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.utils;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.ModConfig;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 
 public enum Action {
     COPYING_STANDALONE_ITEM,
@@ -10,13 +10,12 @@ public enum Action {
     COPYING_RECIPE_INVENTORY;
 
     public boolean shouldIncludeTextAfterRarity() {
-        ModConfig config = WikiWriter.getInstance().getConfig();
-        ModConfig.TextFiltersConfig textFiltersConfig = config.getTextFiltersConfig();
+        WikiWriterConfig config = WikiWriter.getInstance().getConfig();
 
         return switch (this) {
             case COPYING_RECIPE_INVENTORY -> false;
-            case COPYING_STANDALONE_ITEM -> !textFiltersConfig.removeTextBelowRarityWhenCopyingItems;
-            case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> !textFiltersConfig.removeTextBelowRarityWhenCopyingMenus;
+            case COPYING_STANDALONE_ITEM -> !config.removeTextBelowRarityWhenCopyingItems;
+            case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> !config.removeTextBelowRarityWhenCopyingMenus;
         };
     }
 }
