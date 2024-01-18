@@ -1,15 +1,16 @@
 package me.pigicial.wikiwriter.config;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.FieldNamingPolicy;
 import dev.isxander.yacl3.api.NameableEnum;
+import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
-import dev.isxander.yacl3.config.v2.api.autogen.AutoGen;
+import dev.isxander.yacl3.config.v2.api.autogen.*;
 import dev.isxander.yacl3.config.v2.api.autogen.Boolean;
-import dev.isxander.yacl3.config.v2.api.autogen.EnumCycler;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import lombok.Getter;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -20,21 +21,51 @@ import java.util.Objects;
 @Getter
 public class WikiWriterConfig {
 
-    public static ConfigClassHandler<WikiWriterConfig> HANDLER = ConfigClassHandler.createBuilder(WikiWriterConfig.class)
+    public static final ConfigClassHandler<WikiWriterConfig> HANDLER = ConfigClassHandler.createBuilder(WikiWriterConfig.class)
             .id(new Identifier("wikiwriter", "config"))
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
-                    .setPath(FabricLoader.getInstance().getConfigDir().resolve("wikiwriter.json5"))
-                    .appendGsonBuilder(GsonBuilder::setPrettyPrinting)
-                    .setJson5(true)
+                    .setPath(FabricLoader.getInstance().getConfigDir().resolve("wikiwriter.json"))
+                    .appendGsonBuilder(builder -> builder
+                            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+                            .registerTypeHierarchyAdapter(Identifier.class, new Identifier.Serializer()))
+                    .setJson5(false)
                     .build())
             .build();
 
     public Screen createGui(Screen parent) {
-        return HANDLER.generateGui().generateScreen(parent);
+
+        YetAnotherConfigLib gui = HANDLER.generateGui();
+        return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> builder
+                        .title(gui.title())
+                        .categories(gui.categories())
+                        .save(() -> {
+                            gui.saveFunction();
+                            MinecraftClient.getInstance().setScreen(parent);
+                        }))
+                .generateScreen(parent);
+
+
+       // return HANDLER.generateGui().generateScreen(parent);
     }
 
     @AutoGen(category = "general", group = "general")
-    @Boolean(colored = true)
+    @MasterTickBox(value = {
+            "setAmountsToOne",
+            "disableClicking",
+            "menuReferenceModeScenario",
+            "shopMenuMode",
+            "removeDungeonStats",
+            "removeTextBelowRarityWhenCopyingItems",
+            "removeTextBelowRarityWhenCopyingMenus",
+            "removeClickNotices",
+            "removeShopNPCPriceText",
+            "removeShopNPCStockText",
+            "removeShopNPCTradeText",
+            "removePickaxeAbilities",
+            "removePetItems",
+            "autoOpenSuggestedBrowserEditLinks",
+            "skipConfirmScreenForBrowserEditLinks"
+    })
     @SerialEntry
     public boolean modEnabled = true;
 
@@ -102,6 +133,19 @@ public class WikiWriterConfig {
     @Boolean(colored = true)
     @SerialEntry
     public boolean removePetItems = true;
+
+    @AutoGen(category = "general", group = "links")
+    @MasterTickBox(value = {
+            "skipConfirmScreenForBrowserEditLinks"
+    })
+    @Boolean
+    @SerialEntry
+    public boolean autoOpenSuggestedBrowserEditLinks = false;
+
+    @AutoGen(category = "general", group = "links")
+    @Boolean(colored = true)
+    @SerialEntry
+    public boolean skipConfirmScreenForBrowserEditLinks = true;
 
     public enum ReferenceModeScenario implements NameableEnum {
         ALWAYS("Always", Formatting.GREEN),

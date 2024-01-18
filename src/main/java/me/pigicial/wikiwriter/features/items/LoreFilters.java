@@ -6,7 +6,9 @@ import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 public enum LoreFilters {
