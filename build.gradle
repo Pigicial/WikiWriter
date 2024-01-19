@@ -94,6 +94,8 @@ dependencies {
 
     modRuntimeOnly "me.djtheredstoner:DevAuth-fabric:1.1.2"
 
+    modApi "com.terraformersmc:modmenu:9.0.0"
+
     implementation 'com.google.code.gson:gson:2.10.1'
 
     compileOnly 'org.projectlombok:lombok:1.18.26'

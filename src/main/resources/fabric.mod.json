@@ -16,6 +16,9 @@
   "entrypoints": {
     "main": [
       "me.pigicial.wikiwriter.WikiWriter"
+    ],
+    "modmenu": [
+      "me.pigicial.wikiwriter.config.ModMenuIntegration"
     ]
   },
 
