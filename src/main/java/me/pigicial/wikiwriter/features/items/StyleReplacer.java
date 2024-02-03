@@ -2,27 +2,26 @@ package me.pigicial.wikiwriter.features.items;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StyleReplacer {
 
+    private static final char THIN_SPACE = ' ';
     public static final Pattern STRIPPED_COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-ORX]");
 
     private static final Style[] STYLE_VALUES = Style.values();
 
     public static String replace(String text) {
         text = text.replace('§', '&');
+        text = placeInitialSpacingAfterStyling(text);
+
         List<ReplacementSection> replacementSections = getReplacementSections(text);
         if (replacementSections.isEmpty()) {
             return text;
         }
 
-        text = placeInitialSpacingAfterStyling(text);
 
         List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
         StringBuilder newString = new StringBuilder();
@@ -32,18 +31,25 @@ public class StyleReplacer {
             int start = replacementSection.start();
             int end = replacementSection.end();
 
-            Style feature = replacementSection.feature();
-            newString.append(text, lastEnd, start);
+            Style style = replacementSection.style();
 
-            if (feature.reset) {
+            String sectionBetweenLastEndAndThisStart = text.substring(lastEnd, start);
+            // basically a fix for space strikethroughs not showing up
+            if (containsStrikethrough(currentlyAppliedSections)) {
+                sectionBetweenLastEndAndThisStart = sectionBetweenLastEndAndThisStart.replace(" ", "-");
+            }
+            newString.append(sectionBetweenLastEndAndThisStart);
+
+            if (style.reset) {
+                Collections.reverse(currentlyAppliedSections);
                 for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-                    newString.append(currentlyAppliedSection.feature().end);
+                    newString.append(currentlyAppliedSection.style().end);
                 }
 
                 currentlyAppliedSections.clear();
             }
 
-            newString.append(feature.start).append(lastEnd == start && feature.addSpaces ? " " : "");
+            newString.append(style.start).append(lastEnd == start && style.addSpaces ? " " : "");
 
             currentlyAppliedSections.add(replacementSection);
             lastEnd = end;
@@ -51,11 +57,22 @@ public class StyleReplacer {
 
         newString.append(text.substring(lastEnd));
 
+        Collections.reverse(currentlyAppliedSections);
         for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-            newString.append(currentlyAppliedSection.feature().end);
+            newString.append(currentlyAppliedSection.style().end);
         }
 
         return newString.toString();
+    }
+
+    private static boolean containsStrikethrough(List<ReplacementSection> sections) {
+        for (ReplacementSection section : sections) {
+            if (section.style == Style.STRIKETHROUGH) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // For lore on wiki, if there are spaces at the start of a line and there's no style applied
@@ -95,7 +112,9 @@ public class StyleReplacer {
                 }
 
                 String styles = text.substring(0, index).replace(" ", "");
-                String spaceText = " ".repeat(amountOfSpaces);
+                // wiki spaces seem more accurate when there's about twice as many of them
+                // thin space also actually works compared to regular space
+                String spaceText = String.valueOf(THIN_SPACE).repeat(amountOfSpaces * 2);
                 String textAfterStyles = text.substring(index);
 
                 return styles + spaceText + textAfterStyles;
@@ -170,7 +189,7 @@ public class StyleReplacer {
         return text.length() > lastEndIndex && !text.substring(lastEndIndex).trim().isEmpty() && ++amountOfStylizedSections >= 2;
     }
 
-    private record ReplacementSection(Style feature, int start, int end) {
+    private record ReplacementSection(Style style, int start, int end) {
 
     }
 
@@ -196,7 +215,8 @@ public class StyleReplacer {
         UNDERLINE("&n", "<ins>", "</ins>", false),
         ITALICS("&o", "''", "''", false),
         OBFUSCATION("&k", "", "", false),
-        STRIKETHROUGH("&m", "<s>", "</s>", false);
+        // STRIKETHROUGH("&m", "<s>", "</s>", false);
+        STRIKETHROUGH("&m", "", "", false);
 
         private final String key;
         private final String start;
