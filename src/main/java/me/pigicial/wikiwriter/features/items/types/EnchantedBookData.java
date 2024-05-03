@@ -26,7 +26,7 @@ public record EnchantedBookData(String onlyEnchantmentName, int onlyEnchantmentL
     }
 
     @Override
-    public String getTemplateReference() {
+    public String getLoreTemplateReference() {
         return "{{Item_enchantment_" + onlyEnchantmentName + "_" + onlyEnchantmentLevel + "}}";
     }
 

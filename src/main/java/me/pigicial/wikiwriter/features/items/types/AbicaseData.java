@@ -13,7 +13,7 @@ public record AbicaseData(String model) implements TextureAndReferenceData {
     }
 
     @Override
-    public String getTemplateReference() {
+    public String getLoreTemplateReference() {
         return "{{Item_abicase_" + model + "}}";
     }
 

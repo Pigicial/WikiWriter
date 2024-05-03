@@ -1,5 +1,6 @@
 package me.pigicial.wikiwriter.features.items;
 
+import lombok.Getter;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
@@ -39,11 +40,13 @@ public class WikiItem {
     private final boolean emptyTitle;
 
     private String minecraftId;
+    @Getter
     private String skyBlockId;
 
     private final int originalStackSize;
     private int currentStackSize;
 
+    @Getter
     private String nameWithColor;
     private final String nameWithoutColor;
 
@@ -75,7 +78,7 @@ public class WikiItem {
         // Figures out the rarity of the item based on the item name or lore
         rarity = Rarity.parseRarity(lore, nameWithColor);
 
-        updateNameAndStackSize(action); // fix brackets in name plus replace amounts if necessary
+        updateNameAndStackSize(); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
         LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, action);
@@ -85,7 +88,7 @@ public class WikiItem {
 
         showRarity = showRarity && rarity != null;
 
-        textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(itemStack, extraAttributes);
+        textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(this, itemStack, extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
         nameWithColor = StyleReplacer.replace(nameWithReplacements);
@@ -101,7 +104,7 @@ public class WikiItem {
         emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
     }
 
-    private void updateNameAndStackSize(Action action) {
+    private void updateNameAndStackSize() {
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
             showRarity = false;
@@ -109,7 +112,7 @@ public class WikiItem {
             return;
         }
 
-        boolean setToOne = action == Action.COPYING_STANDALONE_ITEM && config.setAmountsToOne;
+        boolean setToOne = config.setAmountsToOne;
         if (setToOne) {
             currentStackSize = 1;
 
@@ -167,41 +170,36 @@ public class WikiItem {
             case COPYING_INVENTORY, COPYING_SHOP_INVENTORY -> {
                 WikiWriterConfig.ReferenceModeScenario mode = config.menuReferenceModeScenario;
 
-                boolean always = mode == WikiWriterConfig.ReferenceModeScenario.ALWAYS;
-                boolean onlyOnShopItemsAndIsShopItem = mode == WikiWriterConfig.ReferenceModeScenario.WHEN_COPYING_SHOP_ITEMS && shopItem;
-                boolean referenceMode = !skyBlockId.isEmpty() && (always || onlyOnShopItemsAndIsShopItem);
+                boolean alwaysReference = mode == WikiWriterConfig.ReferenceModeScenario.ALWAYS;
+                boolean onlyOnShopItemsAndIsShopItem = mode == WikiWriterConfig.ReferenceModeScenario.WHEN_COPYING_SHOP_ITEMS
+                                                       && shopItem;
+                boolean hasAmountInTitle = currentStackSize != 1;
 
+                if (skyBlockId.isEmpty()) {
+                    yield convertToWikiItem();
+                }
+
+                WikiWriter.getInstance().sendMessage("referenceMode = " + alwaysReference);
+                boolean referenceMode = alwaysReference || (onlyOnShopItemsAndIsShopItem && !hasAmountInTitle);
                 yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
             }
         };
     }
 
     private String convertToReference() {
-        String referenceID = getReferenceID();
-        if (referenceID.isEmpty()) {
-            return "";
-        }
-        return "{{Item/" + referenceID.replace(" ", "_").toUpperCase() + "|real_lore}}";
-    }
-
-    public String getReferenceID() {
         if (minecraftId.isEmpty() || minecraftId.equals("air")) {
             return "";
         }
 
         if (textureAndReferenceData != null) {
-            return textureAndReferenceData.getTemplateReference();
+            return textureAndReferenceData.getLoreTemplateReference();
         }
 
-        boolean potion = skyBlockId.equalsIgnoreCase("potion");
-        String referenceId;
-        if (!hasCustomSkullTexture && (skyBlockId.isEmpty() || potion)) {
-            referenceId = potion ? nameWithoutColor.replace("_", " ").toLowerCase() : minecraftId.toLowerCase();
+        if (!hasCustomSkullTexture && skyBlockId.isEmpty()) {
+            return "{{Item_" + minecraftId.toLowerCase() + "}}";
         } else {
-            referenceId = skyBlockId.toLowerCase();
+            return "{{Item/" + skyBlockId.toUpperCase() + "|real_lore}}";
         }
-
-        return referenceId;
     }
 
     private String convertToReferenceWithExtraText() {
@@ -210,12 +208,6 @@ public class WikiItem {
         String alternateAmountString = currentStackSize == 1 ? "" : "," + currentStackSize;
 
         return reference + extraLore + alternateAmountString;
-    }
-
-    @NotNull
-    public String getItemTemplatePageName() {
-        String itemReference = convertToReference().replace("{{", "").replace("}}", "");
-        return itemReference.isEmpty() ? "" : "Template:" + itemReference;
     }
 
     private String convertToWikiItem() {
@@ -267,4 +259,9 @@ public class WikiItem {
             return skyBlockId.isEmpty() ? "unknown_item" : skyBlockId.toLowerCase();
         }
     }
+
+    public String getBaseTextureLink() {
+        return minecraftId;
+    }
+
 }

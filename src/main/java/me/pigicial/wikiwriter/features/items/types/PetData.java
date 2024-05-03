@@ -26,7 +26,7 @@ public record PetData(String type, String tier, @SerializedName("hideInfo") bool
     }
 
     @Override
-    public String getTemplateReference() {
+    public String getLoreTemplateReference() {
         if (mysteryPet) {
             return "{{Item_" + "pet_craft_" + type.toLowerCase() + "}}";
         }

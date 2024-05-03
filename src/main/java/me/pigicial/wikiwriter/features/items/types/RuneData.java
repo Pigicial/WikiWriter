@@ -34,7 +34,7 @@ public record RuneData(String texture, int level) implements TextureAndReference
     }
 
     @Override
-    public String getTemplateReference() {
+    public String getLoreTemplateReference() {
         return "{{Item_" + texture + "_" + level + "}}";
     }
 
