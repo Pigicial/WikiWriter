@@ -26,11 +26,6 @@ public class CopyItemFeature extends KeyBindFeature {
 
         wikiWriter.copyToClipboard(text);
         wikiWriter.sendMessage("Copied hovered item to clipboard.");
-
-        String templatePageName = wikiItem.getItemTemplatePageName();
-        if (!templatePageName.isEmpty()) {
-            wikiWriter.suggestPageLink(templatePageName);
-        }
     }
 
     @Override
