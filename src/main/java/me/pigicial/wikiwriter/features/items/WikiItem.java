@@ -177,6 +177,14 @@ public class WikiItem {
     }
 
     private String convertToReference() {
+        String referenceID = getReferenceID();
+        if (referenceID.isEmpty()) {
+            return "";
+        }
+        return "{{Item/" + referenceID.replace(" ", "_").toUpperCase() + "|real_lore}}";
+    }
+
+    public String getReferenceID() {
         if (minecraftId.isEmpty() || minecraftId.equals("air")) {
             return "";
         }
@@ -193,7 +201,7 @@ public class WikiItem {
             referenceId = skyBlockId.toLowerCase();
         }
 
-        return "{{Item_" + referenceId.replace(" ", "_").toLowerCase() + "}}";
+        return referenceId;
     }
 
     private String convertToReferenceWithExtraText() {
