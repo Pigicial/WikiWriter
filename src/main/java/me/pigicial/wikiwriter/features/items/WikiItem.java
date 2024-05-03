@@ -179,7 +179,6 @@ public class WikiItem {
                     yield convertToWikiItem();
                 }
 
-                WikiWriter.getInstance().sendMessage("referenceMode = " + alwaysReference);
                 boolean referenceMode = alwaysReference || (onlyOnShopItemsAndIsShopItem && !hasAmountInTitle);
                 yield referenceMode ? convertToReferenceWithExtraText() : convertToWikiItem();
             }
