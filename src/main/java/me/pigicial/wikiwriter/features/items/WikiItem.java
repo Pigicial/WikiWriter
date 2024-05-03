@@ -68,8 +68,7 @@ public class WikiItem {
         hasCustomSkullTexture = itemStack.getItem() == Items.PLAYER_HEAD;
 
         NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
-        skyBlockId = extraAttributes.getString("id").toLowerCase().replace(":", ".");
-        // 1.7 ids use dots instead of colon symbols with tor's automation system
+        skyBlockId = extraAttributes.getString("id").toLowerCase();
 
         NbtCompound display = nbt.getCompound("display");
         lore = TextUtils.parseJsonLore(display);
