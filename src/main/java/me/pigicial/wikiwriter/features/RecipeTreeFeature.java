@@ -143,7 +143,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             String name = Formatting.strip(TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName())));
 
             NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
-            String skyBlockId = extraAttributes.getString("id").replace(":", ".");
+            String skyBlockId = extraAttributes.getString("id");
             int amount = itemStack.getCount();
 
             List<String> lore = TextUtils.parseJsonLore(nbt.getCompound("display"));
