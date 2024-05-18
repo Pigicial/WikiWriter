@@ -148,7 +148,7 @@ public class WikiItem {
         if (hasEnchantments && !minecraftId.equalsIgnoreCase("player_head")) {
             if (minecraftId.equals("book")) {
                 minecraftId = "enchanted_enchanted_book"; // the base book item is called this when its glowing
-            } else {
+            } else if (!minecraftId.equals("enchanted_book")) { // don't turn enchanted books into enchanted_enchanted_book
                 minecraftId = "enchanted_" + minecraftId;
             }
         }
