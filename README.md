@@ -21,12 +21,12 @@ Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Templa
 ###### [Recipe Template:](https://wiki.hypixel.net/Template:Craft_Item)
 ```
 {{Craft Item
-|in2={{Item_blaze_powder}},16
-|in4={{Item_blaze_powder}},16
-|in5={{Item_enchanted_ender_pearl}},16
-|in6={{Item_blaze_powder}},16
-|in8={{Item_blaze_powder}},16
-|out={{Item_enchanted_eye_of_ender}}
+|in2={{Item/BLAZE_POWDER|real_lore}},16
+|in4={{Item/BLAZE_POWDER|real_lore}},16
+|in5={{Item/ENCHANTED_ENDER_PEARL|real_lore}},16
+|in6={{Item/BLAZE_POWDER|real_lore}},16
+|in8={{Item/BLAZE_POWDER|real_lore}},16
+|out={{Item/ENCHANTED_ENDER_PEARL|real_lore}}
 }}
 <noinclude>[[Category:Recipe Templates]]</noinclude>
 ```
@@ -51,12 +51,12 @@ Similar to recipes, shop inventories can be converted into [Inventory Templates]
 ```
 {{Merchant
 |name=Ulyn
-|item1={{Item_mycel}}\n\n&7Cost\n&620 Coins
-|item2={{Item_blaze_rod}}\n\n&7Cost\n&650 Coins
-|item3={{Item_magma_cream}}\n\n&7Cost\n&620 Coins
-|item4={{Item_quartz}}\n\n&7Cost\n&650 Coins
-|item5={{Item_nether_stalk}}\n\n&7Cost\n&625 Coins
-|item6={{Item_ghast_tear}}\n\n&7Cost\n&6200 Coins
+|item1={{Item/MYCEL|real_lore}}\n\n&7Cost\n&620 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
+|item2={{Item/BLAZE_ROD|real_lore}}\n\n&7Cost\n&650 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
+|item3={{Item/MAGMA_CREAM|real_lore}}\n\n&7Cost\n&620 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
+|item4={{Item/QUARTZ|real_lore}}\n\n&7Cost\n&650 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
+|item5={{Item/NETHER_STALK|real_lore}}\n\n&7Cost\n&625 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
+|item6={{Item/GHAST_TEAR|real_lore}}\n\n&7Cost\n&6200 Coins\n\n&7Stock\n&6640 &7remaining\n\n&eClick to trade!\n&eRight-click for more trading options!
 }}
 <noinclude>[[Category:NPC UI Templates]]</noinclude>
 ```
