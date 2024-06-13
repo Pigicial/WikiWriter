@@ -6,9 +6,7 @@ import me.pigicial.wikiwriter.utils.Action;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.function.Predicate;
 
 public enum LoreFilters {
@@ -104,14 +102,14 @@ public enum LoreFilters {
                 continue;
             }
 
-            int startIndex = sectionData.startIndex;
-            int endIndex = sectionData.endIndex;
+            int sectionStart = sectionData.startIndex;
+            int sectionEnd = sectionData.endIndex;
 
             int rarityIndex = optionalRarityIndex.getAsInt();
-            if (rarityIndex >= startIndex && rarityIndex < endIndex) {
+            if (rarityIndex >= sectionStart && rarityIndex < sectionEnd) {
                 // rarity was removed
                 optionalRarityIndex = OptionalInt.empty();
-            } else if (rarityIndex >= endIndex) {
+            } else if (rarityIndex >= sectionEnd) {
                 // rarity was after removed text, therefore its index changed
                 optionalRarityIndex = OptionalInt.of(rarityIndex - sectionData.amountOfLines);
             } // otherwise, rarity index is the same

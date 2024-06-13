@@ -1,7 +1,5 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.features.items.replacements.RegexTextReplacements;
-import me.pigicial.wikiwriter.features.items.replacements.StyleReplacer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -24,24 +22,6 @@ public final class TextUtils {
         return text.isEmpty() ? "" : new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(text).replace("\\\"", "\""));
     }
 
-    public static String convertListToString(List<String> textList) {
-        List<String> newList = new ArrayList<>();
-        if (textList.isEmpty()) {
-            return "";
-        }
-
-        for (String text : textList) {
-            newList.add(StyleReplacer.applyStyleAndTextModifications(text));
-        }
-
-        String s = RegexTextReplacements.replaceEverything(String.join("\", \"", newList), false);
-        if (s.startsWith("{") && s.endsWith("}")) {
-            s = s.substring(1, s.length() - 1);
-        }
-
-        return unescapeText(s);
-    }
-
     public static List<String> parseJsonLore(NbtCompound displayTag) {
         NbtList loreTag = displayTag.getList("Lore", NbtElement.STRING_TYPE);
 
@@ -57,8 +37,8 @@ public final class TextUtils {
     }
 
     public static String convertJsonTextToLegacy(String jsonLine) {
-        Component asComponent = JSONComponentSerializer.json().deserialize(jsonLine);
-        String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(asComponent);
+        Component component = JSONComponentSerializer.json().deserialize(jsonLine);
+        String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(component);
         return legacyLine.replace('&', '§');
     }
 }
