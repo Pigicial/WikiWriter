@@ -4,8 +4,6 @@ plugins {
     id 'maven-publish'
     id 'io.freefair.lombok' version '6.6.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
-
-    id 'org.jetbrains.kotlin.jvm' version '1.8.22'
 }
 
 repositories {
@@ -22,9 +20,6 @@ repositories {
         url 'https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1'
     }
 }
-
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
 
 version = "${mod_version}-for-MC-${minecraft_version}"
 group = "me.pigicial"
@@ -122,16 +117,6 @@ shadowJar {
 }
  */
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = 17
-    }
-}
-
 processResources {
     inputs.property "version", mod_version
     inputs.property "mcversion", minecraft_version
@@ -147,9 +132,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
-
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications {
