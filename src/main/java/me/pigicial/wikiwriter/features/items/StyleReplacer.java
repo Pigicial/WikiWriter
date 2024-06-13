@@ -1,5 +1,10 @@
 package me.pigicial.wikiwriter.features.items;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -8,10 +13,12 @@ import java.util.regex.Pattern;
 
 public class StyleReplacer {
 
+    private static final LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder().build();
+
     private static final char THIN_SPACE = ' ';
     public static final Pattern STRIPPED_COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-ORX]");
 
-    private static final Style[] STYLE_VALUES = Style.values();
+    private static final MCStyle[] MC_STYLE_VALUES = MCStyle.values();
 
     public static String replace(String text) {
         text = text.replace('§', '&');
@@ -22,7 +29,6 @@ public class StyleReplacer {
             return text;
         }
 
-
         List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
         StringBuilder newString = new StringBuilder();
         int lastEnd = 0;
@@ -31,19 +37,19 @@ public class StyleReplacer {
             int start = replacementSection.start();
             int end = replacementSection.end();
 
-            Style style = replacementSection.style();
+            MCStyle style = replacementSection.MCStyle();
 
-            String sectionBetweenLastEndAndThisStart = text.substring(lastEnd, start);
+            String textBetweenLastEndAndThisStart = text.substring(lastEnd, start);
             // basically a fix for space strikethroughs not showing up
             if (containsStrikethrough(currentlyAppliedSections)) {
-                sectionBetweenLastEndAndThisStart = sectionBetweenLastEndAndThisStart.replace(" ", "-");
+                textBetweenLastEndAndThisStart = textBetweenLastEndAndThisStart.replace(" ", "-");
             }
-            newString.append(sectionBetweenLastEndAndThisStart);
+            newString.append(textBetweenLastEndAndThisStart);
 
             if (style.reset) {
                 Collections.reverse(currentlyAppliedSections);
                 for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-                    newString.append(currentlyAppliedSection.style().end);
+                    newString.append(currentlyAppliedSection.MCStyle().end);
                 }
 
                 currentlyAppliedSections.clear();
@@ -59,15 +65,19 @@ public class StyleReplacer {
 
         Collections.reverse(currentlyAppliedSections);
         for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
-            newString.append(currentlyAppliedSection.style().end);
+            newString.append(currentlyAppliedSection.MCStyle().end);
         }
 
-        return newString.toString();
+        String result = newString.toString();
+        // Fix progress bars appearing a bit too long (4/5 of the length appears to be roughly the same length)
+        result = result.replace("-----", "----");
+
+        return result;
     }
 
     private static boolean containsStrikethrough(List<ReplacementSection> sections) {
         for (ReplacementSection section : sections) {
-            if (section.style == Style.STRIKETHROUGH) {
+            if (section.MCStyle == MCStyle.STRIKETHROUGH) {
                 return true;
             }
         }
@@ -130,10 +140,10 @@ public class StyleReplacer {
 
         while (matcher.find()) {
             String check = matcher.group();
-            Style style = getStyleByCode(check);
+            MCStyle MCStyle = getStyleByCode(check);
 
-            if (style != null) {
-                sections.add(new ReplacementSection(style, matcher.start(), matcher.end()));
+            if (MCStyle != null) {
+                sections.add(new ReplacementSection(MCStyle, matcher.start(), matcher.end()));
             }
         }
 
@@ -141,8 +151,8 @@ public class StyleReplacer {
     }
 
     @Nullable
-    private static StyleReplacer.Style getStyleByCode(String key) {
-        for (Style feature : STYLE_VALUES) {
+    private static StyleReplacer.MCStyle getStyleByCode(String key) {
+        for (MCStyle feature : MC_STYLE_VALUES) {
             if (feature.key.equals(key)) {
                 return feature;
             }
@@ -152,49 +162,58 @@ public class StyleReplacer {
     }
 
     public static boolean hasMultipleStyles(String text) {
-        Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
+        String rawLegacyText = text.replace("&", "§");
+        TextComponent component = LEGACY_COMPONENT_SERIALIZER.deserialize(rawLegacyText);
 
-        Set<Style> currentStyles = new LinkedHashSet<>();
-        int lastEndIndex = 0;
-        int amountOfStylizedSections = 0;
+        List<TextComponent> sections = separateStyleSections(component);
+        return sections.size() >= 2;
+    }
 
-        while (matcher.find()) {
-            String code = matcher.group();
-            Style style = getStyleByCode(code);
-            if (style == null) {
-                continue;
+    // From https://gist.github.com/Minikloon/e6a7679d171b90dc4e0731db46d77c84
+    private static List<TextComponent> separateStyleSections(TextComponent component) {
+        List<TextComponent> flattened = new ArrayList<>();
+
+        Style enforcedState = enforceStates(component.style());
+        component = component.style(enforcedState);
+
+        Stack<TextComponent> toCheck = new Stack<>();
+        toCheck.add(component);
+
+        while (!toCheck.empty()) {
+            TextComponent parent = toCheck.pop();
+            if (!parent.content().isEmpty()) {
+                flattened.add(parent);
             }
 
-            if (currentStyles.isEmpty() && (style == Style.RESET || style == Style.WHITE)) {
-                lastEndIndex = matcher.end();
-                continue;
+            List<Component> children = new ArrayList<>(parent.children());
+            Collections.reverse(children);
+            for (Component child : children) {
+                if (child instanceof TextComponent text) {
+                    Style style = parent.style();
+                    style = style.merge(child.style());
+                    toCheck.add(text.style(style));
+                } // Unsupported otherwise
             }
-
-            if (style.reset) {
-                currentStyles.clear();
-            } else if (!currentStyles.add(style)) {
-                lastEndIndex = matcher.end();
-                continue;
-            }
-
-            String textBetweenLastSearch = text.substring(lastEndIndex, matcher.start());
-            if (!textBetweenLastSearch.trim().isEmpty() && ++amountOfStylizedSections >= 2) {
-                return true;
-            }
-
-            lastEndIndex = matcher.end();
         }
-
-        // accommodates for any remaining text that didn't have its style changed before the end
-        return text.length() > lastEndIndex && !text.substring(lastEndIndex).trim().isEmpty() && ++amountOfStylizedSections >= 2;
+        return flattened;
     }
 
-    private record ReplacementSection(Style style, int start, int end) {
+    private static Style enforceStates(Style style) {
+        Style.Builder builder = style.toBuilder();
+        style.decorations().forEach((decoration, state) -> {
+            if (state == TextDecoration.State.NOT_SET) {
+                builder.decoration(decoration, false);
+            }
+        });
+        return builder.build();
+    }
+
+    private record ReplacementSection(MCStyle MCStyle, int start, int end) {
 
     }
 
-    private enum Style {
-        RESET("&r", "", "", true),
+    private enum MCStyle {
+        RESET("&r", "", ""),
         BLACK("&0", "&0", ""),
         DARK_BLUE("&1", "&1", ""),
         DARK_GREEN("&2", "&2", ""),
@@ -224,11 +243,11 @@ public class StyleReplacer {
         private final boolean reset;
         private final boolean addSpaces;
 
-        Style(String key, String start, String end) {
+        MCStyle(String key, String start, String end) {
             this(key, start, end, true);
         }
 
-        Style(String key, String start, String end, boolean reset) {
+        MCStyle(String key, String start, String end, boolean reset) {
             this.key = key;
             this.start = start;
             this.end = end;
