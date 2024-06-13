@@ -169,7 +169,7 @@ public enum LoreFilters {
         return null;
     }
 
-    private static boolean matches(String textFromLore, String checkingAgainst) {
+    private boolean matches(String textFromLore, String checkingAgainst) {
         boolean bothLinesEmpty = textFromLore.replace(" ", "").isEmpty() && checkingAgainst.replace(" ", "").isEmpty();
         boolean containsText = textFromLore.contains(checkingAgainst) && !checkingAgainst.isEmpty();
         boolean isAnythingAndNotEmpty = checkingAgainst.equals("{any-not-empty}") && !textFromLore.replace(" ", "").isEmpty();

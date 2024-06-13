@@ -3,6 +3,8 @@ package me.pigicial.wikiwriter.features.items;
 import lombok.Getter;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
+import me.pigicial.wikiwriter.features.items.replacements.RegexTextReplacements;
+import me.pigicial.wikiwriter.features.items.replacements.StyleReplacer;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -90,7 +92,7 @@ public class WikiItem {
         textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(this, itemStack, extraAttributes);
 
         String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
-        nameWithColor = StyleReplacer.replace(nameWithReplacements);
+        nameWithColor = StyleReplacer.applyStyleAndTextModifications(nameWithReplacements);
         nameWithoutColor = Objects.requireNonNull(Formatting.strip(nameWithReplacements)).replace('§', '&');
 
         if (showRarity && StyleReplacer.hasMultipleStyles(nameWithColor)) {
@@ -105,10 +107,13 @@ public class WikiItem {
 
     private void updateNameAndStackSize() {
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
-            lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
-            showRarity = false;
-            nameWithColor = "INSERT_LINK_HERE";
-            return;
+            // non-clickable lore supports brackets
+            if (!generateModifier().equals(NOT_CLICKABLE)) {
+                lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
+                showRarity = false;
+                nameWithColor = "INSERT_LINK_HERE";
+                return;
+            }
         }
 
         boolean setToOne = config.setAmountsToOne;
