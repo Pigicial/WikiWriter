@@ -1,7 +1,7 @@
 package me.pigicial.wikiwriter.utils;
 
-import me.pigicial.wikiwriter.features.items.RegexTextReplacements;
-import me.pigicial.wikiwriter.features.items.StyleReplacer;
+import me.pigicial.wikiwriter.features.items.replacements.RegexTextReplacements;
+import me.pigicial.wikiwriter.features.items.replacements.StyleReplacer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -31,7 +31,7 @@ public final class TextUtils {
         }
 
         for (String text : textList) {
-            newList.add(StyleReplacer.replace(text));
+            newList.add(StyleReplacer.applyStyleAndTextModifications(text));
         }
 
         String s = RegexTextReplacements.replaceEverything(String.join("\", \"", newList), false);

@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.features.items;
+package me.pigicial.wikiwriter.features.items.replacements;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -20,24 +20,24 @@ public class StyleReplacer {
 
     private static final MCStyle[] MC_STYLE_VALUES = MCStyle.values();
 
-    public static String replace(String text) {
+    public static String applyStyleAndTextModifications(String text) {
         text = text.replace('§', '&');
         text = placeInitialSpacingAfterStyling(text);
 
-        List<ReplacementSection> replacementSections = getReplacementSections(text);
-        if (replacementSections.isEmpty()) {
+        List<StyleSection> styleSections = getStyleSections(text);
+        if (styleSections.isEmpty()) {
             return text;
         }
 
-        List<ReplacementSection> currentlyAppliedSections = new LinkedList<>();
+        List<StyleSection> currentlyAppliedSections = new LinkedList<>();
         StringBuilder newString = new StringBuilder();
         int lastEnd = 0;
 
-        for (ReplacementSection replacementSection : replacementSections) {
-            int start = replacementSection.start();
-            int end = replacementSection.end();
+        for (StyleSection styleSection : styleSections) {
+            int start = styleSection.start();
+            int end = styleSection.end();
 
-            MCStyle style = replacementSection.MCStyle();
+            MCStyle style = styleSection.MCStyle();
 
             String textBetweenLastEndAndThisStart = text.substring(lastEnd, start);
             // basically a fix for space strikethroughs not showing up
@@ -48,7 +48,7 @@ public class StyleReplacer {
 
             if (style.reset) {
                 Collections.reverse(currentlyAppliedSections);
-                for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
+                for (StyleSection currentlyAppliedSection : currentlyAppliedSections) {
                     newString.append(currentlyAppliedSection.MCStyle().end);
                 }
 
@@ -57,14 +57,14 @@ public class StyleReplacer {
 
             newString.append(style.start).append(lastEnd == start && style.addSpaces ? " " : "");
 
-            currentlyAppliedSections.add(replacementSection);
+            currentlyAppliedSections.add(styleSection);
             lastEnd = end;
         }
 
         newString.append(text.substring(lastEnd));
 
         Collections.reverse(currentlyAppliedSections);
-        for (ReplacementSection currentlyAppliedSection : currentlyAppliedSections) {
+        for (StyleSection currentlyAppliedSection : currentlyAppliedSections) {
             newString.append(currentlyAppliedSection.MCStyle().end);
         }
 
@@ -75,8 +75,8 @@ public class StyleReplacer {
         return result;
     }
 
-    private static boolean containsStrikethrough(List<ReplacementSection> sections) {
-        for (ReplacementSection section : sections) {
+    private static boolean containsStrikethrough(List<StyleSection> sections) {
+        for (StyleSection section : sections) {
             if (section.MCStyle == MCStyle.STRIKETHROUGH) {
                 return true;
             }
@@ -134,16 +134,16 @@ public class StyleReplacer {
         return text;
     }
 
-    private static List<ReplacementSection> getReplacementSections(String text) {
+    private static List<StyleSection> getStyleSections(String text) {
         Matcher matcher = STRIPPED_COLOR_PATTERN.matcher(text);
-        List<ReplacementSection> sections = new LinkedList<>();
+        List<StyleSection> sections = new LinkedList<>();
 
         while (matcher.find()) {
             String check = matcher.group();
             MCStyle MCStyle = getStyleByCode(check);
 
             if (MCStyle != null) {
-                sections.add(new ReplacementSection(MCStyle, matcher.start(), matcher.end()));
+                sections.add(new StyleSection(MCStyle, matcher.start(), matcher.end()));
             }
         }
 
@@ -208,7 +208,7 @@ public class StyleReplacer {
         return builder.build();
     }
 
-    private record ReplacementSection(MCStyle MCStyle, int start, int end) {
+    private record StyleSection(MCStyle MCStyle, int start, int end) {
 
     }
 

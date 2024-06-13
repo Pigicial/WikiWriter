@@ -1,4 +1,4 @@
-package me.pigicial.wikiwriter.features.items;
+package me.pigicial.wikiwriter.features.items.replacements;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
