@@ -3,8 +3,6 @@ package me.pigicial.wikiwriter.features.items;
 import lombok.Getter;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
-import me.pigicial.wikiwriter.features.items.replacements.RegexTextReplacements;
-import me.pigicial.wikiwriter.features.items.replacements.StyleReplacer;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
@@ -53,7 +51,7 @@ public class WikiItem {
     private final String nameWithoutColor;
 
     private final String loreAsString;
-    private final String extraLoreBelowRarity;
+    private final String extraLoreBelowRarityAsString;
 
     private boolean showRarity = true;
 
@@ -76,23 +74,23 @@ public class WikiItem {
         lore = TextUtils.parseJsonLore(display);
 
         nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName()));
-        // Figures out the rarity of the item based on the item name or lore
-        rarity = Rarity.parseRarity(lore, nameWithColor);
+        rarity = Rarity.getRarityFromName(nameWithColor);
 
         updateNameAndStackSize(); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
         LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, action);
-        loreAsString = TextUtils.convertListToString(lore);
-        extraLoreBelowRarity = TextUtils.convertListToString(removeData.loreBelowRarityToPossibleAdd());
+        loreAsString = TextReplacementPipeline.replaceTextListAndConvertToString(lore);
+
+        extraLoreBelowRarityAsString = TextReplacementPipeline.replaceTextListAndConvertToString(removeData.loreBelowRarityToPossibleAdd());
         shopItem = removeData.detectedShopLore();
 
         showRarity = showRarity && rarity != null;
 
         textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(this, itemStack, extraAttributes);
 
-        String nameWithReplacements = RegexTextReplacements.replaceEverything(nameWithColor, true);
-        nameWithColor = StyleReplacer.applyStyleAndTextModifications(nameWithReplacements);
+        String nameWithReplacements = nameWithColor.replace(":", "<nowiki>:</nowiki>");
+        nameWithColor = TextReplacementPipeline.replaceText(nameWithReplacements);
         nameWithoutColor = Objects.requireNonNull(Formatting.strip(nameWithReplacements)).replace('§', '&');
 
         if (showRarity && StyleReplacer.hasMultipleStyles(nameWithColor)) {
@@ -109,7 +107,7 @@ public class WikiItem {
         if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
             // non-clickable lore supports brackets
             if (!generateModifier().equals(NOT_CLICKABLE)) {
-                lore.add(0, RegexTextReplacements.LINE_SEPARATORS.replace(nameWithColor));
+                lore.add(0, nameWithColor);
                 showRarity = false;
                 nameWithColor = "INSERT_LINK_HERE";
                 return;
@@ -207,7 +205,7 @@ public class WikiItem {
 
     private String convertToReferenceWithExtraText() {
         String reference = convertToReference();
-        String extraLore = extraLoreBelowRarity.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarity;
+        String extraLore = extraLoreBelowRarityAsString.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarityAsString;
         String alternateAmountString = currentStackSize == 1 ? "" : "," + currentStackSize;
 
         return reference + extraLore + alternateAmountString;
@@ -228,9 +226,9 @@ public class WikiItem {
             name = ":" + (showRarity ? nameWithoutColor : nameWithColor);
         }
 
-        String amountString = lore.isEmpty() && extraLoreBelowRarity.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
-        String loreString = emptyTitle || lore.isEmpty() ? "" : "," + loreAsString;
-        String potentialExtraLore = emptyTitle || extraLoreBelowRarity.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarity;
+        String amountString = lore.isEmpty() && extraLoreBelowRarityAsString.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
+        String loreString = emptyTitle || loreAsString.isEmpty() ? "" : "," + loreAsString;
+        String potentialExtraLore = emptyTitle || extraLoreBelowRarityAsString.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarityAsString;
 
         return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString + potentialExtraLore;
     }

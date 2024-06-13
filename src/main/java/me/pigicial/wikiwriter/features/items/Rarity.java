@@ -39,26 +39,6 @@ public enum Rarity {
         return name;
     }
 
-    public static Rarity parseRarity(List<String> lore, String name) {
-        Rarity rarity = getRarityFromName(name);
-        if (rarity == null) {
-            rarity = getRarityFromLore(lore);
-        }
-
-        return rarity;
-    }
-
-    public static Rarity getRarityFromLore(List<String> lore) {
-        for (String line : lore) {
-            Rarity rarity = getRarityFromLine(line);
-            if (rarity != null) {
-                return rarity;
-            }
-        }
-
-        return null;
-    }
-
     public static OptionalInt getRarityIndexFromLore(List<String> lore) {
         for (int i = 0, loreSize = lore.size(); i < loreSize; i++) {
             String line = lore.get(i);
