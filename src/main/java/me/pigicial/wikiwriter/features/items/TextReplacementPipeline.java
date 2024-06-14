@@ -1,5 +1,6 @@
 package me.pigicial.wikiwriter.features.items;
 
+import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -9,18 +10,18 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class TextReplacementPipeline {
 
-    private static final char THIN_SPACE = ' ';
+    public static final char THIN_SPACE = ' ';
 
-    private final List<Consumer<List<TextComponent>>> firstRunPerLineModifications = new ArrayList<>();
+    private final List<Consumer<List<TextComponent>>> initialPerLineModifications = new ArrayList<>();
+    private final List<Consumer<List<TextComponent>>> initialMultiLineModifications = new ArrayList<>();
 
     public TextReplacementPipeline() {
-        registerInitialLineModification(TextReplacementPipeline::modifySingleLineAsComponents);
-
         // Register skyblock level modifications
+        /*
         registerInitialLineModification(list -> {
             for (int i = list.size() - 1; i >= 0; i--) {
                 TextComponent component = list.get(i);
@@ -43,10 +44,15 @@ public class TextReplacementPipeline {
                 list.set(i, component);
             }
         });
+         */
     }
 
-    public void registerInitialLineModification(Consumer<List<TextComponent>> separatedComponentsConsumer) {
-        firstRunPerLineModifications.add(separatedComponentsConsumer);
+    public void registerInitialPerLineModification(Consumer<List<TextComponent>> separatedComponentsConsumer) {
+        initialPerLineModifications.add(separatedComponentsConsumer);
+    }
+
+    public void registerInitialMultiLineModification(Consumer<List<TextComponent>> separatedComponentsConsumer) {
+        initialMultiLineModifications.add(separatedComponentsConsumer);
     }
 
     public String replaceTextListAndConvertToString(List<String> list) {
@@ -58,8 +64,19 @@ public class TextReplacementPipeline {
         return TextUtils.unescapeText(String.join("\n", list));
     }
 
-    private static void makeModificationsToList(List<String> lines) {
-        System.out.println("lines (" + lines.size() + ") = " + lines);
+    private void makeModificationsToList(List<String> lines) {
+        // Modifiers that take in the list of lines
+        List<TextComponent> linesAsComponents = new ArrayList<>();
+        for (String line : lines) {
+            linesAsComponents.add(StyleConversions.toComponent(line));
+        }
+        for (Consumer<List<TextComponent>> modifier : initialMultiLineModifications) {
+            modifier.accept(linesAsComponents);
+        }
+        lines.clear();
+        lines.addAll(linesAsComponents.stream().map(StyleConversions::toLegacyText).toList());
+
+        // Modifiers that apply to each individual line and their sections
         for (int i = 0, linesSize = lines.size(); i < linesSize; i++) {
             String text = lines.get(i);
 
@@ -68,22 +85,24 @@ public class TextReplacementPipeline {
         }
     }
 
-    public static String replaceText(String text) {
-        TextComponent component = StyleReplacer.toComponent(text);
-        List<TextComponent> separatedComponents = StyleReplacer.separateStyleSections(component);
+    public String replaceText(String text) {
+        TextComponent component = StyleConversions.toComponent(text);
+        List<TextComponent> separatedComponents = StyleConversions.getSections(component);
+
+        for (Consumer<List<TextComponent>> modifier : initialPerLineModifications) {
+            modifier.accept(separatedComponents);
+            StyleConversions.combineSameStyles(separatedComponents);
+        }
 
         modifySingleLineAsComponents(separatedComponents);
+        StyleConversions.combineSameStyles(separatedComponents);
 
-        String string = StyleReplacer.toString(separatedComponents);
-        System.out.println("text = " + text);
-        System.out.println("string = " + string);
-        return string;
+        return StyleConversions.toLegacyText(separatedComponents);
     }
 
-    private static void modifySingleLineAsComponents(List<TextComponent> separatedComponents) {
+    private void modifySingleLineAsComponents(List<TextComponent> separatedComponents) {
         for (int i = 0, separatedComponentsSize = separatedComponents.size(); i < separatedComponentsSize; i++) {
             TextComponent component = separatedComponents.get(i);
-            System.out.println("component section = " + component);
 
             // Strikethrough and spaces
             String colorlessText = component.content();
@@ -92,11 +111,9 @@ public class TextReplacementPipeline {
                 int length = colorlessText.length();
 
                 if (component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
-                    System.out.println("1");
-                    component = convertToStrikethrough(component, length);
+                    component = convertStrikethroughToDashes(component, length);
                 } else if (component.style().color() == null) {
-                    System.out.println("2");
-                    component = convertToThinSpaces(component, length);
+                    component = convertInvisibleSpacesToThinSpaces(component, length);
                 }
             }
             component = component.decoration(TextDecoration.STRIKETHROUGH, false);
@@ -109,18 +126,18 @@ public class TextReplacementPipeline {
     }
 
 
-    private static TextComponent convertToStrikethrough(TextComponent component, int length) {
+    private TextComponent convertStrikethroughToDashes(TextComponent component, int length) {
         Style style = component.style().decoration(TextDecoration.STRIKETHROUGH, false);
         return Component.text("-".repeat(length).replace("-----", "----")).style(style);
     }
 
-    private static TextComponent convertToThinSpaces(TextComponent component, int length) {
+    private TextComponent convertInvisibleSpacesToThinSpaces(TextComponent component, int length) {
         Style style = component.style();
         String thinSpace = String.valueOf(THIN_SPACE).repeat(length * 2);
         return Component.text(thinSpace).style(style).color(NamedTextColor.WHITE);
     }
 
-    private static TextComponent replaceWithMediaWikiDecorations(TextComponent component) {
+    private TextComponent replaceWithMediaWikiDecorations(TextComponent component) {
         // MediaWiki modifications:
         List<String> prefixList = new ArrayList<>();
         List<String> suffixList = new ArrayList<>();
@@ -147,20 +164,6 @@ public class TextReplacementPipeline {
         }
         return component;
     }
-
-    /*
-    private static TextComponent replaceProgressBarsAndValues(TextComponent component) {
-        component = component.replaceText(builder -> {
-            return builder
-                    .match(Pattern.compile("\\d*.?\\d*(%?)"))
-                    .replacement((matchResult, builder1) -> {
-                        return "0" +
-                    });
-        });
-
-        return component;
-    }
-     */
 
     private enum DecorationReplacements {
         UNDERLINE(TextDecoration.UNDERLINED, "<ins>", "</ins>"),

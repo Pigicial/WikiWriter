@@ -27,8 +27,9 @@ public interface TextureAndReferenceData {
             return abicaseData;
         }
 
-        if (extraAttributes.getString("id").equals("POTION")) {
-            return new PotionData(wikiItem, extraAttributes);
+        PotionData potionData = PotionData.getPotionData(wikiItem, extraAttributes);
+        if (potionData != null) {
+            return potionData;
         }
 
         return EnchantedBookData.getEnchantedBookData(itemStack, extraAttributes);
