@@ -2,9 +2,14 @@ package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
+import me.pigicial.wikiwriter.features.items.StyleReplacer;
+import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
+import me.pigicial.wikiwriter.features.replacements.CollectionMenuReplacementPipeline;
+import me.pigicial.wikiwriter.features.replacements.MenuModification;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -19,10 +24,14 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import javax.swing.text.Style;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class GUIStealerFeature extends KeyBindFeature {
 
@@ -78,6 +87,9 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
+        MenuModification modification = generateApplicableTextModifications(inventoryName, items);
+        Consumer<TextReplacementPipeline> pipelineConsumer = modification == null ? null : modification.getTextPipelineConsumer();
+
         builder.append("<noinclude>[[Category:Inventory Templates]]</noinclude>\n{{Inventory\n")
                 .append("|name=").append(inventoryName).append("\n")
                 .append("|rows=").append(rows).append("\n");
@@ -87,7 +99,11 @@ public class GUIStealerFeature extends KeyBindFeature {
             int horizontalPosition = 1 + (i % 9);
             int verticalPosition = (i / 9);
 
-            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY);
+            WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, pipelineConsumer);
+            if (modification != null) {
+                modification.getItemConsumer().accept(item);
+            }
+
             String text = item.generateText(Action.COPYING_INVENTORY);
 
             builder.append("|")
@@ -100,6 +116,18 @@ public class GUIStealerFeature extends KeyBindFeature {
         builder.append("}}");
         wikiWriter.sendMessage("Copied top GUI to clipboard.");
         wikiWriter.copyToClipboard(builder.toString());
+    }
+
+    @Nullable
+    private MenuModification generateApplicableTextModifications(String inventoryName, List<ItemStack> items) {
+        if (inventoryName.equals(" Collection")) {
+            String highestRequirement = CollectionMenuReplacementPipeline.detectHighestTierCollectionRequirement(items);
+            if (highestRequirement != null) {
+                return new CollectionMenuReplacementPipeline(highestRequirement);
+            }
+        }
+
+        return null;
     }
 
     private boolean isShopMode(List<ItemStack> items, int size, int rows) {

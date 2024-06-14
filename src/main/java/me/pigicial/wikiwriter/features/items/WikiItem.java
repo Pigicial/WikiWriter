@@ -1,6 +1,7 @@
 package me.pigicial.wikiwriter.features.items;
 
 import lombok.Getter;
+import lombok.Setter;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +31,10 @@ public class WikiItem {
 
     private final WikiWriterConfig config = WikiWriter.getInstance().getConfig();
 
+    @Getter
+    private final ItemStack itemStack;
     private final Rarity rarity;
+    @Getter
     private final List<String> lore;
 
     @Nullable
@@ -39,6 +44,7 @@ public class WikiItem {
     private final boolean hasCustomSkullTexture;
     private final boolean emptyTitle;
 
+    @Setter
     private String minecraftId;
     @Getter
     private String skyBlockId;
@@ -50,12 +56,20 @@ public class WikiItem {
     private String nameWithColor;
     private final String nameWithoutColor;
 
+    @Getter
+    private final TextReplacementPipeline textPipeline;
     private final String loreAsString;
     private final String extraLoreBelowRarityAsString;
 
     private boolean showRarity = true;
 
     public WikiItem(@NotNull ItemStack itemStack, Action action) {
+        this(itemStack, action, null);
+    }
+
+    public WikiItem(@NotNull ItemStack itemStack, Action action, @Nullable Consumer<TextReplacementPipeline> textModifications) {
+        this.itemStack = itemStack;
+
         NbtCompound nbt = itemStack.getNbt();
         // I don't think this can be null but there's null checks in ItemStack so just in case
         if (nbt == null) {
@@ -80,13 +94,17 @@ public class WikiItem {
 
         // Removes certain lines of lore based on config settings, then stores them
         LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, action);
-        loreAsString = TextReplacementPipeline.replaceTextListAndConvertToString(lore);
-
-        extraLoreBelowRarityAsString = TextReplacementPipeline.replaceTextListAndConvertToString(removeData.loreBelowRarityToPossibleAdd());
         shopItem = removeData.detectedShopLore();
 
-        showRarity = showRarity && rarity != null;
+        textPipeline = new TextReplacementPipeline();
+        if (textModifications != null) {
+            textModifications.accept(textPipeline);
+        }
 
+        loreAsString = textPipeline.replaceTextListAndConvertToString(lore);
+        extraLoreBelowRarityAsString = textPipeline.replaceTextListAndConvertToString(removeData.loreBelowRarityToPossibleAdd());
+
+        showRarity = showRarity && rarity != null;
         textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(this, itemStack, extraAttributes);
 
         String nameWithReplacements = nameWithColor.replace(":", "<nowiki>:</nowiki>");
