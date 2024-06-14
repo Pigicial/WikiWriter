@@ -1,9 +1,12 @@
 package me.pigicial.wikiwriter.features.replacements;
 
-import me.pigicial.wikiwriter.features.items.StyleReplacer;
+import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.TextUtils;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -14,24 +17,58 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CollectionMenuReplacementPipeline implements MenuModification {
 
-    private final String highestTier;
+    private static final int TOP_COLLECTION_ITEM_INDEX = 4;
 
-    public CollectionMenuReplacementPipeline(String highestTier) {
-        this.highestTier = highestTier;
+    private final String highestTier;
+    private final int highestTierNumber;
+    private final String highestTierRomanNumeral;
+
+    public CollectionMenuReplacementPipeline(String highestTierAmount, int highestTierNumber, String highestTierRomanNumeral) {
+        this.highestTier = highestTierAmount;
+        this.highestTierNumber = highestTierNumber;
+        this.highestTierRomanNumeral = highestTierRomanNumeral;
+
+        WikiWriter.getInstance().sendMessage("highestTier = " + highestTier);
+        WikiWriter.getInstance().sendMessage("highestTierRomanNumeral = " + highestTierRomanNumeral);
     }
 
     @Override
-    public Consumer<WikiItem> getItemConsumer() {
-        return item -> {
+    public BiConsumer<WikiItem, Integer> getItemConsumer() {
+        return (item, index) -> {
             Item material = item.getItemStack().getItem();
             if (material.equals(Items.YELLOW_STAINED_GLASS_PANE) || material.equals(Items.RED_STAINED_GLASS_PANE)) {
-                item.setMinecraftId("green_stained_glass_pane");
+                item.setMinecraftId("lime_stained_glass_pane");
+
+                String name = item.getName();
+                TextComponent componentWithNewColor = StyleConversions.toComponent(name).color(NamedTextColor.GREEN);
+                String replacedName = StyleConversions.toLegacyText(componentWithNewColor);
+                item.setName(replacedName);
+            }
+
+            // Replace roman numeral at the top
+            System.out.println("name thingy = " + material.toString() + " (" + index + ")");
+            if (!material.toString().contains("glass") && index == TOP_COLLECTION_ITEM_INDEX) {
+                String name = item.getName();
+                TextComponent component = StyleConversions.toComponent(name);
+                String rawText = component.content();
+
+                // Find the index of the last space
+                int lastSpaceIndex = rawText.lastIndexOf(' ');
+                String collectionName = rawText.substring(0, lastSpaceIndex).strip();
+
+                // Replace roman numeral
+                Component replacedComponent = Component.text(collectionName + " " + highestTierRomanNumeral)
+                        .style(component.style());
+                String replacedName = StyleConversions.toLegacyText(replacedComponent);
+                item.setName(replacedName);
+                System.out.println("Replaced name = " + replacedName + " " + highestTierRomanNumeral);
             }
         };
     }
@@ -42,73 +79,141 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
     }
 
     public void modifyText(TextReplacementPipeline textReplacementPipeline) {
-        textReplacementPipeline.registerInitialLineModification(list -> {
-            for (int i = 0; i < list.size(); i++) {
-                TextComponent component = list.get(i);
-
-                // Set progress bars to green for 100%
-                String text = component.content();
-                if (!text.isEmpty() && text.isBlank() && component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
-                    component = component.color(NamedTextColor.GREEN);
-                }
-
-                // Replace numbers
-                int index = i;
-                component = (TextComponent) component.replaceText(replacementBuilder ->
-                        replacementBuilder
-                                .match(Pattern.compile("\\d+(\\.\\d+)?"))
-                                .replacement((matchResult, newTextBuilder) -> {
-                                    // percentages above progress bars
-                                    if (index + 1 == list.size() - 1 && list.get(index + 1).content().equals("%")) {
-                                        return newTextBuilder
-                                                .content("100")
-                                                .color(NamedTextColor.GREEN)
-                                                .build();
-                                    } else if (index > 0 && list.get(0).content().contains("Collected")) {
-                                        return newTextBuilder
-                                                .content(highestTier)
-                                                .build();
-                                    } else if (index != list.size() - 1) {
-                                        // don't replace last number after progress bar
-                                        return newTextBuilder
-                                                .content(highestTier)
-                                                .build();
-                                    } else {
-                                        return newTextBuilder.build();
-                                    }
-                                }));
-
-                list.set(i, component);
-            }
-        });
+        textReplacementPipeline.registerInitialPerLineModification(this::modifyText);
+        textReplacementPipeline.registerInitialMultiLineModification(this::fixContributionsList);
     }
 
-    @Nullable
-    public static String detectHighestTierCollectionRequirement(List<ItemStack> items) {
-        // due to the way items are found, the last one found is automatically the highest
-        String latestCollectionRequirement = null;
-        for (ItemStack itemStack : items) {
-            String collectionRequirement = detectCollectionRequirement(itemStack);
-            if (collectionRequirement != null) {
-                latestCollectionRequirement = collectionRequirement;
+    private void modifyText(List<TextComponent> list) {
+        for (int index = 0; index < list.size(); index++) {
+            TextComponent component = list.get(index);
+
+            // Set progress bars to green for 100%
+            String text = component.content();
+            if (!text.isEmpty() && text.isBlank() && component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
+                component = component.color(NamedTextColor.GREEN);
+            }
+
+            // Replace numbers
+            if (text.strip().equals("%")) {
+                component = component.color(NamedTextColor.GREEN);
+            }
+
+            Pattern numberPattern = Pattern.compile("\\d+(\\.\\d+)?");
+            Matcher numberMatcher = numberPattern.matcher(text);
+            if (numberMatcher.find()) {
+                boolean nextSectionIsPercentage = index + 1 == list.size() - 1 && list.get(index + 1).content().equals("%");
+                boolean isTopCollectionAmountText = index > 0 && list.get(0).content().contains("Collect");
+                boolean isBeforeSlash = index < list.size() - 1 && list.get(index + 1).content().contains("/");
+
+                if (nextSectionIsPercentage) {
+                    component = Component.text("100").style(component.style()).color(NamedTextColor.GREEN);
+                } else if (isTopCollectionAmountText) {
+                    // Top center item has total collection/collected text
+                    component = Component.text(highestTier).style(component.style());
+                } else if (isBeforeSlash) {
+                    // Is before slash
+                    component = Component.text(highestTier).style(component.style());
+                }
+            }
+
+            list.set(index, component);
+        }
+    }
+
+    private void fixContributionsList(List<TextComponent> components) {
+        boolean removingLines = false;
+        int contributionsIndex = -1;
+        for (int index = 0; index < components.size(); index++) {
+            TextComponent component = components.get(index);
+            String text = StyleConversions.toLegacyText(component);
+            if (text.contains("Contributions:")) {
+                removingLines = true;
+                contributionsIndex = index;
+                continue;
+            }
+
+            boolean blank = StyleConversions.stripColor(text).isBlank();
+            if (removingLines) {
+                if (blank) {
+                    // hit an empty spot - might not even be needed
+                    removingLines = false;
+                } else {
+                    components.remove(index);
+                    index--;
+                }
             }
         }
 
-        return latestCollectionRequirement;
+        if (contributionsIndex != -1) {
+            TextComponent steveContributions = generateContributionsText("Steve", 0.75);
+            TextComponent alexContributions = generateContributionsText("Alex", 0.25);
+            components.add(contributionsIndex + 1, steveContributions);
+            components.add(contributionsIndex + 2, alexContributions);
+        }
     }
 
-    private static String detectCollectionRequirement(ItemStack itemStack) {
+    private TextComponent generateContributionsText(String name, double multiplier) {
+        return Component.text("[MVP").color(NamedTextColor.AQUA)
+                .append(Component.text("+").color(NamedTextColor.RED))
+                .append(Component.text("] " + name).color(NamedTextColor.AQUA))
+                .append(Component.text(": ").color(NamedTextColor.GRAY))
+                .append(Component.text(formatNumber((int) (highestTierNumber * multiplier))).color(NamedTextColor.YELLOW));
+    }
+
+    public static String formatNumber(int number) {
+        if (number >= 1_000_000) {
+            double millions = number / 1_000_000.0;
+            return (millions % 1 == 0)
+                    ? String.format("%dm", (int) millions)
+                    : String.format("%.1fm", millions);
+        } else if (number >= 1_000) {
+            double thousands = number / 1_000.0;
+            return (thousands % 1 == 0)
+                    ? String.format("%dk", (int) thousands)
+                    : String.format("%.1fk", thousands);
+        } else {
+            return Integer.toString(number);
+        }
+    }
+
+    @Nullable
+    public static CollectionMenuReplacementPipeline generatePipelineIsApplicable(List<ItemStack> items) {
+        WikiWriter.getInstance().sendMessage("Test 1");
+        // due to the way items are found, the last one found is automatically the highest
+        int amount = 0;
+        int tiers = 0;
+        for (ItemStack itemStack : items) {
+            int collectionRequirement = detectCollectionRequirement(itemStack);
+            if (collectionRequirement != 0) {
+                amount = collectionRequirement;
+                System.out.println("Detected " + amount + ", now at " + (tiers + 1));
+                tiers++;
+            }
+        }
+
+        if (amount == 0) {
+            return null;
+        }
+
+        String formattedAmount = NumberFormat.getNumberInstance().format(amount);
+        return new CollectionMenuReplacementPipeline(formattedAmount, amount, TextUtils.convertToRomanNumeral(tiers));
+    }
+
+    private static int detectCollectionRequirement(ItemStack itemStack) {
         WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY);
+        WikiWriter.getInstance().sendMessage("Test 2");
         for (String lore : item.getLore()) {
-            TextComponent component = StyleReplacer.toComponent(lore);
-            List<TextComponent> sections = StyleReplacer.separateStyleSections(component);
+            TextComponent component = StyleConversions.toComponent(lore);
+            List<TextComponent> sections = StyleConversions.getSections(component);
             if (sections.size() < 4) { // guaranteed to be at least 4
+                WikiWriter.getInstance().sendMessage("Fail 1 (" + sections.size() + ")");
                 continue;
             }
 
             // checks for progress bar
             TextComponent firstSection = sections.get(0);
             if (!firstSection.content().isBlank() || !firstSection.hasDecoration(TextDecoration.STRIKETHROUGH)) {
+                WikiWriter.getInstance().sendMessage("Fail 2");
                 continue;
             }
 
@@ -126,12 +231,10 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
             }
 
             try {
-                double value = Double.parseDouble(text) * multiplier;
-                return NumberFormat.getNumberInstance().format(value);
-            } catch (NumberFormatException ignored) {
-            }
+                return (int) (Double.parseDouble(text) * multiplier);
+            } catch (NumberFormatException ignored) { }
         }
 
-        return null;
+        return 0;
     }
 }

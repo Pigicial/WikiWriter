@@ -6,6 +6,7 @@ import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -25,7 +26,6 @@ public class WikiItem {
 
     private static final String DONT_SHOW_TOOLTIP = "?";
     private static final String NOT_CLICKABLE = "!";
-
     private static final Pattern AUCTION_ITEM_COUNT_PATTERN = Pattern.compile("§7-?(\\d+)x ");
     private static final Pattern SHOP_NAME_ITEM_COUNT = Pattern.compile("§8x(\\d\\d?)");
 
@@ -42,7 +42,6 @@ public class WikiItem {
 
     private final boolean shopItem;
     private final boolean hasCustomSkullTexture;
-    private final boolean emptyTitle;
 
     @Setter
     private String minecraftId;
@@ -52,14 +51,13 @@ public class WikiItem {
     private final int originalStackSize;
     private int currentStackSize;
 
-    @Getter
-    private String nameWithColor;
-    private final String nameWithoutColor;
+    @Getter @Setter
+    private String name;
 
     @Getter
     private final TextReplacementPipeline textPipeline;
-    private final String loreAsString;
-    private final String extraLoreBelowRarityAsString;
+
+    private final LoreFilters.RemovedLore removeData;
 
     private boolean showRarity = true;
 
@@ -87,13 +85,13 @@ public class WikiItem {
         NbtCompound display = nbt.getCompound("display");
         lore = TextUtils.parseJsonLore(display);
 
-        nameWithColor = TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName()));
-        rarity = Rarity.getRarityFromName(nameWithColor);
+        name = TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName()));
+        rarity = Rarity.getRarityFromName(name);
 
         updateNameAndStackSize(); // fix brackets in name plus replace amounts if necessary
 
         // Removes certain lines of lore based on config settings, then stores them
-        LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, action);
+        removeData = LoreFilters.checkAndFilter(lore, action);
         shopItem = removeData.detectedShopLore();
 
         textPipeline = new TextReplacementPipeline();
@@ -101,33 +99,27 @@ public class WikiItem {
             textModifications.accept(textPipeline);
         }
 
-        loreAsString = textPipeline.replaceTextListAndConvertToString(lore);
-        extraLoreBelowRarityAsString = textPipeline.replaceTextListAndConvertToString(removeData.loreBelowRarityToPossibleAdd());
-
         showRarity = showRarity && rarity != null;
         textureAndReferenceData = TextureAndReferenceData.getFromExtraAttributes(this, itemStack, extraAttributes);
 
-        String nameWithReplacements = nameWithColor.replace(":", "<nowiki>:</nowiki>");
-        nameWithColor = TextReplacementPipeline.replaceText(nameWithReplacements);
-        nameWithoutColor = Objects.requireNonNull(Formatting.strip(nameWithReplacements)).replace('§', '&');
+        String nameWithReplacements = name.replace(":", "<nowiki>:</nowiki>");
+        name = textPipeline.replaceText(nameWithReplacements);
 
-        if (showRarity && StyleReplacer.hasMultipleStyles(nameWithColor)) {
+        if (showRarity && StyleConversions.hasMultipleStyles(name)) {
             showRarity = false;
         }
 
         // Fixes various item ID quirks (and handles colors and whatnot)
         fixIDs(itemStack, display, extraAttributes);
-
-        emptyTitle = nameWithoutColor.replace(" ", "").isEmpty();
     }
 
     private void updateNameAndStackSize() {
-        if (nameWithColor.contains("[") || nameWithColor.contains("]") || nameWithColor.contains("{") || nameWithColor.contains("}")) {
+        if (name.contains("[") || name.contains("]") || name.contains("{") || name.contains("}")) {
             // non-clickable lore supports brackets
             if (!generateModifier().equals(NOT_CLICKABLE)) {
-                lore.add(0, nameWithColor);
+                lore.add(0, name);
                 showRarity = false;
-                nameWithColor = "INSERT_LINK_HERE";
+                name = "INSERT_LINK_HERE";
                 return;
             }
         }
@@ -136,11 +128,11 @@ public class WikiItem {
         if (setToOne) {
             currentStackSize = 1;
 
-            Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(nameWithColor);
-            nameWithColor = matcher.replaceAll("");
+            Matcher matcher = AUCTION_ITEM_COUNT_PATTERN.matcher(name);
+            name = matcher.replaceAll("");
 
-            matcher = SHOP_NAME_ITEM_COUNT.matcher(nameWithColor);
-            nameWithColor = matcher.replaceAll("");
+            matcher = SHOP_NAME_ITEM_COUNT.matcher(name);
+            name = matcher.replaceAll("");
         }
     }
 
@@ -174,6 +166,7 @@ public class WikiItem {
             }
         }
 
+        String nameWithoutColor = StyleConversions.stripColor(name);
         if (hasCustomSkullTexture && skyBlockId.isEmpty() && nameWithoutColor.endsWith(" Minion")) {
             // for the crafted minions menu basically
             skyBlockId = nameWithoutColor.substring(0, nameWithoutColor.length() - 7) + "_GENERATOR_1";
@@ -223,7 +216,11 @@ public class WikiItem {
 
     private String convertToReferenceWithExtraText() {
         String reference = convertToReference();
-        String extraLore = extraLoreBelowRarityAsString.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarityAsString;
+        String extraLore = this.getExtraLoreBelowRarity();
+        if (!extraLore.isEmpty()) {
+            extraLore = TextUtils.unescapeText("\n") + extraLore;
+        }
+
         String alternateAmountString = currentStackSize == 1 ? "" : "," + currentStackSize;
 
         return reference + extraLore + alternateAmountString;
@@ -239,20 +236,33 @@ public class WikiItem {
         String rarityString = showRarity ? rarity.toString() : "";
         String textureLink = this.generateTextureLink();
 
-        String name = "";
+        boolean emptyTitle = isEmptyTitle();
+        String nameWithoutColor = StyleConversions.stripColor(this.name);
+        String usedName = "";
         if (!emptyTitle && !minecraftId.equals(nameWithoutColor)) {
-            name = ":" + (showRarity ? nameWithoutColor : nameWithColor);
+            usedName = ":" + (showRarity ? nameWithoutColor : this.name);
         }
+
+        String loreAsString = textPipeline.replaceTextListAndConvertToString(lore);
+        String extraLoreBelowRarityAsString = this.getExtraLoreBelowRarity();
 
         String amountString = lore.isEmpty() && extraLoreBelowRarityAsString.isEmpty() && currentStackSize == 1 ? "" : "," + currentStackSize;
         String loreString = emptyTitle || loreAsString.isEmpty() ? "" : "," + loreAsString;
         String potentialExtraLore = emptyTitle || extraLoreBelowRarityAsString.isEmpty() ? "" : TextUtils.unescapeText("\n") + extraLoreBelowRarityAsString;
 
-        return modifier + textureType + "," + rarityString + "," + textureLink + name + amountString + loreString + potentialExtraLore;
+        return modifier + textureType + "," + rarityString + "," + textureLink + usedName + amountString + loreString + potentialExtraLore;
+    }
+
+    public boolean isEmptyTitle() {
+        return StyleConversions.stripColor(name).replace(" ", "").isEmpty();
+    }
+
+    public String getExtraLoreBelowRarity() {
+        return textPipeline.replaceTextListAndConvertToString(removeData.loreBelowRarityToPossibleAdd());
     }
 
     private String generateModifier() {
-        if (emptyTitle && lore.isEmpty()) {
+        if (isEmptyTitle() && lore.isEmpty()) {
             return DONT_SHOW_TOOLTIP;
         } else if (skyBlockId.isEmpty() && config.disableClicking) {
             return NOT_CLICKABLE;

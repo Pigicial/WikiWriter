@@ -2,14 +2,12 @@ package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
-import me.pigicial.wikiwriter.features.items.StyleReplacer;
 import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.features.replacements.CollectionMenuReplacementPipeline;
 import me.pigicial.wikiwriter.features.replacements.MenuModification;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -27,8 +25,6 @@ import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import javax.swing.text.Style;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -101,7 +97,7 @@ public class GUIStealerFeature extends KeyBindFeature {
 
             WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY, pipelineConsumer);
             if (modification != null) {
-                modification.getItemConsumer().accept(item);
+                modification.getItemConsumer().accept(item, i);
             }
 
             String text = item.generateText(Action.COPYING_INVENTORY);
@@ -120,13 +116,12 @@ public class GUIStealerFeature extends KeyBindFeature {
 
     @Nullable
     private MenuModification generateApplicableTextModifications(String inventoryName, List<ItemStack> items) {
-        if (inventoryName.equals(" Collection")) {
-            String highestRequirement = CollectionMenuReplacementPipeline.detectHighestTierCollectionRequirement(items);
-            if (highestRequirement != null) {
-                return new CollectionMenuReplacementPipeline(highestRequirement);
-            }
+        if (inventoryName.endsWith(" Collection")) {
+            WikiWriter.getInstance().sendMessage("Test-B");
+            return CollectionMenuReplacementPipeline.generatePipelineIsApplicable(items);
         }
 
+        WikiWriter.getInstance().sendMessage("Fail-B 2");
         return null;
     }
 
