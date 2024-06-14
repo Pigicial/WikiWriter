@@ -54,6 +54,7 @@ public class WikiWriterConfig {
             "disableClicking",
             "menuReferenceModeScenario",
             "shopMenuMode",
+            "autoFixCertainMenuTypes",
             "removeDungeonStats",
             "removeTextBelowRarityWhenCopyingItems",
             "removeTextBelowRarityWhenCopyingMenus",
@@ -89,10 +90,10 @@ public class WikiWriterConfig {
     @SerialEntry
     public boolean shopMenuMode = true;
 
-    @AutoGen(category = "general", group = "textFilters")
+    @AutoGen(category = "general", group = "copyingInventories")
     @Boolean(colored = true)
     @SerialEntry
-    public boolean removeDungeonStats = true;
+    public boolean autoFixCertainMenuTypes = true;
 
     @AutoGen(category = "general", group = "textFilters")
     @Boolean(colored = true)
@@ -117,12 +118,12 @@ public class WikiWriterConfig {
     @AutoGen(category = "general", group = "textFilters")
     @Boolean(colored = true)
     @SerialEntry
-    public boolean removeShopNPCStockText = true;
+    public boolean removeShopNPCStockText = false;
 
     @AutoGen(category = "general", group = "textFilters")
     @Boolean(colored = true)
     @SerialEntry
-    public boolean removeShopNPCTradeText = true;
+    public boolean removeShopNPCTradeText = false;
 
     @AutoGen(category = "general", group = "textFilters")
     @Boolean(colored = true)
