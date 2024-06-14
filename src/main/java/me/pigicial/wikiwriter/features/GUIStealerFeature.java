@@ -6,6 +6,7 @@ import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.features.replacements.CollectionMenuReplacementPipeline;
 import me.pigicial.wikiwriter.features.replacements.MenuModification;
+import me.pigicial.wikiwriter.features.replacements.SBLevelGuideMenuModifications;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
@@ -117,11 +118,13 @@ public class GUIStealerFeature extends KeyBindFeature {
     @Nullable
     private MenuModification generateApplicableTextModifications(String inventoryName, List<ItemStack> items) {
         if (inventoryName.endsWith(" Collection")) {
-            WikiWriter.getInstance().sendMessage("Test-B");
             return CollectionMenuReplacementPipeline.generatePipelineIsApplicable(items);
         }
 
-        WikiWriter.getInstance().sendMessage("Fail-B 2");
+        if (inventoryName.contains("Guide")) {
+            return new SBLevelGuideMenuModifications();
+        }
+
         return null;
     }
 

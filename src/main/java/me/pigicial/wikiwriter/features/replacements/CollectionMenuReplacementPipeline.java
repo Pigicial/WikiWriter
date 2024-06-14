@@ -1,10 +1,9 @@
 package me.pigicial.wikiwriter.features.replacements;
 
-import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
 import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -34,9 +33,6 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
         this.highestTier = highestTierAmount;
         this.highestTierNumber = highestTierNumber;
         this.highestTierRomanNumeral = highestTierRomanNumeral;
-
-        WikiWriter.getInstance().sendMessage("highestTier = " + highestTier);
-        WikiWriter.getInstance().sendMessage("highestTierRomanNumeral = " + highestTierRomanNumeral);
     }
 
     @Override
@@ -53,7 +49,6 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
             }
 
             // Replace roman numeral at the top
-            System.out.println("name thingy = " + material.toString() + " (" + index + ")");
             if (!material.toString().contains("glass") && index == TOP_COLLECTION_ITEM_INDEX) {
                 String name = item.getName();
                 TextComponent component = StyleConversions.toComponent(name);
@@ -64,11 +59,9 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
                 String collectionName = rawText.substring(0, lastSpaceIndex).strip();
 
                 // Replace roman numeral
-                Component replacedComponent = Component.text(collectionName + " " + highestTierRomanNumeral)
-                        .style(component.style());
+                Component replacedComponent = Component.text(collectionName + " " + highestTierRomanNumeral).style(component.style());
                 String replacedName = StyleConversions.toLegacyText(replacedComponent);
                 item.setName(replacedName);
-                System.out.println("Replaced name = " + replacedName + " " + highestTierRomanNumeral);
             }
         };
     }
@@ -178,7 +171,6 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
 
     @Nullable
     public static CollectionMenuReplacementPipeline generatePipelineIsApplicable(List<ItemStack> items) {
-        WikiWriter.getInstance().sendMessage("Test 1");
         // due to the way items are found, the last one found is automatically the highest
         int amount = 0;
         int tiers = 0;
@@ -186,7 +178,6 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
             int collectionRequirement = detectCollectionRequirement(itemStack);
             if (collectionRequirement != 0) {
                 amount = collectionRequirement;
-                System.out.println("Detected " + amount + ", now at " + (tiers + 1));
                 tiers++;
             }
         }
@@ -201,19 +192,16 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
 
     private static int detectCollectionRequirement(ItemStack itemStack) {
         WikiItem item = new WikiItem(itemStack, Action.COPYING_INVENTORY);
-        WikiWriter.getInstance().sendMessage("Test 2");
         for (String lore : item.getLore()) {
             TextComponent component = StyleConversions.toComponent(lore);
             List<TextComponent> sections = StyleConversions.getSections(component);
             if (sections.size() < 4) { // guaranteed to be at least 4
-                WikiWriter.getInstance().sendMessage("Fail 1 (" + sections.size() + ")");
                 continue;
             }
 
             // checks for progress bar
             TextComponent firstSection = sections.get(0);
             if (!firstSection.content().isBlank() || !firstSection.hasDecoration(TextDecoration.STRIKETHROUGH)) {
-                WikiWriter.getInstance().sendMessage("Fail 2");
                 continue;
             }
 

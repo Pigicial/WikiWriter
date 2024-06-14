@@ -12,12 +12,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,15 +35,15 @@ public class WikiItem {
     @Getter
     private final List<String> lore;
 
-    @Nullable
-    private final TextureAndReferenceData textureAndReferenceData;
+    @Nullable @Setter
+    private TextureAndReferenceData textureAndReferenceData;
 
     private final boolean shopItem;
     private final boolean hasCustomSkullTexture;
 
     @Setter
     private String minecraftId;
-    @Getter
+    @Getter @Setter
     private String skyBlockId;
 
     private final int originalStackSize;
@@ -60,6 +58,8 @@ public class WikiItem {
     private final LoreFilters.RemovedLore removeData;
 
     private boolean showRarity = true;
+    @Setter
+    private boolean forcedNotClickable = false;
 
     public WikiItem(@NotNull ItemStack itemStack, Action action) {
         this(itemStack, action, null);
@@ -264,7 +264,9 @@ public class WikiItem {
     private String generateModifier() {
         if (isEmptyTitle() && lore.isEmpty()) {
             return DONT_SHOW_TOOLTIP;
-        } else if (skyBlockId.isEmpty() && config.disableClicking) {
+        } else if ((hasCustomSkullTexture && skyBlockId.isEmpty()) && config.disableClicking) {
+            return NOT_CLICKABLE;
+        } else if (forcedNotClickable || config.disableClicking) {
             return NOT_CLICKABLE;
         } else {
             return "";

@@ -8,9 +8,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class TextReplacementPipeline {
 
@@ -20,31 +21,7 @@ public class TextReplacementPipeline {
     private final List<Consumer<List<TextComponent>>> initialMultiLineModifications = new ArrayList<>();
 
     public TextReplacementPipeline() {
-        // Register skyblock level modifications
-        /*
-        registerInitialLineModification(list -> {
-            for (int i = list.size() - 1; i >= 0; i--) {
-                TextComponent component = list.get(i);
 
-                // Set progress bars to white
-                String text = component.content();
-                if (!text.isEmpty() && text.isBlank() && component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
-                    component = component.color(NamedTextColor.WHITE);
-                }
-
-                // Replace numbers
-                component = (TextComponent) component.replaceText(replacementBuilder ->
-                        replacementBuilder
-                                .match(Pattern.compile("\\d+(\\.\\d+)?(%)?"))
-                                .replacement((matchResult, newTextBuilder) -> newTextBuilder
-                                        .content("0" + matchResult.group(2))
-                                        .build()
-                                ));
-
-                list.set(i, component);
-            }
-        });
-         */
     }
 
     public void registerInitialPerLineModification(Consumer<List<TextComponent>> separatedComponentsConsumer) {
@@ -101,27 +78,26 @@ public class TextReplacementPipeline {
     }
 
     private void modifySingleLineAsComponents(List<TextComponent> separatedComponents) {
-        for (int i = 0, separatedComponentsSize = separatedComponents.size(); i < separatedComponentsSize; i++) {
-            TextComponent component = separatedComponents.get(i);
+        for (int index = 0, separatedComponentsSize = separatedComponents.size(); index < separatedComponentsSize; index++) {
+            TextComponent component = separatedComponents.get(index);
 
             // Strikethrough and spaces
             String colorlessText = component.content();
             boolean onlyContainsSpaces = !colorlessText.isEmpty() && colorlessText.isBlank();
-            if (onlyContainsSpaces) {
-                int length = colorlessText.length();
+            int length = colorlessText.length();
 
-                if (component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
-                    component = convertStrikethroughToDashes(component, length);
-                } else if (component.style().color() == null) {
-                    component = convertInvisibleSpacesToThinSpaces(component, length);
-                }
+            if (onlyContainsSpaces && component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
+                component = convertStrikethroughToDashes(component, length);
+            } else if (index == 0 & colorlessText.startsWith(" ")) {
+                component = convertFirstInvisibleSpacesToThinSpaces(component);
             }
+
             component = component.decoration(TextDecoration.STRIKETHROUGH, false);
 
             component = replaceWithMediaWikiDecorations(component);
             component = (TextComponent) component.replaceText(builder -> builder.matchLiteral(",").replacement("<nowiki>,</nowiki>"));
 
-            separatedComponents.set(i, component);
+            separatedComponents.set(index, component);
         }
     }
 
@@ -131,10 +107,20 @@ public class TextReplacementPipeline {
         return Component.text("-".repeat(length).replace("-----", "----")).style(style);
     }
 
-    private TextComponent convertInvisibleSpacesToThinSpaces(TextComponent component, int length) {
-        Style style = component.style();
-        String thinSpace = String.valueOf(THIN_SPACE).repeat(length * 2);
-        return Component.text(thinSpace).style(style).color(NamedTextColor.WHITE);
+    private TextComponent convertFirstInvisibleSpacesToThinSpaces(TextComponent component) {
+        String text = component.content();
+        int amountOfSpaces = 0;
+        for (char characters : text.toCharArray()) {
+            if (characters == ' ') {
+                amountOfSpaces++;
+            } else {
+                break;
+            }
+        }
+
+        Style style = component.style().colorIfAbsent(NamedTextColor.WHITE);
+        String thinSpaces = String.valueOf(THIN_SPACE).repeat(amountOfSpaces * 2);
+        return Component.text(thinSpaces + text.substring(amountOfSpaces)).style(style);
     }
 
     private TextComponent replaceWithMediaWikiDecorations(TextComponent component) {
