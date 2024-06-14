@@ -7,15 +7,49 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 public class TextReplacementPipeline {
 
     private static final char THIN_SPACE = ' ';
 
-    public static String replaceTextListAndConvertToString(List<String> list) {
+    private final List<Consumer<List<TextComponent>>> firstRunPerLineModifications = new ArrayList<>();
+
+    public TextReplacementPipeline() {
+        registerInitialLineModification(TextReplacementPipeline::modifySingleLineAsComponents);
+
+        // Register skyblock level modifications
+        registerInitialLineModification(list -> {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                TextComponent component = list.get(i);
+
+                // Set progress bars to white
+                String text = component.content();
+                if (!text.isEmpty() && text.isBlank() && component.hasDecoration(TextDecoration.STRIKETHROUGH)) {
+                    component = component.color(NamedTextColor.WHITE);
+                }
+
+                // Replace numbers
+                component = (TextComponent) component.replaceText(replacementBuilder ->
+                        replacementBuilder
+                                .match(Pattern.compile("\\d+(\\.\\d+)?(%)?"))
+                                .replacement((matchResult, newTextBuilder) -> newTextBuilder
+                                        .content("0" + matchResult.group(2))
+                                        .build()
+                                ));
+
+                list.set(i, component);
+            }
+        });
+    }
+
+    public void registerInitialLineModification(Consumer<List<TextComponent>> separatedComponentsConsumer) {
+        firstRunPerLineModifications.add(separatedComponentsConsumer);
+    }
+
+    public String replaceTextListAndConvertToString(List<String> list) {
         if (list.isEmpty()) {
             return "";
         }
@@ -73,6 +107,7 @@ public class TextReplacementPipeline {
             separatedComponents.set(i, component);
         }
     }
+
 
     private static TextComponent convertToStrikethrough(TextComponent component, int length) {
         Style style = component.style().decoration(TextDecoration.STRIKETHROUGH, false);
