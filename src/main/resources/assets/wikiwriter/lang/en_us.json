@@ -24,6 +24,8 @@
   "yacl3.config.wikiwriter:config.menuReferenceModeScenario.desc": "Toggles when copied items in menus should use template references instead (i.e. {{Item/DIAMOND_SWORD|real_lore}}) \n\nThis setting doesn't affect recipes or items without a SkyBlock ID.",
   "yacl3.config.wikiwriter:config.shopMenuMode": "Automatic Shop Menu Format",
   "yacl3.config.wikiwriter:config.shopMenuMode.desc": "Automatically converts copied shop GUIs to use the required shop menu format.\n\nNote: Shop prices are affected by certain accessories, so make sure to remove them first.",
+  "yacl3.config.wikiwriter:config.autoFixCertainMenuTypes": "Automatically Setup Collection and SB Guide Menus",
+  "yacl3.config.wikiwriter:config.autoFixCertainMenuTypes.desc": "Automatically updates certain types of text in the Item Collection and SkyBlock Guide menus, so they are 100% and 0% unlocked respectively.",
   "yacl3.config.wikiwriter:config.removeDungeonStats": "Remove Dungeon Stats",
   "yacl3.config.wikiwriter:config.removeDungeonStats.desc": "When enabled, dungeon stats in dark gray text will be removed from item lore.",
   "yacl3.config.wikiwriter:config.removeTextBelowRarityWhenCopyingItems": "Remove Text Below Item Rarities (Copying Items)",

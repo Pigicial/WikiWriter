@@ -1,6 +1,7 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
+import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
 import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
@@ -117,6 +118,10 @@ public class GUIStealerFeature extends KeyBindFeature {
 
     @Nullable
     private MenuModification generateApplicableTextModifications(String inventoryName, List<ItemStack> items) {
+        if (!WikiWriter.getInstance().getConfig().autoFixCertainMenuTypes) {
+            return null;
+        }
+
         if (inventoryName.endsWith(" Collection")) {
             return CollectionMenuReplacementPipeline.generatePipelineIsApplicable(items);
         }
