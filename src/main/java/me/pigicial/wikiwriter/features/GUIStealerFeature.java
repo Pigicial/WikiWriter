@@ -242,7 +242,7 @@ public class GUIStealerFeature extends KeyBindFeature {
         if (resultItem != null) {
             String itemID = resultItem.getSkyBlockId();
             if (!itemID.isEmpty()) {
-                String templatePageName = "Template:Recipe/" + itemID;
+                String templatePageName = "Template:Recipe/" + itemID.toUpperCase();
                 wikiWriter.suggestPageLink(templatePageName);
             }
         }
@@ -294,7 +294,7 @@ public class GUIStealerFeature extends KeyBindFeature {
         if (resultItem != null) {
             String itemID = resultItem.getSkyBlockId();
             if (!itemID.isEmpty()) {
-                String templatePageName = "Template:Recipe/" + itemID;
+                String templatePageName = "Template:Recipe/" + itemID.toUpperCase();
                 wikiWriter.suggestPageLink(templatePageName);
             }
         }
