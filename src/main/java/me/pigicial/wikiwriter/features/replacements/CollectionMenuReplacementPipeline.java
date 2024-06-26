@@ -138,8 +138,8 @@ public class CollectionMenuReplacementPipeline implements MenuModification {
         }
 
         if (contributionsIndex != -1) {
-            TextComponent steveContributions = generateContributionsText("Steve", 0.75);
-            TextComponent alexContributions = generateContributionsText("Alex", 0.25);
+            TextComponent steveContributions = generateContributionsText("Steve", 0.8);
+            TextComponent alexContributions = generateContributionsText("Alex", 0.2);
             components.add(contributionsIndex + 1, steveContributions);
             components.add(contributionsIndex + 2, alexContributions);
         }
