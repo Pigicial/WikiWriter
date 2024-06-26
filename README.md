@@ -10,7 +10,7 @@ Items can be converted into [Item Templates](https://wiki.hypixel.net/Category:I
 ##### [Item Template:](https://wiki.hypixel.net/Category:Item_UI_Templates)
 ```
 <noinclude>[[Category:Item UI Templates]]</noinclude><includeonly>
-mc,uncommon,fishing_rod:Grappling Hook ,1,&7Travel around in MCStyle using\n&7this Grappling Hook.\n&82 Second Cooldown\n\n&a''' UNCOMMON'''
+mc,uncommon,fishing_rod:Grappling Hook ,1,&7Travel around in style using\n&7this Grappling Hook.\n&82 Second Cooldown\n\n&a''' UNCOMMON'''
 </includeonly>
 ```
 
@@ -44,7 +44,7 @@ Recipes can be copied into [Inventory Templates](https://wiki.hypixel.net/Templa
 ```
 
 ## Shops
-Similar to recipes, shop inventories can be converted into [Inventory Templates](https://wiki.hypixel.net/Category:NPC_UI_Templates) using a [similar MCStyle](https://wiki.hypixel.net/Template:Merchant) of syntax.
+Similar to recipes, shop inventories can be converted into [Inventory Templates](https://wiki.hypixel.net/Category:NPC_UI_Templates) using a [similar style](https://wiki.hypixel.net/Template:Merchant) of syntax.
 
 ![Ulyn](src/main/resources/assets/wikiwriter/ulyn.png)
 ###### [Merchant Template:](https://wiki.hypixel.net/Template:Merchant)
