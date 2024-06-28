@@ -8,6 +8,10 @@ import me.pigicial.wikiwriter.features.items.types.TextureAndReferenceData;
 import me.pigicial.wikiwriter.utils.Action;
 import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.utils.TextUtils;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -68,10 +72,10 @@ public class WikiItem {
     public WikiItem(@NotNull ItemStack itemStack, Action action, @Nullable Consumer<TextReplacementPipeline> textModifications) {
         this.itemStack = itemStack;
 
-        NbtCompound nbt = itemStack.getNbt();
+        ComponentMap components = itemStack.getComponents();
         // I don't think this can be null but there's null checks in ItemStack so just in case
-        if (nbt == null) {
-            nbt = new NbtCompound();
+        if (components == null) {
+            components = ComponentMap.EMPTY;
         }
 
         originalStackSize = itemStack.getCount();
@@ -79,13 +83,18 @@ public class WikiItem {
         minecraftId = itemStack.getItem().getName(itemStack).getString().toLowerCase().replace(" ", "_").replace("'", "");
         hasCustomSkullTexture = itemStack.getItem() == Items.PLAYER_HEAD;
 
-        NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
+        NbtComponent extraAttributesAsComponent = components.get(DataComponentTypes.CUSTOM_DATA);
+        NbtCompound extraAttributes = extraAttributesAsComponent == null
+                ? new NbtCompound()
+                : extraAttributesAsComponent.copyNbt();
+
         skyBlockId = extraAttributes.getString("id").toLowerCase();
 
-        NbtCompound display = nbt.getCompound("display");
-        lore = TextUtils.parseJsonLore(display);
+        lore = TextUtils.parseJsonLore(components.get(DataComponentTypes.LORE));
 
-        name = TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName()));
+        Text nameAsText = components.get(DataComponentTypes.CUSTOM_NAME);
+        name = nameAsText == null ? "" : TextUtils.convertToLegacyText(nameAsText);
+
         rarity = Rarity.getRarityFromName(name);
 
         updateNameAndStackSize(); // fix brackets in name plus replace amounts if necessary
@@ -110,7 +119,7 @@ public class WikiItem {
         }
 
         // Fixes various item ID quirks (and handles colors and whatnot)
-        fixIDs(itemStack, display, extraAttributes);
+        fixIDs(itemStack, components, extraAttributes);
     }
 
     private void updateNameAndStackSize() {
@@ -136,14 +145,15 @@ public class WikiItem {
         }
     }
 
-    private void fixIDs(ItemStack stack, NbtCompound display, NbtCompound extraAttributes) {
+    private void fixIDs(ItemStack stack, ComponentMap components, NbtCompound extraAttributes) {
         boolean hasEnchantments = stack.hasEnchantments() || stack.hasGlint() || skyBlockId.equalsIgnoreCase("potion");
 
         if (hasCustomSkullTexture) {
             minecraftId = "player_head";
         }
 
-        long color = display.getLong("color");
+        DyedColorComponent colorComponent = components.get(DataComponentTypes.DYED_COLOR);
+        long color = colorComponent == null ? 0 : colorComponent.rgb();
         if (minecraftId.startsWith("leather") && color != 0) {
             LeatherArmorColor armorColor = LeatherArmorColor.findColor(color);
             if (armorColor != LeatherArmorColor.DEFAULT) {

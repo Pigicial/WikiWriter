@@ -9,6 +9,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -135,18 +138,23 @@ public class RecipeTreeFeature extends KeyBindFeature {
         }
 
         public static ItemInfo getItemInfo(ItemStack itemStack) {
-            NbtCompound nbt = itemStack.getNbt();
-            if (nbt == null) {
-                nbt = new NbtCompound();
+            ComponentMap components = itemStack.getComponents();
+            if (components == null) {
+                components = ComponentMap.EMPTY;
             }
 
-            String name = Formatting.strip(TextUtils.convertJsonTextToLegacy(Text.Serialization.toJsonString(itemStack.getName())));
+            Text nameAsText = components.get(DataComponentTypes.CUSTOM_NAME);
+            String name = nameAsText == null ? "" : TextUtils.convertToLegacyText(nameAsText);
 
-            NbtCompound extraAttributes = nbt.getCompound("ExtraAttributes");
+            NbtComponent extraAttributesAsComponent = components.get(DataComponentTypes.CUSTOM_DATA);
+            NbtCompound extraAttributes = extraAttributesAsComponent == null
+                    ? new NbtCompound()
+                    : extraAttributesAsComponent.copyNbt();
+
             String skyBlockId = extraAttributes.getString("id");
             int amount = itemStack.getCount();
 
-            List<String> lore = TextUtils.parseJsonLore(nbt.getCompound("display"));
+            List<String> lore = TextUtils.parseJsonLore(components.get(DataComponentTypes.LORE));
             boolean hasRecipes = LoreFilters.checkAndFilter(lore, Action.COPYING_RECIPE_INVENTORY)
                     .hasFeatures(LoreFilters.VIEW_RECIPE, LoreFilters.VIEW_RECIPES);
 

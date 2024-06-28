@@ -22,7 +22,7 @@ import java.util.Objects;
 public class WikiWriterConfig {
 
     public static final ConfigClassHandler<WikiWriterConfig> HANDLER = ConfigClassHandler.createBuilder(WikiWriterConfig.class)
-            .id(new Identifier("wikiwriter", "config"))
+            .id(Identifier.of("wikiwriter", "config"))
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve("wikiwriter.json"))
                     .appendGsonBuilder(builder -> builder
