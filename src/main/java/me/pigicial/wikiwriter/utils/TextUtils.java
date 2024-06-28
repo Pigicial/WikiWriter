@@ -3,11 +3,13 @@ package me.pigicial.wikiwriter.utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.component.type.LoreComponent;
+import net.minecraft.registry.BuiltinRegistries;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.TreeMap;
 
 public final class TextUtils {
 
+    private static final RegistryWrapper.WrapperLookup LOOKUP = BuiltinRegistries.createWrapperLookup();
     private final static TreeMap<Integer, String> ROMAN_NUMERAL_MAP = new TreeMap<>();
 
     static {
@@ -45,23 +48,23 @@ public final class TextUtils {
         return text.isEmpty() ? "" : new UnicodeUnescaper().translate(StringEscapeUtils.escapeJava(text).replace("\\\"", "\""));
     }
 
-    public static List<String> parseJsonLore(NbtCompound displayTag) {
-        NbtList loreTag = displayTag.getList("Lore", NbtElement.STRING_TYPE);
+    public static List<String> parseJsonLore(@Nullable LoreComponent loreComponent) {
+        if (loreComponent == null) {
+            return new ArrayList<>();
+        }
 
         List<String> lore = new ArrayList<>();
-        for (int i = 0; i < loreTag.size(); i++) {
-            String jsonLine = loreTag.getString(i);
-            String legacyLine = TextUtils.convertJsonTextToLegacy(jsonLine);
-
-            lore.add(legacyLine);
+        for (Text line : loreComponent.styledLines()) {
+            lore.add(convertToLegacyText(line));
         }
 
         return lore;
     }
 
-    public static String convertJsonTextToLegacy(String jsonLine) {
-        Component component = JSONComponentSerializer.json().deserialize(jsonLine);
-        String legacyLine = LegacyComponentSerializer.legacyAmpersand().serialize(component);
-        return legacyLine.replace('&', '§');
+    public static String convertToLegacyText(Text text) {
+        String asJson = Text.Serialization.toJsonString(text, LOOKUP);
+        Component asComponent = JSONComponentSerializer.json().deserialize(asJson);
+        String asLegacy = LegacyComponentSerializer.legacyAmpersand().serialize(asComponent);
+        return asLegacy.replace('&', '§');
     }
 }

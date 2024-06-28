@@ -2,8 +2,8 @@ package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import org.lwjgl.glfw.GLFW;
 
 public class RawNBTExtractorFeature extends KeyBindFeature {
@@ -19,7 +19,7 @@ public class RawNBTExtractorFeature extends KeyBindFeature {
             return;
         }
 
-        NbtCompound nbt = itemUnderCursor.getNbt();
+        ComponentMap nbt = itemUnderCursor.getComponents();
         if (nbt != null) {
             WikiWriter.getInstance().copyToClipboard(nbt.toString());
             wikiWriter.sendMessage("Copied hovered item NBT to clipboard.");

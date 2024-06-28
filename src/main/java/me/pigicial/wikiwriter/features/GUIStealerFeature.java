@@ -1,7 +1,6 @@
 package me.pigicial.wikiwriter.features;
 
 import me.pigicial.wikiwriter.WikiWriter;
-import me.pigicial.wikiwriter.config.WikiWriterConfig;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
 import me.pigicial.wikiwriter.features.items.TextReplacementPipeline;
 import me.pigicial.wikiwriter.features.items.WikiItem;
@@ -14,15 +13,16 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -139,18 +139,21 @@ public class GUIStealerFeature extends KeyBindFeature {
         }
 
         ItemStack firstPotentialShopItem = items.get(10);
-        NbtCompound shopItemNbt = firstPotentialShopItem.getNbt();
+        ComponentMap shopItemNbt = firstPotentialShopItem.getComponents();
         boolean doesFirstItemExist = !firstPotentialShopItem.isEmpty() && shopItemNbt != null;
 
-        if (doesFirstItemExist) {
-            NbtList loreTag = shopItemNbt.getCompound("display").getList("Lore", NbtElement.STRING_TYPE);
-            List<String> lore = new ArrayList<>();
-            for (int i = 0; i < loreTag.size(); i++) {
-                lore.add(TextUtils.convertJsonTextToLegacy(loreTag.getString(i)));
-            }
 
-            LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
-            return removeData.detectedShopLore() && areTopAndBottomRowsCorrectForShop(items, size);
+        if (doesFirstItemExist) {
+            LoreComponent loreComponent = shopItemNbt.get(DataComponentTypes.LORE);
+            if (loreComponent != null) {
+                List<String> lore = new ArrayList<>();
+                for (Text styledLine : loreComponent.styledLines()) {
+                    lore.add(TextUtils.convertToLegacyText(styledLine));
+                }
+
+                LoreFilters.RemovedLore removeData = LoreFilters.checkAndFilter(lore, Action.COPYING_SHOP_INVENTORY);
+                return removeData.detectedShopLore() && areTopAndBottomRowsCorrectForShop(items, size);
+            }
         }
 
         return false;
