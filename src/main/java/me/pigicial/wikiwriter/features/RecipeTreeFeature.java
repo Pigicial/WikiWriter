@@ -3,7 +3,9 @@ package me.pigicial.wikiwriter.features;
 import lombok.AllArgsConstructor;
 import me.pigicial.wikiwriter.WikiWriter;
 import me.pigicial.wikiwriter.features.items.LoreFilters;
+import me.pigicial.wikiwriter.features.items.types.PetData;
 import me.pigicial.wikiwriter.utils.Action;
+import me.pigicial.wikiwriter.utils.StyleConversions;
 import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -22,6 +24,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
+import java.time.Period;
 import java.util.*;
 
 public class RecipeTreeFeature extends KeyBindFeature {
@@ -46,7 +49,7 @@ public class RecipeTreeFeature extends KeyBindFeature {
             int size = items.size();
             int rows = size / 9;
 
-            if (isRecipeMenu(rows, inventoryName, items)) {
+            if (isCraftingRecipeMenu(rows, inventoryName, items) || isForceRecipeMenu(inventoryName, rows)) {
                 processRecipe(inventoryName, items);
             }
         }
@@ -54,7 +57,8 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
     protected void processRecipe(String inventoryName, List<ItemStack> items) {
         boolean isCraftingTable = inventoryName.equalsIgnoreCase("Craft Item");
-        ItemStack product = isCraftingTable ? items.get(23) : items.get(25);
+        boolean isForceRecipe = isForceRecipeMenu(inventoryName, items.size() / 9);
+        ItemStack product = isForceRecipe ? items.get(16) : (isCraftingTable ? items.get(23) : items.get(25));
         if (isCraftingTable && !product.isEmpty() && product.getItem() == Items.BARRIER) {
             wikiWriter.sendMessage("Cannot copy invalid recipe tree." + Formatting.GRAY + " (Barrier Detected)");
             return;
@@ -76,9 +80,9 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
         List<ItemInfo> ingredients = new ArrayList<>();
 
-        for (int slot : CRAFTING_TABLE_INGREDIENT_SLOTS) {
+        for (int slot : isForceRecipe ? FORGE_POSITION_TO_SLOT_MAP : CRAFTING_TABLE_INGREDIENT_SLOTS) {
             ItemStack ingredientItem = items.get(slot);
-            if (ingredientItem.isEmpty()) {
+            if (ingredientItem.isEmpty() || ingredientItem.getItem() == Items.BLACK_STAINED_GLASS_PANE) {
                 continue;
             }
 
@@ -97,12 +101,25 @@ public class RecipeTreeFeature extends KeyBindFeature {
         }
 
         ingredients.sort(Collections.reverseOrder(Comparator.comparing(ItemInfo::getAmount)));
+        if (isForceRecipe) {
+            builder.append("<!--- Before publishing, delete invalid ingredient templates! --->\n");
+        }
         for (ItemInfo ingredient : ingredients) {
-            builder.append(ingredient.convertToCollapsibleTreeResource()).append("\n");
+            if (isForceRecipe) {
+                // Try both, since there's no way of knowing if it's forgable on its own
+                // (force menu doesn't have "click to view recipe" or anything)
+                builder.append(ingredient.convertToBaseTreeResource())
+                        .append("\n")
+                        .append(ingredient.convertToTemplateTreeResource())
+                        .append("\n");
+
+            } else {
+                builder.append(ingredient.convertToCollapsibleTreeResource()).append("\n");
+            }
         }
 
         builder.append("}}<noinclude>[[Category:CollapsibleTree]]</noinclude>");
-        wikiWriter.sendMessage("Copied recipe tree to clipboard.");
+        wikiWriter.sendMessage("Copied " + (isForceRecipe ? "forge" : "crafting") + " recipe tree to clipboard.");
         wikiWriter.copyToClipboard(builder.toString());
 
         if (!output.id.isEmpty()) {
@@ -137,6 +154,14 @@ public class RecipeTreeFeature extends KeyBindFeature {
             }
         }
 
+        private String convertToTemplateTreeResource() {
+            return "{{CollapsibleTree/Item/" + id.toLowerCase() + "|Item|{{#expr:" + amount + " * {{{2|1}}}}}}}";
+        }
+
+        private String convertToBaseTreeResource() {
+            return "{{CollapsibleTree/Base|{{formatnum:{{#expr:" + amount + " * {{{2|1}}}}}}} {{Item/" + id + "|is=20}}}}";
+        }
+
         public static ItemInfo getItemInfo(ItemStack itemStack) {
             ComponentMap components = itemStack.getComponents();
             if (components == null) {
@@ -144,14 +169,20 @@ public class RecipeTreeFeature extends KeyBindFeature {
             }
 
             Text nameAsText = components.get(DataComponentTypes.CUSTOM_NAME);
-            String name = nameAsText == null ? "" : TextUtils.convertToLegacyText(nameAsText);
+            String name = nameAsText == null ? "" : StyleConversions.stripColor(TextUtils.convertToLegacyText(nameAsText));
 
-            NbtComponent extraAttributesAsComponent = components.get(DataComponentTypes.CUSTOM_DATA);
-            NbtCompound extraAttributes = extraAttributesAsComponent == null
+            NbtComponent customDataComponent = components.get(DataComponentTypes.CUSTOM_DATA);
+            NbtCompound customData = customDataComponent == null
                     ? new NbtCompound()
-                    : extraAttributesAsComponent.copyNbt();
+                    : customDataComponent.copyNbt();
 
-            String skyBlockId = extraAttributes.getString("id");
+            String skyBlockId = customData.getString("id");
+            PetData petData = PetData.getPetInfo(customData);
+            if (petData != null) {
+                // fix id and brackets in name
+                skyBlockId = petData.type().toLowerCase() + "_pet";
+                name = name.contains("]") ? name.substring(name.indexOf("]") + 1).trim() + " Pet" : name;
+            }
             int amount = itemStack.getCount();
 
             List<String> lore = TextUtils.parseJsonLore(components.get(DataComponentTypes.LORE));
@@ -163,7 +194,9 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
             // not perfect, but good enough for 98% of items
             String fileName;
-            if (itemStack.getItem() == Items.PLAYER_HEAD) {
+            if (petData != null) {
+                fileName = "SkyBlock_pets_" + petData.type().toLowerCase() + ".png";
+            } else if (itemStack.getItem() == Items.PLAYER_HEAD) {
                 fileName = "SkyBlock_items_" + skyBlockId.toLowerCase() + ".png";
             } else if (itemStack.hasGlint()) {
                 fileName = "SkyBlock_items_enchanted_" + minecraftId + ".gif";
@@ -173,5 +206,9 @@ public class RecipeTreeFeature extends KeyBindFeature {
 
             return new ItemInfo(name, fileName, skyBlockId, hasRecipes, amount);
         }
+    }
+
+    private boolean isForceRecipeMenu(String inventoryName, int rows) {
+        return inventoryName.equals("Confirm Process") && rows == 6;
     }
 }

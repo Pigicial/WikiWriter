@@ -82,7 +82,7 @@ public abstract class KeyBindFeature implements ScreenKeyboardEvents.AfterKeyPre
         return null;
     }
 
-    protected boolean isRecipeMenu(int rows, String inventoryName, List<ItemStack> items) {
+    protected boolean isCraftingRecipeMenu(int rows, String inventoryName, List<ItemStack> items) {
         return (inventoryName.equalsIgnoreCase("Craft Item") || inventoryName.endsWith("Recipe"))
                 && rows == 6
                 && !items.get(CRAFTING_TABLE_OR_RECIPE_REQUIRED_SLOT).isEmpty();
