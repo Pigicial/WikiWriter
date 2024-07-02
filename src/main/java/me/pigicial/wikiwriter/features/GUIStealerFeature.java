@@ -74,7 +74,7 @@ public class GUIStealerFeature extends KeyBindFeature {
             return;
         }
 
-        if (isRecipeMenu(rows, inventoryName, items)) {
+        if (isCraftingRecipeMenu(rows, inventoryName, items)) {
             processRecipe(builder, inventoryName, items);
             return;
         }
