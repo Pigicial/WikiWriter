@@ -25,7 +25,7 @@ pluginManagement {
             url "https://maven.shedaniel.me/"
         }
         maven {
-            url "https://maven.terraformersmc.com/releases/"
+            url "https://maven.terraformersmc.com/"
         }
     }
 

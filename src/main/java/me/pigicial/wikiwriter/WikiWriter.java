@@ -20,7 +20,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
@@ -98,7 +97,7 @@ public class WikiWriter implements ModInitializer {
         }
 
         for (String message : messages) {
-            player.sendMessage(Text.of(messagePrefix + Formatting.RESET + " " + message));
+            player.sendMessage(Component.text(messagePrefix + Formatting.RESET + " " + message));
         }
     }
 
