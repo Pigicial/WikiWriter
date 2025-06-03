@@ -1,12 +1,13 @@
 package me.pigicial.wikiwriter.features.items.types;
 
 import com.google.common.collect.Iterators;
+import me.pigicial.wikiwriter.utils.TextUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 
-public record EnchantedBookData(String onlyEnchantmentName, int onlyEnchantmentLevel) implements TextureAndReferenceData {
+public record EnchantedBookData(String onlyEnchantmentId, int onlyEnchantmentLevel) implements TextureAndReferenceData {
 
     @Nullable
     public static EnchantedBookData getEnchantedBookData(ItemStack itemStack, NbtCompound extraAttributes) {
@@ -19,7 +20,7 @@ public record EnchantedBookData(String onlyEnchantmentName, int onlyEnchantmentL
             return null;
         }
 
-        String enchantment = Iterators.get(enchantmentInfo.getKeys().iterator(), 0);
+        String enchantment = Iterators.get(enchantmentInfo.getKeys().iterator(), 0).toUpperCase();
         int level = enchantmentInfo.getInt(enchantment);
 
         return new EnchantedBookData(enchantment, level);
@@ -27,7 +28,7 @@ public record EnchantedBookData(String onlyEnchantmentName, int onlyEnchantmentL
 
     @Override
     public String getLoreTemplateReference() {
-        return "{{Item_enchantment_" + onlyEnchantmentName + "_" + onlyEnchantmentLevel + "}}";
+        return "{{Enchantment/" + onlyEnchantmentId + "|lore|" + TextUtils.convertToRomanNumeral(onlyEnchantmentLevel) + "}}";
     }
 
     @Override
