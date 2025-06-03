@@ -220,7 +220,7 @@ public class WikiItem {
         if (!hasCustomSkullTexture && skyBlockId.isEmpty()) {
             return "{{Item_" + minecraftId.toLowerCase() + "}}";
         } else {
-            return "{{Item/" + skyBlockId.toUpperCase() + "|real_lore}}";
+            return "{{Item/" + skyBlockId.toUpperCase() + "|lore}}";
         }
     }
 

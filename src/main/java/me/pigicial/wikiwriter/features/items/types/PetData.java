@@ -31,7 +31,7 @@ public record PetData(String type, String tier, @SerializedName("hideInfo") bool
             return "{{Item_" + "pet_craft_" + type.toLowerCase() + "}}";
         }
 
-        return "{{Item_pet_" + type.toLowerCase() + "_" + tier.toLowerCase() + "}}";
+        return "{{Pet/" + type.toUpperCase() + "|lore|" + tier.toUpperCase() + "}}";
     }
 
     @Override

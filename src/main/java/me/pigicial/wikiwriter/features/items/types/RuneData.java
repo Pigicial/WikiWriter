@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public record RuneData(String texture, int level) implements TextureAndReferenceData {
+public record RuneData(String id, String texture, int level) implements TextureAndReferenceData {
 
     @Nullable
     public static RuneData getRuneData(NbtCompound extraAttributes) {
@@ -30,12 +30,12 @@ public record RuneData(String texture, int level) implements TextureAndReference
         };
 
         int runeLevel = runeInfo.getInt(runeId);
-        return new RuneData(texture, runeLevel);
+        return new RuneData(runeId, texture, runeLevel);
     }
 
     @Override
     public String getLoreTemplateReference() {
-        return "{{Item_" + texture + "_" + level + "}}";
+        return "{{Item/RUNE_" + id.toUpperCase() + "_" + level + "}}";
     }
 
     @Override
