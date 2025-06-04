@@ -20,7 +20,7 @@ public record PotionData(WikiItem item, NbtCompound extraAttributes) implements 
         if (extraAttributes.contains("potion")) {
             return "{{Item_" + item.getName().replace("_", " ").toLowerCase() + "}}";
         }
-        return "{{Item/POTION|real_lore}}";
+        return "{{Item/POTION|lore}}";
     }
 
     @Override

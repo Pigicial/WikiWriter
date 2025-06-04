@@ -12,10 +12,13 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,8 +83,15 @@ public class WikiItem {
 
         originalStackSize = itemStack.getCount();
         currentStackSize = originalStackSize;
-        minecraftId = itemStack.getItem().getName(itemStack).getString().toLowerCase().replace(" ", "_").replace("'", "");
-        hasCustomSkullTexture = itemStack.getItem() == Items.PLAYER_HEAD;
+
+        Item item = itemStack.getItem();
+        Identifier customModelIdentifier = components.get(DataComponentTypes.ITEM_MODEL);
+        if (customModelIdentifier != null) {
+            // 1.21 items are technically skull items with a custom model, this checks for the actual model
+            item = Registries.ITEM.get(customModelIdentifier);
+        }
+        minecraftId = item.getName().getString().toLowerCase().replace(" ", "_").replace("'", "");
+        hasCustomSkullTexture = item == Items.PLAYER_HEAD;
 
         NbtComponent extraAttributesAsComponent = components.get(DataComponentTypes.CUSTOM_DATA);
         NbtCompound extraAttributes = extraAttributesAsComponent == null

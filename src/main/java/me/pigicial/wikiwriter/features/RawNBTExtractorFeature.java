@@ -1,5 +1,8 @@
 package me.pigicial.wikiwriter.features;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mojang.serialization.JsonOps;
 import me.pigicial.wikiwriter.WikiWriter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.ComponentMap;
@@ -21,8 +24,14 @@ public class RawNBTExtractorFeature extends KeyBindFeature {
 
         ComponentMap nbt = itemUnderCursor.getComponents();
         if (nbt != null) {
-            WikiWriter.getInstance().copyToClipboard(nbt.toString());
-            wikiWriter.sendMessage("Copied hovered item NBT to clipboard.");
+            // Serialize using Mojang's codec if available
+            var result = ComponentMap.CODEC.encodeStart(JsonOps.INSTANCE, nbt);
+            result.result().ifPresent(json -> {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String prettyJson = gson.toJson(json);
+                WikiWriter.getInstance().copyToClipboard(prettyJson);
+                wikiWriter.sendMessage("Copied hovered item NBT to clipboard.");
+            });
         }
     }
 
