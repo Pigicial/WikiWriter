@@ -20,10 +20,10 @@ public record EnchantedBookData(String onlyEnchantmentId, int onlyEnchantmentLev
             return null;
         }
 
-        String enchantment = Iterators.get(enchantmentInfo.getKeys().iterator(), 0).toUpperCase();
+        String enchantment = Iterators.get(enchantmentInfo.getKeys().iterator(), 0);
         int level = enchantmentInfo.getInt(enchantment);
 
-        return new EnchantedBookData(enchantment, level);
+        return new EnchantedBookData(enchantment.toUpperCase(), level);
     }
 
     @Override
